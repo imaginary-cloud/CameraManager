@@ -9,9 +9,10 @@
 import UIKit
 import AVFoundation
 
+private let _singletonSharedInstance = CameraManager()
+
 enum CameraDevice {
-    case Front
-    case Back
+    case Front, Back
 }
 
 enum CameraFlashMode: Int {
@@ -20,15 +21,27 @@ enum CameraFlashMode: Int {
     case Auto
 }
 
-private let _singletonSharedInstance = CameraManager()
-
+/// Class for handling iDevices custom camera usage
 class CameraManager: NSObject {
    
-    var hasFrontCamera = false
-    var captureSession: AVCaptureSession?
+    /// The Bool property to determin if current device has front camera.
+    var hasFrontCamera: Bool = {
+        let devices = AVCaptureDevice.devicesWithMediaType(AVMediaTypeVideo)
+        for  device in devices  {
+            let captureDevice = device as AVCaptureDevice
+            if (captureDevice.position == AVCaptureDevicePosition.Front) {
+                return true
+            }
+        }
+        return false
+    }()
+    
+    /// A block creating UI to present error message to the user.
     var showErrorBlock:(erTitle: String, erMessage: String) -> Void = { (erTitle: String, erMessage: String) -> Void in
         UIAlertView(title: erTitle, message: erMessage, delegate: nil, cancelButtonTitle: "OK").show()
     }
+    
+    /// Property to change camera device between front and back.
     var cameraDevice: CameraDevice {
         get {
             return self.currentCameraDevice
@@ -61,6 +74,8 @@ class CameraManager: NSObject {
             }
         }
     }
+    
+    /// Property to change camera flash mode.
     var flashMode: CameraFlashMode {
         get {
             return self.currentFlashMode
@@ -87,6 +102,7 @@ class CameraManager: NSObject {
         }
     }
     
+    private var captureSession: AVCaptureSession?
     private var sessionQueue: dispatch_queue_t = dispatch_queue_create("CameraSessionQueue", DISPATCH_QUEUE_SERIAL)
     private var frontCamera: AVCaptureInput?
     private var rearCamera: AVCaptureInput?
@@ -97,6 +113,7 @@ class CameraManager: NSObject {
     private var currentFlashMode = CameraFlashMode.Off
     private weak var embedingView: UIView?
     
+    /// CameraManager singleton instance to use the camera.
     class var sharedInstance: CameraManager {
         return _singletonSharedInstance
     }
@@ -106,6 +123,11 @@ class CameraManager: NSObject {
         self._stopFollowingDeviceOrientation()
     }
     
+    /**
+    Inits a capture session and adds a preview layer to the given view. Preview layer bounds will automaticaly be set to match given view.
+    
+    :param: view The view you want to add the preview layer to
+    */
     func addPreeviewLayerToView(view: UIView)
     {
         if let validEmbedingView = self.embedingView? {
@@ -122,11 +144,17 @@ class CameraManager: NSObject {
         }
     }
     
+    /**
+    Stops running capture session but all setup devices, inputs and outputs stay for further reuse.
+    */
     func stopCaptureSession()
     {
         self.captureSession?.stopRunning()
     }
     
+    /**
+    Stops running capture session and removes all setup devices, inputs and outputs.
+    */
     func stopAndRemoveCaptureSession()
     {
         self.stopCaptureSession()
@@ -139,6 +167,11 @@ class CameraManager: NSObject {
         self.stillImageOutput = nil
     }
     
+    /**
+    Captures still image from currently running capture session.
+    
+    :param: imageCompletition Completition block containing the captured UIImage
+    */
     func capturePictureWithCompletition(imageCompletition: UIImage -> Void)
     {
         if self.cameraIsSetup {
