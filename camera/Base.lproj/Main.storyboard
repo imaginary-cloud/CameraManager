@@ -39,12 +39,27 @@
                                     <action selector="changeCameraDevice:" destination="BYZ-38-t0r" eventType="touchUpInside" id="KDu-mr-jHd"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="19j-xT-Ttb">
+                                <rect key="frame" x="16" y="534" width="144" height="50"/>
+                                <color key="backgroundColor" red="0.54901963470000004" green="0.77647066119999997" blue="0.2470588386" alpha="1" colorSpace="deviceRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="144" id="7mm-eo-7Ng"/>
+                                    <constraint firstAttribute="height" constant="50" id="jff-rD-TUp"/>
+                                </constraints>
+                                <state key="normal" title="Change flash mode">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="changeFlashMode:" destination="BYZ-38-t0r" eventType="touchUpInside" id="e2b-Lg-iqO"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <gestureRecognizers/>
                         <constraints>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="sT4-CC-oh5" secondAttribute="bottom" constant="16" id="2R7-rR-eRm"/>
                             <constraint firstItem="yyS-3g-UqL" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="2RH-Jf-TPm"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="19j-xT-Ttb" secondAttribute="bottom" constant="16" id="7rU-gk-OPx"/>
                             <constraint firstItem="EI2-CK-oqA" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="E1I-Yh-igT"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="yyS-3g-UqL" secondAttribute="bottom" id="INX-TM-tak"/>
                             <constraint firstAttribute="trailing" secondItem="yyS-3g-UqL" secondAttribute="trailing" id="JEu-x6-qah"/>
@@ -53,6 +68,7 @@
                             <constraint firstItem="yyS-3g-UqL" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="SyJ-SX-ooI"/>
                             <constraint firstItem="EI2-CK-oqA" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="Y9T-eB-SQS"/>
                             <constraint firstAttribute="trailing" secondItem="EI2-CK-oqA" secondAttribute="trailing" id="m1R-4g-dGU"/>
+                            <constraint firstItem="19j-xT-Ttb" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="16" id="uuM-vU-IPX"/>
                         </constraints>
                         <connections>
                             <outletCollection property="gestureRecognizers" destination="JKz-eJ-YyR" appends="YES" id="nxl-QQ-Kli"/>

@@ -22,6 +22,11 @@ class ViewController: UIViewController {
         self.imageView.hidden = true
     }
     
+    @IBAction func changeFlashMode(sender: UIButton)
+    {
+        self.cameraManager.flashMode = CameraFlashMode.fromRaw((self.cameraManager.flashMode.toRaw()+1)%3)!
+    }
+    
     @IBAction func viewTapped(sender: UITapGestureRecognizer)
     {
         if self.cameraView.hidden == true {

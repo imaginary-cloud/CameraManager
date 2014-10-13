@@ -14,6 +14,12 @@ enum CameraDevice {
     case Back
 }
 
+enum CameraFlashMode: Int {
+    case Off
+    case On
+    case Auto
+}
+
 private let _singletonSharedInstance = CameraManager()
 
 class CameraManager: NSObject {
@@ -55,6 +61,31 @@ class CameraManager: NSObject {
             }
         }
     }
+    var flashMode: CameraFlashMode {
+        get {
+            return self.currentFlashMode
+        }
+        set(newflashMode) {
+            if newflashMode != self.currentFlashMode {
+                self.captureSession?.beginConfiguration()
+                let devices = AVCaptureDevice.devicesWithMediaType(AVMediaTypeVideo)
+                for  device in devices  {
+                    let captureDevice = device as AVCaptureDevice
+                    if (captureDevice.position == AVCaptureDevicePosition.Back) {
+                        let avFlashMode = AVCaptureFlashMode.fromRaw(newflashMode.toRaw())
+                        if (captureDevice.isFlashModeSupported(avFlashMode!)) {
+                            captureDevice.lockForConfiguration(nil)
+                            captureDevice.flashMode = avFlashMode!
+                            captureDevice.unlockForConfiguration()
+                        }
+                    }
+                }
+                self.captureSession?.commitConfiguration()
+                
+                self.currentFlashMode = newflashMode
+            }
+        }
+    }
     
     private var sessionQueue: dispatch_queue_t = dispatch_queue_create("CameraSessionQueue", DISPATCH_QUEUE_SERIAL)
     private var frontCamera: AVCaptureInput?
@@ -63,6 +94,7 @@ class CameraManager: NSObject {
     private var previewLayer: AVCaptureVideoPreviewLayer?
     private var cameraIsSetup = false
     private var currentCameraDevice = CameraDevice.Back
+    private var currentFlashMode = CameraFlashMode.Off
     private weak var embedingView: UIView?
     
     class var sharedInstance: CameraManager {
