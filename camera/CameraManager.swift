@@ -14,7 +14,10 @@ private let _singletonSharedInstance = CameraManager()
 class CameraManager: NSObject {
    
     var captureSession: AVCaptureSession?
-
+    var showErrorBlock:(erTitle: String, erMessage: String) -> Void = { (erTitle: String, erMessage: String) -> Void in
+        UIAlertView(title: erTitle, message: erMessage, delegate: nil, cancelButtonTitle: "OK").show()
+    }
+    
     private var sessionQueue: dispatch_queue_t = dispatch_queue_create("CameraSessionQueue", DISPATCH_QUEUE_SERIAL)
     private var frontCamera: AVCaptureInput?
     private var rearCamera: AVCaptureInput?
@@ -27,6 +30,11 @@ class CameraManager: NSObject {
         return _singletonSharedInstance
     }
     
+    deinit {
+        self.stopCaptureSession()
+        self._stopFollowingDeviceOrientation()
+    }
+    
     func addPreeviewLayerToView(view: UIView)
     {
         if self.cameraIsSetup {
@@ -37,25 +45,34 @@ class CameraManager: NSObject {
             })
         }
     }
+    
+    func stopCaptureSession()
+    {
+        self.captureSession?.stopRunning()
+    }
 
     func capturePictureWithCompletition(imageCompletition: UIImage -> Void)
     {
-        dispatch_async(self.sessionQueue, {
-            if let validStillImageOutput = self.stillImageOutput? {
-                validStillImageOutput.captureStillImageAsynchronouslyFromConnection(validStillImageOutput.connectionWithMediaType(AVMediaTypeVideo), completionHandler: { [weak self] (sample: CMSampleBuffer!, error: NSError!) -> Void in
-                    if (error? != nil) {
-                        dispatch_async(dispatch_get_main_queue(), {
-                            if let weakSelf = self {
-                                weakSelf._show("error", message: error.localizedDescription)
-                            }
-                        })
-                    } else {
-                        let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(sample)
-                        imageCompletition(UIImage(data: imageData))
-                    }
-                })
-            }
-        })
+        if self.cameraIsSetup {
+            dispatch_async(self.sessionQueue, {
+                if let validStillImageOutput = self.stillImageOutput? {
+                    validStillImageOutput.captureStillImageAsynchronouslyFromConnection(validStillImageOutput.connectionWithMediaType(AVMediaTypeVideo), completionHandler: { [weak self] (sample: CMSampleBuffer!, error: NSError!) -> Void in
+                        if (error? != nil) {
+                            dispatch_async(dispatch_get_main_queue(), {
+                                if let weakSelf = self {
+                                    weakSelf._show("error", message: error.localizedDescription)
+                                }
+                            })
+                        } else {
+                            let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(sample)
+                            imageCompletition(UIImage(data: imageData))
+                        }
+                    })
+                }
+            })
+        } else {
+            self._show("No capture session setup", message: "I can't take any picture")
+        }
     }
     
     func orientationChanged()
@@ -100,6 +117,11 @@ class CameraManager: NSObject {
     private func _startFollowingDeviceOrientation()
     {
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "orientationChanged", name: UIDeviceOrientationDidChangeNotification, object: nil)
+    }
+    
+    private func _stopFollowingDeviceOrientation()
+    {
+        NSNotificationCenter.defaultCenter().removeObserver(self, name: UIDeviceOrientationDidChangeNotification, object: nil)
     }
 
     private func _addPreeviewLayerToView(view: UIView)
@@ -164,11 +186,7 @@ class CameraManager: NSObject {
     private func _show (title: String, message: String)
     {
         dispatch_async(dispatch_get_main_queue(), { () -> Void in
-            UIAlertView(
-                title: title,
-                message: message,
-                delegate: self,
-                cancelButtonTitle: "OK").show()
-            })
+            self.showErrorBlock(erTitle: title, erMessage: message)
+        })
     }
 }
