@@ -21,7 +21,8 @@ class CameraManager: NSObject {
     private var stillImageOutput: AVCaptureStillImageOutput?
     private var previewLayer: AVCaptureVideoPreviewLayer?
     private var cameraIsSetup = false
-
+    private weak var embedingView: UIView?
+    
     class var sharedInstance: CameraManager {
         return _singletonSharedInstance
     }
@@ -57,14 +58,21 @@ class CameraManager: NSObject {
         })
     }
     
-    func startFollowingDeviceOrientation()
-    {
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "orientationChanged", name: UIDeviceOrientationDidChangeNotification, object: nil)
-    }
-    
     func orientationChanged()
     {
-        
+        switch UIDevice.currentDevice().orientation {
+        case .LandscapeLeft:
+            self.previewLayer?.connection.videoOrientation = .LandscapeRight
+        case .LandscapeRight:
+            self.previewLayer?.connection.videoOrientation = .LandscapeLeft
+        default:
+            self.previewLayer?.connection.videoOrientation = .Portrait
+        }
+        dispatch_async(dispatch_get_main_queue(), { () -> Void in
+            if let validEmbedingView = self.embedingView? {
+                self.previewLayer?.frame = validEmbedingView.bounds
+            }
+        })
     }
     
     private func _setupCamera(completition: Void -> Void)
@@ -82,18 +90,25 @@ class CameraManager: NSObject {
                 self._setupPreviewLayer()
                 validCaptureSession.commitConfiguration()
                 validCaptureSession.startRunning()
+                self._startFollowingDeviceOrientation()
                 completition()
                 self.cameraIsSetup = true
             }
         })
     }
     
+    private func _startFollowingDeviceOrientation()
+    {
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "orientationChanged", name: UIDeviceOrientationDidChangeNotification, object: nil)
+    }
+
     private func _addPreeviewLayerToView(view: UIView)
     {
         dispatch_async(dispatch_get_main_queue(), { () -> Void in
             self.previewLayer?.frame = view.layer.bounds
             view.clipsToBounds = true
             view.layer.addSublayer(self.previewLayer)
+            self.embedingView = view
         })
     }
 

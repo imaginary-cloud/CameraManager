@@ -15,12 +15,36 @@
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="EI2-CK-oqA" userLabel="cameraView">
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                                <color key="backgroundColor" red="0.54901963470000004" green="0.77647066119999997" blue="0.2470588386" alpha="1" colorSpace="deviceRGB"/>
+                                <color key="tintColor" red="0.54901963470000004" green="0.77647066119999997" blue="0.2470588386" alpha="1" colorSpace="deviceRGB"/>
+                            </view>
+                            <imageView hidden="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="yyS-3g-UqL">
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                            </imageView>
+                        </subviews>
+                        <color key="backgroundColor" red="1" green="0.1062835932" blue="0.122519394" alpha="1" colorSpace="calibratedRGB"/>
                         <gestureRecognizers/>
+                        <constraints>
+                            <constraint firstItem="yyS-3g-UqL" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="2RH-Jf-TPm"/>
+                            <constraint firstItem="EI2-CK-oqA" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="E1I-Yh-igT"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="yyS-3g-UqL" secondAttribute="bottom" id="INX-TM-tak"/>
+                            <constraint firstAttribute="trailing" secondItem="yyS-3g-UqL" secondAttribute="trailing" id="JEu-x6-qah"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="EI2-CK-oqA" secondAttribute="bottom" id="JW8-WC-69E"/>
+                            <constraint firstItem="yyS-3g-UqL" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="SyJ-SX-ooI"/>
+                            <constraint firstItem="EI2-CK-oqA" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="Y9T-eB-SQS"/>
+                            <constraint firstAttribute="trailing" secondItem="EI2-CK-oqA" secondAttribute="trailing" id="m1R-4g-dGU"/>
+                        </constraints>
                         <connections>
                             <outletCollection property="gestureRecognizers" destination="JKz-eJ-YyR" appends="YES" id="nxl-QQ-Kli"/>
                         </connections>
                     </view>
+                    <connections>
+                        <outlet property="cameraView" destination="EI2-CK-oqA" id="bUS-Rk-omr"/>
+                        <outlet property="imageView" destination="yyS-3g-UqL" id="CZo-cW-NXH"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
                 <tapGestureRecognizer id="JKz-eJ-YyR">
