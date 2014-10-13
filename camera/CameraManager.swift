@@ -9,13 +9,51 @@
 import UIKit
 import AVFoundation
 
+enum CameraDevice {
+    case Front
+    case Back
+}
+
 private let _singletonSharedInstance = CameraManager()
 
 class CameraManager: NSObject {
    
+    var hasFrontCamera = false
     var captureSession: AVCaptureSession?
     var showErrorBlock:(erTitle: String, erMessage: String) -> Void = { (erTitle: String, erMessage: String) -> Void in
         UIAlertView(title: erTitle, message: erMessage, delegate: nil, cancelButtonTitle: "OK").show()
+    }
+    var cameraDevice: CameraDevice {
+        get {
+            return self.currentCameraDevice
+        }
+        set(newCameraDevice) {
+            if newCameraDevice != self.currentCameraDevice {
+                self.captureSession?.beginConfiguration()
+                
+                switch newCameraDevice {
+                case .Front:
+                    if self.hasFrontCamera {
+                        if let validBackDevice = self.rearCamera? {
+                            self.captureSession?.removeInput(validBackDevice)
+                        }
+                        if let validFrontDevice = self.frontCamera? {
+                            self.captureSession?.addInput(validFrontDevice)
+                        }
+                    }
+                case .Back:
+                    if let validFrontDevice = self.frontCamera? {
+                        self.captureSession?.removeInput(validFrontDevice)
+                    }
+                    if let validBackDevice = self.rearCamera? {
+                        self.captureSession?.addInput(validBackDevice)
+                    }
+                }
+                self.captureSession?.commitConfiguration()
+                
+                self.currentCameraDevice = newCameraDevice
+            }
+        }
     }
     
     private var sessionQueue: dispatch_queue_t = dispatch_queue_create("CameraSessionQueue", DISPATCH_QUEUE_SERIAL)
@@ -24,6 +62,7 @@ class CameraManager: NSObject {
     private var stillImageOutput: AVCaptureStillImageOutput?
     private var previewLayer: AVCaptureVideoPreviewLayer?
     private var cameraIsSetup = false
+    private var currentCameraDevice = CameraDevice.Back
     private weak var embedingView: UIView?
     
     class var sharedInstance: CameraManager {
@@ -31,12 +70,17 @@ class CameraManager: NSObject {
     }
     
     deinit {
-        self.stopCaptureSession()
+        self.stopAndRemoveCaptureSession()
         self._stopFollowingDeviceOrientation()
     }
     
     func addPreeviewLayerToView(view: UIView)
     {
+        if let validEmbedingView = self.embedingView? {
+            if let validPreviewLayer = self.previewLayer? {
+                validPreviewLayer.removeFromSuperlayer()
+            }
+        }
         if self.cameraIsSetup {
             self._addPreeviewLayerToView(view)
         } else {
@@ -50,7 +94,19 @@ class CameraManager: NSObject {
     {
         self.captureSession?.stopRunning()
     }
-
+    
+    func stopAndRemoveCaptureSession()
+    {
+        self.stopCaptureSession()
+        self.cameraDevice = .Back
+        self.cameraIsSetup = false
+        self.previewLayer = nil
+        self.captureSession = nil
+        self.frontCamera = nil
+        self.rearCamera = nil
+        self.stillImageOutput = nil
+    }
+    
     func capturePictureWithCompletition(imageCompletition: UIImage -> Void)
     {
         if self.cameraIsSetup {
@@ -126,11 +182,11 @@ class CameraManager: NSObject {
 
     private func _addPreeviewLayerToView(view: UIView)
     {
+        self.embedingView = view
         dispatch_async(dispatch_get_main_queue(), { () -> Void in
             self.previewLayer?.frame = view.layer.bounds
             view.clipsToBounds = true
             view.layer.addSublayer(self.previewLayer)
-            self.embedingView = view
         })
     }
 
@@ -158,6 +214,7 @@ class CameraManager: NSObject {
         }
         if let validVideoFrontDevice = videoFrontDevice? {
             self.frontCamera = AVCaptureDeviceInput.deviceInputWithDevice(validVideoFrontDevice, error: &error) as AVCaptureDeviceInput
+            self.hasFrontCamera = true
         }
         if let validVideoBackDevice = videoBackDevice? {
             self.rearCamera = AVCaptureDeviceInput.deviceInputWithDevice(validVideoBackDevice, error: &error) as AVCaptureDeviceInput

@@ -18,21 +18,38 @@
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="EI2-CK-oqA" userLabel="cameraView">
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
-                                <color key="backgroundColor" red="0.54901963470000004" green="0.77647066119999997" blue="0.2470588386" alpha="1" colorSpace="deviceRGB"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <color key="tintColor" red="0.54901963470000004" green="0.77647066119999997" blue="0.2470588386" alpha="1" colorSpace="deviceRGB"/>
                             </view>
                             <imageView hidden="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="yyS-3g-UqL">
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                             </imageView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sT4-CC-oh5">
+                                <rect key="frame" x="460" y="534" width="124" height="50"/>
+                                <color key="backgroundColor" red="0.98039221759999995" green="0.0078431377190000002" blue="0.52156865600000002" alpha="1" colorSpace="deviceRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="124" id="BGe-7V-1jO"/>
+                                    <constraint firstAttribute="height" constant="50" id="k4Z-XY-hG9"/>
+                                </constraints>
+                                <state key="normal" title="Change camera">
+                                    <color key="titleColor" red="1" green="0.87630701789999998" blue="0.35755069969999997" alpha="1" colorSpace="calibratedRGB"/>
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="changeCameraDevice:" destination="BYZ-38-t0r" eventType="touchUpInside" id="KDu-mr-jHd"/>
+                                </connections>
+                            </button>
                         </subviews>
-                        <color key="backgroundColor" red="1" green="0.1062835932" blue="0.122519394" alpha="1" colorSpace="calibratedRGB"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <gestureRecognizers/>
                         <constraints>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="sT4-CC-oh5" secondAttribute="bottom" constant="16" id="2R7-rR-eRm"/>
                             <constraint firstItem="yyS-3g-UqL" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="2RH-Jf-TPm"/>
                             <constraint firstItem="EI2-CK-oqA" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="E1I-Yh-igT"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="yyS-3g-UqL" secondAttribute="bottom" id="INX-TM-tak"/>
                             <constraint firstAttribute="trailing" secondItem="yyS-3g-UqL" secondAttribute="trailing" id="JEu-x6-qah"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="EI2-CK-oqA" secondAttribute="bottom" id="JW8-WC-69E"/>
+                            <constraint firstAttribute="trailing" secondItem="sT4-CC-oh5" secondAttribute="trailing" constant="16" id="Q92-5b-7Z7"/>
                             <constraint firstItem="yyS-3g-UqL" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="SyJ-SX-ooI"/>
                             <constraint firstItem="EI2-CK-oqA" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="Y9T-eB-SQS"/>
                             <constraint firstAttribute="trailing" secondItem="EI2-CK-oqA" secondAttribute="trailing" id="m1R-4g-dGU"/>

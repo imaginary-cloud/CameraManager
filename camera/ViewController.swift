@@ -15,13 +15,15 @@ class ViewController: UIViewController {
     @IBOutlet weak var cameraView: UIView!
     @IBOutlet weak var imageView: UIImageView!
     
-    override func viewDidLoad() {
+    override func viewDidLoad()
+    {
         super.viewDidLoad()
         self.cameraManager.addPreeviewLayerToView(self.cameraView)
         self.imageView.hidden = true
     }
     
-    @IBAction func viewTapped(sender: UITapGestureRecognizer) {
+    @IBAction func viewTapped(sender: UITapGestureRecognizer)
+    {
         if self.cameraView.hidden == true {
             self.cameraView.hidden = false
             self.imageView.hidden = true
@@ -32,6 +34,10 @@ class ViewController: UIViewController {
                 self.imageView.image = image
             })
         }
+    }
+    @IBAction func changeCameraDevice(sender: UIButton)
+    {
+        self.cameraManager.cameraDevice = self.cameraManager.cameraDevice == CameraDevice.Front ? CameraDevice.Back : CameraDevice.Front
     }
 }
 
