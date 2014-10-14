@@ -170,7 +170,8 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     var captureSession: AVCaptureSession?
 
     private weak var embedingView: UIView?
-
+    private var videoCompletition: ((videoURL: NSURL) -> Void)?
+    
     private var sessionQueue: dispatch_queue_t = dispatch_queue_create("CameraSessionQueue", DISPATCH_QUEUE_SERIAL)
 
     private var frontCamera: AVCaptureInput?
@@ -301,10 +302,11 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     /**
     Stop recording a video.
     */
-    func stopRecordingVideo()
+    func stopRecordingVideo(completition:(videoURL: NSURL) -> Void)
     {
         if let runningMovieOutput = self.movieOutput {
             if runningMovieOutput.recording {
+                self.videoCompletition = completition
                 runningMovieOutput.stopRecording()
             }
         }
@@ -325,9 +327,15 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         } else {
             let library = ALAssetsLibrary()
             library.writeVideoAtPathToSavedPhotosAlbum(outputFileURL, completionBlock: { (assetURL: NSURL?, error: NSError?) -> Void in
-                
                 if (error != nil) {
                     self._show("Unable to save video to the iPhone.", message: error!.localizedDescription)
+                } else {
+                    if let validCompletition = self.videoCompletition {
+                        if let validAssetURL = assetURL {
+                            validCompletition(videoURL: validAssetURL)
+                            self.videoCompletition = nil
+                        }
+                    }
                 }
             })
         }
@@ -336,51 +344,55 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     
     // PRAGMA MARK - CameraManager()
 
-    func orientationChanged()
+    @objc private func _orientationChanged()
     {
-        switch UIDevice.currentDevice().orientation {
-        case .LandscapeLeft:
-            self.previewLayer?.connection.videoOrientation = .LandscapeRight
-        case .LandscapeRight:
-            self.previewLayer?.connection.videoOrientation = .LandscapeLeft
-        default:
-            self.previewLayer?.connection.videoOrientation = .Portrait
-        }
-        dispatch_async(dispatch_get_main_queue(), { () -> Void in
-            if let validEmbedingView = self.embedingView? {
-                self.previewLayer?.frame = validEmbedingView.bounds
+        if let validPreviewLayer = self.previewLayer {
+            switch UIDevice.currentDevice().orientation {
+            case .LandscapeLeft:
+                validPreviewLayer.connection.videoOrientation = .LandscapeRight
+            case .LandscapeRight:
+                validPreviewLayer.connection.videoOrientation = .LandscapeLeft
+            default:
+                validPreviewLayer.connection.videoOrientation = .Portrait
             }
-        })
+            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                if let validEmbedingView = self.embedingView? {
+                    validPreviewLayer.frame = validEmbedingView.bounds
+                }
+            })
+        }
     }
     
     private func _setupCamera(completition: Void -> Void)
     {
-        self._checkIfCameraIsAvailable()
-        
-        self.captureSession = AVCaptureSession()
-        self.captureSession?.sessionPreset = AVCaptureSessionPresetPhoto
-
-        dispatch_async(sessionQueue, {
-            if let validCaptureSession = self.captureSession? {
-                validCaptureSession.beginConfiguration()
-                self._addVideoInput()
-                self._setupStillImageOutput()
-                if let validStillImageOutput = self.stillImageOutput? {
-                    self.captureSession?.addOutput(self.stillImageOutput)
+        if self._checkIfCameraIsAvailable() {
+            self.captureSession = AVCaptureSession()
+            self.captureSession?.sessionPreset = AVCaptureSessionPresetPhoto
+            
+            dispatch_async(sessionQueue, {
+                if let validCaptureSession = self.captureSession? {
+                    validCaptureSession.beginConfiguration()
+                    self._addVideoInput()
+                    self._setupStillImageOutput()
+                    if let validStillImageOutput = self.stillImageOutput? {
+                        self.captureSession?.addOutput(self.stillImageOutput)
+                    }
+                    self._setupPreviewLayer()
+                    validCaptureSession.commitConfiguration()
+                    validCaptureSession.startRunning()
+                    self._startFollowingDeviceOrientation()
+                    completition()
+                    self.cameraIsSetup = true
                 }
-                self._setupPreviewLayer()
-                validCaptureSession.commitConfiguration()
-                validCaptureSession.startRunning()
-                self._startFollowingDeviceOrientation()
-                completition()
-                self.cameraIsSetup = true
-            }
-        })
+            })
+        } else {
+           self._show("Camera unavailable", message: "The device does not have a camera")
+        }
     }
     
     private func _startFollowingDeviceOrientation()
     {
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "orientationChanged", name: UIDeviceOrientationDidChangeNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "_orientationChanged", name: UIDeviceOrientationDidChangeNotification, object: nil)
     }
     
     private func _stopFollowingDeviceOrientation()
@@ -398,13 +410,10 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         })
     }
 
-    private func _checkIfCameraIsAvailable()
+    private func _checkIfCameraIsAvailable() -> Bool
     {
-        AVCaptureDevice.requestAccessForMediaType(AVMediaTypeVideo, completionHandler: { (cameraAvailable) -> Void in
-            if !cameraAvailable {
-                self._show("Camera unavailable", message: "The app does not have access to camera")
-            }
-        })
+        let deviceHasCamera = UIImagePickerController.isCameraDeviceAvailable(UIImagePickerControllerCameraDevice.Rear) || UIImagePickerController.isCameraDeviceAvailable(UIImagePickerControllerCameraDevice.Front)
+        return deviceHasCamera
     }
     
     private func _addVideoInput()

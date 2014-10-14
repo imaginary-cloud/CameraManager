@@ -34,23 +34,13 @@ class ViewController: UIViewController {
         if sender.selected {
             self.cameraManager.startRecordingVideo()    
         } else {
-            self.cameraManager.stopRecordingVideo()
+            self.cameraManager.stopRecordingVideo({ (videoURL) -> Void in
+                println("YEEEEEEY ! ! ")
+                println(videoURL)
+            })
         }
     }
     
-//    @IBAction func viewTapped(sender: UITapGestureRecognizer)
-//    {
-//        if self.cameraView.hidden == true {
-//            self.cameraView.hidden = false
-//            self.imageView.hidden = true
-//        } else {
-//            self.cameraManager.capturePictureWithCompletition({ (image: UIImage) -> Void in
-//                self.cameraView.hidden = true
-//                self.imageView.hidden = false
-//                self.imageView.image = image
-//            })
-//        }
-//    }
     @IBAction func changeCameraDevice(sender: UIButton)
     {
         self.cameraManager.cameraDevice = self.cameraManager.cameraDevice == CameraDevice.Front ? CameraDevice.Back : CameraDevice.Front
