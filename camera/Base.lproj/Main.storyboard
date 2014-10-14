@@ -53,6 +53,25 @@
                                     <action selector="changeFlashMode:" destination="BYZ-38-t0r" eventType="touchUpInside" id="e2b-Lg-iqO"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="FSo-n8-ZwV">
+                                <rect key="frame" x="12" y="12" width="50" height="50"/>
+                                <color key="backgroundColor" red="0.54901963470000004" green="0.77647066119999997" blue="0.2470588386" alpha="1" colorSpace="deviceRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="50" id="Cr1-Jm-NA1"/>
+                                    <constraint firstAttribute="width" constant="50" id="kaE-Cr-QzA"/>
+                                </constraints>
+                                <state key="normal">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <integer key="value" value="20"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="recordButtonTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Ggq-m1-AQB"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <gestureRecognizers/>
@@ -64,15 +83,14 @@
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="yyS-3g-UqL" secondAttribute="bottom" id="INX-TM-tak"/>
                             <constraint firstAttribute="trailing" secondItem="yyS-3g-UqL" secondAttribute="trailing" id="JEu-x6-qah"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="EI2-CK-oqA" secondAttribute="bottom" id="JW8-WC-69E"/>
+                            <constraint firstItem="FSo-n8-ZwV" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" constant="12" id="Mz5-rc-oFa"/>
                             <constraint firstAttribute="trailing" secondItem="sT4-CC-oh5" secondAttribute="trailing" constant="16" id="Q92-5b-7Z7"/>
                             <constraint firstItem="yyS-3g-UqL" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="SyJ-SX-ooI"/>
                             <constraint firstItem="EI2-CK-oqA" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="Y9T-eB-SQS"/>
                             <constraint firstAttribute="trailing" secondItem="EI2-CK-oqA" secondAttribute="trailing" id="m1R-4g-dGU"/>
+                            <constraint firstItem="FSo-n8-ZwV" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="12" id="tQM-Ne-yeQ"/>
                             <constraint firstItem="19j-xT-Ttb" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="16" id="uuM-vU-IPX"/>
                         </constraints>
-                        <connections>
-                            <outletCollection property="gestureRecognizers" destination="JKz-eJ-YyR" appends="YES" id="nxl-QQ-Kli"/>
-                        </connections>
                     </view>
                     <connections>
                         <outlet property="cameraView" destination="EI2-CK-oqA" id="bUS-Rk-omr"/>
@@ -80,11 +98,6 @@
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
-                <tapGestureRecognizer id="JKz-eJ-YyR">
-                    <connections>
-                        <action selector="viewTapped:" destination="BYZ-38-t0r" id="g5R-Rg-R0e"/>
-                    </connections>
-                </tapGestureRecognizer>
             </objects>
         </scene>
     </scenes>

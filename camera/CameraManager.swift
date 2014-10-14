@@ -8,6 +8,7 @@
 
 import UIKit
 import AVFoundation
+import AssetsLibrary
 
 private let _singletonSharedInstance = CameraManager()
 
@@ -16,13 +17,15 @@ enum CameraDevice {
 }
 
 enum CameraFlashMode: Int {
-    case Off
-    case On
-    case Auto
+    case Off, On, Auto
+}
+
+enum CameraOutputMode {
+    case StillImage, VideoWithMic, VideoOnly
 }
 
 /// Class for handling iDevices custom camera usage
-class CameraManager: NSObject {
+class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
    
     /// The Bool property to determin if current device has front camera.
     var hasFrontCamera: Bool = {
@@ -102,16 +105,94 @@ class CameraManager: NSObject {
         }
     }
     
-    private var captureSession: AVCaptureSession?
+    /// Property to change camera output.
+    var cameraOutputMode: CameraOutputMode {
+        get {
+            return self.currentCameraOutputMode
+        }
+        set(newCameraOutputMode) {
+            if newCameraOutputMode != self.currentCameraOutputMode {
+                self.captureSession?.beginConfiguration()
+
+                // remove current setting
+                switch self.currentCameraOutputMode {
+                case .StillImage:
+                    if let validStillImageOutput = self.stillImageOutput? {
+                        self.captureSession?.removeOutput(validStillImageOutput)
+                    }
+                case .VideoOnly, .VideoWithMic:
+                    if let validMovieOutput = self.movieOutput? {
+                        self.captureSession?.removeOutput(validMovieOutput)
+                    }
+                    if self.currentCameraOutputMode == .VideoWithMic {
+                        if let validMic = self.mic? {
+                            self.captureSession?.removeInput(validMic)
+                        }
+                    }
+                }
+                // configure new devices
+                switch newCameraOutputMode {
+                case .StillImage:
+                    if (self.stillImageOutput == nil) {
+                        self._setupStillImageOutput()
+                    }
+                    if let validStillImageOutput = self.stillImageOutput? {
+                        self.captureSession?.addOutput(validStillImageOutput)
+                    }
+                    self.captureSession?.sessionPreset = AVCaptureSessionPresetPhoto
+
+                case .VideoOnly, .VideoWithMic:
+                    if (self.movieOutput == nil) {
+                        self._setupMovieOutput()
+                    }
+                    if let validMovieOutput = self.movieOutput? {
+                        self.captureSession?.addOutput(validMovieOutput)
+                    }
+                    if self.currentCameraOutputMode == .VideoWithMic {
+                        if (self.mic == nil) {
+                            self._setupMic()
+                        }
+                        if let validMic = self.mic? {
+                            self.captureSession?.addInput(validMic)
+                        }
+                    }
+                    self.captureSession?.sessionPreset = AVCaptureSessionPresetMedium
+
+                }
+                self.captureSession?.commitConfiguration()
+                
+                self.currentCameraOutputMode = newCameraOutputMode
+            }
+        }
+    }
+    
+    /// Capture sessioc to customize camera settings.
+    var captureSession: AVCaptureSession?
+
+    private weak var embedingView: UIView?
+
     private var sessionQueue: dispatch_queue_t = dispatch_queue_create("CameraSessionQueue", DISPATCH_QUEUE_SERIAL)
+
     private var frontCamera: AVCaptureInput?
     private var rearCamera: AVCaptureInput?
+    private var mic: AVCaptureDeviceInput?
     private var stillImageOutput: AVCaptureStillImageOutput?
+    private var movieOutput: AVCaptureMovieFileOutput?
     private var previewLayer: AVCaptureVideoPreviewLayer?
+    
     private var cameraIsSetup = false
+    
     private var currentCameraDevice = CameraDevice.Back
     private var currentFlashMode = CameraFlashMode.Off
-    private weak var embedingView: UIView?
+    private var currentCameraOutputMode = CameraOutputMode.StillImage
+    
+    private var tempFilePath: NSURL = {
+        let tempPath = NSTemporaryDirectory().stringByAppendingPathComponent("tempMovie").stringByAppendingPathExtension("mp4")
+        if NSFileManager.defaultManager().fileExistsAtPath(tempPath!) {
+            NSFileManager.defaultManager().removeItemAtPath(tempPath!, error: nil)
+        }
+        return NSURL(fileURLWithPath: tempPath!)
+        }()
     
     /// CameraManager singleton instance to use the camera.
     class var sharedInstance: CameraManager {
@@ -127,8 +208,9 @@ class CameraManager: NSObject {
     Inits a capture session and adds a preview layer to the given view. Preview layer bounds will automaticaly be set to match given view.
     
     :param: view The view you want to add the preview layer to
+    :param: cameraOutputMode The mode you want capturesession to run image / video / video and microphone
     */
-    func addPreeviewLayerToView(view: UIView)
+    func addPreeviewLayerToView(view: UIView, cameraOutputMode: CameraOutputMode)
     {
         if let validEmbedingView = self.embedingView? {
             if let validPreviewLayer = self.previewLayer? {
@@ -137,9 +219,11 @@ class CameraManager: NSObject {
         }
         if self.cameraIsSetup {
             self._addPreeviewLayerToView(view)
+            self.cameraOutputMode = cameraOutputMode
         } else {
             self._setupCamera({ Void -> Void in
                 self._addPreeviewLayerToView(view)
+                self.cameraOutputMode = cameraOutputMode
             })
         }
     }
@@ -164,7 +248,9 @@ class CameraManager: NSObject {
         self.captureSession = nil
         self.frontCamera = nil
         self.rearCamera = nil
+        self.mic = nil
         self.stillImageOutput = nil
+        self.movieOutput = nil
     }
     
     /**
@@ -175,27 +261,81 @@ class CameraManager: NSObject {
     func capturePictureWithCompletition(imageCompletition: UIImage -> Void)
     {
         if self.cameraIsSetup {
-            dispatch_async(self.sessionQueue, {
-                if let validStillImageOutput = self.stillImageOutput? {
-                    validStillImageOutput.captureStillImageAsynchronouslyFromConnection(validStillImageOutput.connectionWithMediaType(AVMediaTypeVideo), completionHandler: { [weak self] (sample: CMSampleBuffer!, error: NSError!) -> Void in
-                        if (error? != nil) {
-                            dispatch_async(dispatch_get_main_queue(), {
-                                if let weakSelf = self {
-                                    weakSelf._show("error", message: error.localizedDescription)
-                                }
-                            })
-                        } else {
-                            let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(sample)
-                            imageCompletition(UIImage(data: imageData))
-                        }
-                    })
-                }
-            })
+            if self.cameraOutputMode == .StillImage {
+                dispatch_async(self.sessionQueue, {
+                    if let validStillImageOutput = self.stillImageOutput? {
+                        validStillImageOutput.captureStillImageAsynchronouslyFromConnection(validStillImageOutput.connectionWithMediaType(AVMediaTypeVideo), completionHandler: { [weak self] (sample: CMSampleBuffer!, error: NSError!) -> Void in
+                            if (error? != nil) {
+                                dispatch_async(dispatch_get_main_queue(), {
+                                    if let weakSelf = self {
+                                        weakSelf._show("error", message: error.localizedDescription)
+                                    }
+                                })
+                            } else {
+                                let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(sample)
+                                imageCompletition(UIImage(data: imageData))
+                            }
+                        })
+                    }
+                })
+            } else {
+                self._show("Capture session output mode video", message: "I can't take any picture")
+            }
         } else {
             self._show("No capture session setup", message: "I can't take any picture")
         }
     }
     
+    /**
+    Starts recording a video with or without voice as in the session preset.
+    */
+    func startRecordingVideo()
+    {
+        if self.cameraOutputMode != .StillImage {
+            self.movieOutput?.startRecordingToOutputFileURL(self.tempFilePath, recordingDelegate: self)
+        } else {
+            self._show("Capture session output still image", message: "I can only take pictures")
+        }
+    }
+    
+    /**
+    Stop recording a video.
+    */
+    func stopRecordingVideo()
+    {
+        if let runningMovieOutput = self.movieOutput {
+            if runningMovieOutput.recording {
+                runningMovieOutput.stopRecording()
+            }
+        }
+    }
+    
+    
+    // PRAGMA MARK - AVCaptureFileOutputRecordingDelegate
+    
+    func captureOutput(captureOutput: AVCaptureFileOutput!, didStartRecordingToOutputFileAtURL fileURL: NSURL!, fromConnections connections: [AnyObject]!)
+    {
+        
+    }
+    
+    func captureOutput(captureOutput: AVCaptureFileOutput!, didFinishRecordingToOutputFileAtURL outputFileURL: NSURL!, fromConnections connections: [AnyObject]!, error: NSError!)
+    {
+        if (error != nil) {
+            self._show("Unable to save video to the iPhone", message: error.localizedDescription)
+        } else {
+            let library = ALAssetsLibrary()
+            library.writeVideoAtPathToSavedPhotosAlbum(outputFileURL, completionBlock: { (assetURL: NSURL?, error: NSError?) -> Void in
+                
+                if (error != nil) {
+                    self._show("Unable to save video to the iPhone.", message: error!.localizedDescription)
+                }
+            })
+        }
+    }
+
+    
+    // PRAGMA MARK - CameraManager()
+
     func orientationChanged()
     {
         switch UIDevice.currentDevice().orientation {
@@ -224,7 +364,10 @@ class CameraManager: NSObject {
             if let validCaptureSession = self.captureSession? {
                 validCaptureSession.beginConfiguration()
                 self._addVideoInput()
-                self._addStillImageOutput()
+                self._setupStillImageOutput()
+                if let validStillImageOutput = self.stillImageOutput? {
+                    self.captureSession?.addOutput(self.stillImageOutput)
+                }
                 self._setupPreviewLayer()
                 validCaptureSession.commitConfiguration()
                 validCaptureSession.startRunning()
@@ -291,11 +434,30 @@ class CameraManager: NSObject {
         }
     }
     
-    private func _addStillImageOutput()
+    private func _setupMic()
     {
-        self.stillImageOutput = AVCaptureStillImageOutput()
-        if let validStillImageOutput = self.stillImageOutput? {
-            self.captureSession?.addOutput(self.stillImageOutput)
+        if (self.mic == nil) {
+            var error: NSError?
+            let micDevice:AVCaptureDevice = AVCaptureDevice.defaultDeviceWithMediaType(AVMediaTypeAudio);
+            self.mic = AVCaptureDeviceInput.deviceInputWithDevice(micDevice, error: &error) as? AVCaptureDeviceInput;
+            if let errorHappened = error {
+                self.mic = nil
+                self._show("Mic error", message: errorHappened.description)
+            }
+        }
+    }
+    
+    private func _setupStillImageOutput()
+    {
+        if (self.stillImageOutput == nil) {
+            self.stillImageOutput = AVCaptureStillImageOutput()
+        }
+    }
+    
+    private func _setupMovieOutput()
+    {
+        if (self.movieOutput == nil) {
+            self.movieOutput = AVCaptureMovieFileOutput()
         }
     }
 

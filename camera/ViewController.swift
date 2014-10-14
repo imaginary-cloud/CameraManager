@@ -18,7 +18,7 @@ class ViewController: UIViewController {
     override func viewDidLoad()
     {
         super.viewDidLoad()
-        self.cameraManager.addPreeviewLayerToView(self.cameraView)
+        self.cameraManager.addPreeviewLayerToView(self.cameraView, cameraOutputMode: CameraOutputMode.VideoWithMic)
         self.imageView.hidden = true
     }
     
@@ -27,19 +27,30 @@ class ViewController: UIViewController {
         self.cameraManager.flashMode = CameraFlashMode.fromRaw((self.cameraManager.flashMode.toRaw()+1)%3)!
     }
     
-    @IBAction func viewTapped(sender: UITapGestureRecognizer)
+    @IBAction func recordButtonTapped(sender: UIButton)
     {
-        if self.cameraView.hidden == true {
-            self.cameraView.hidden = false
-            self.imageView.hidden = true
+        sender.selected = !sender.selected
+        sender.backgroundColor = sender.selected ? UIColor.redColor() : UIColor.greenColor()
+        if sender.selected {
+            self.cameraManager.startRecordingVideo()    
         } else {
-            self.cameraManager.capturePictureWithCompletition({ (image: UIImage) -> Void in
-                self.cameraView.hidden = true
-                self.imageView.hidden = false
-                self.imageView.image = image
-            })
+            self.cameraManager.stopRecordingVideo()
         }
     }
+    
+//    @IBAction func viewTapped(sender: UITapGestureRecognizer)
+//    {
+//        if self.cameraView.hidden == true {
+//            self.cameraView.hidden = false
+//            self.imageView.hidden = true
+//        } else {
+//            self.cameraManager.capturePictureWithCompletition({ (image: UIImage) -> Void in
+//                self.cameraView.hidden = true
+//                self.imageView.hidden = false
+//                self.imageView.image = image
+//            })
+//        }
+//    }
     @IBAction func changeCameraDevice(sender: UIButton)
     {
         self.cameraManager.cameraDevice = self.cameraManager.cameraDevice == CameraDevice.Front ? CameraDevice.Back : CameraDevice.Front
