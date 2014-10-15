@@ -34,13 +34,16 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     /// Capture sessioc to customize camera settings.
     var captureSession: AVCaptureSession?
     
-    /// Property to determine if the manager should show the error for the user. If you want to show the errors yourself set this to false. If you want to add custom error UI set showErrorBlock property
+    /// Property to determine if the manager should show the error for the user. If you want to show the errors yourself set this to false. If you want to add custom error UI set showErrorBlock property. Default value is true.
     var showErrorsToUsers = true
     
     /// A block creating UI to present error message to the user.
     var showErrorBlock:(erTitle: String, erMessage: String) -> Void = { (erTitle: String, erMessage: String) -> Void in
         UIAlertView(title: erTitle, message: erMessage, delegate: nil, cancelButtonTitle: "OK").show()
     }
+    
+    /// Property to determine if  manager should write the resources to the phone library. Default value is true.
+    var writeFilesToPhoneLibrary = true
 
     /// The Bool property to determin if current device has front camera.
     var hasFrontCamera: Bool = {
@@ -180,8 +183,6 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                     if let validStillImageOutput = self.stillImageOutput? {
                         self.captureSession?.addOutput(validStillImageOutput)
                     }
-                    self.captureSession?.sessionPreset = AVCaptureSessionPresetPhoto
-
                 case .VideoOnly, .VideoWithMic:
                     if (self.movieOutput == nil) {
                         self._setupOutputs()
@@ -197,8 +198,6 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                             self.captureSession?.addInput(validMic)
                         }
                     }
-                    self.captureSession?.sessionPreset = AVCaptureSessionPresetMedium
-
                 }
                 self.captureSession?.commitConfiguration()
                 
@@ -318,19 +317,21 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                                 })
                             } else {
                                 let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(sample)
-                                imageCompletition(UIImage(data: imageData))
                                 if let weakSelf = self {
-                                    if let validLibrary = weakSelf.library? {
-                                        validLibrary.writeImageDataToSavedPhotosAlbum(imageData, metadata:nil, completionBlock: {
-                                            (picUrl, error) -> Void in
-                                            if (error? != nil) {
-                                                dispatch_async(dispatch_get_main_queue(), {
-                                                    weakSelf._show("error", message: error.localizedDescription)
-                                                })
-                                            }
-                                        })
+                                    if weakSelf.writeFilesToPhoneLibrary {
+                                        if let validLibrary = weakSelf.library? {
+                                            validLibrary.writeImageDataToSavedPhotosAlbum(imageData, metadata:nil, completionBlock: {
+                                                (picUrl, error) -> Void in
+                                                if (error? != nil) {
+                                                    dispatch_async(dispatch_get_main_queue(), {
+                                                        weakSelf._show("error", message: error.localizedDescription)
+                                                    })
+                                                }
+                                            })
+                                        }
                                     }
                                 }
+                                imageCompletition(UIImage(data: imageData))
                             }
                         })
                     }
@@ -382,24 +383,33 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
             self._show("Unable to save video to the iPhone", message: error.localizedDescription)
         } else {
             if let validLibrary = self.library? {
-                validLibrary.writeVideoAtPathToSavedPhotosAlbum(outputFileURL, completionBlock: { (assetURL: NSURL?, error: NSError?) -> Void in
-                    if (error != nil) {
-                        self._show("Unable to save video to the iPhone.", message: error!.localizedDescription)
-                    } else {
-                        if let validCompletition = self.videoCompletition {
+                if self.writeFilesToPhoneLibrary {
+                    validLibrary.writeVideoAtPathToSavedPhotosAlbum(outputFileURL, completionBlock: { (assetURL: NSURL?, error: NSError?) -> Void in
+                        if (error != nil) {
+                            self._show("Unable to save video to the iPhone.", message: error!.localizedDescription)
+                        } else {
                             if let validAssetURL = assetURL {
-                                validCompletition(videoURL: validAssetURL)
-                                self.videoCompletition = nil
+                                self._executeVideoCompletitionWithURL(validAssetURL)
                             }
                         }
-                    }
-                })
+                    })
+                } else {
+                    self._executeVideoCompletitionWithURL(outputFileURL)
+                }
             }
         }
     }
     
     // PRAGMA MARK - CameraManager()
 
+    private func _executeVideoCompletitionWithURL(url: NSURL)
+    {
+        if let validCompletition = self.videoCompletition {
+            validCompletition(videoURL: url)
+            self.videoCompletition = nil
+        }
+    }
+    
     @objc private func _orientationChanged()
     {
         if let validPreviewLayer = self.previewLayer? {
@@ -430,6 +440,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
             dispatch_async(sessionQueue, {
                 if let validCaptureSession = self.captureSession? {
                     validCaptureSession.beginConfiguration()
+                    validCaptureSession.sessionPreset = AVCaptureSessionPresetHigh
                     self._addVideoInput()
                     self._setupOutputs()
                     self.cameraOutputMode = self.currentCameraOutputMode
