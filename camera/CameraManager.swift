@@ -31,6 +31,12 @@ enum CameraOutputQuality {
 /// Class for handling iDevices custom camera usage
 class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
    
+    /// Capture sessioc to customize camera settings.
+    var captureSession: AVCaptureSession?
+    
+    /// Property to determine if the manager should show the error for the user.
+    var showErrorsToUsers = true
+
     /// The Bool property to determin if current device has front camera.
     var hasFrontCamera: Bool = {
         let devices = AVCaptureDevice.devicesWithMediaType(AVMediaTypeVideo)
@@ -201,9 +207,6 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         }
     }
     
-    /// Capture sessioc to customize camera settings.
-    var captureSession: AVCaptureSession?
-
     private weak var embedingView: UIView?
     private var videoCompletition: ((videoURL: NSURL) -> Void)?
     
@@ -382,19 +385,21 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     @objc private func _orientationChanged()
     {
         if let validPreviewLayer = self.previewLayer? {
-            switch UIDevice.currentDevice().orientation {
-            case .LandscapeLeft:
-                validPreviewLayer.connection.videoOrientation = .LandscapeRight
-            case .LandscapeRight:
-                validPreviewLayer.connection.videoOrientation = .LandscapeLeft
-            default:
-                validPreviewLayer.connection.videoOrientation = .Portrait
-            }
-            dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                if let validEmbedingView = self.embedingView? {
-                    validPreviewLayer.frame = validEmbedingView.bounds
+            if let validPreviewLayerConnection = validPreviewLayer.connection? {
+                switch UIDevice.currentDevice().orientation {
+                case .LandscapeLeft:
+                    validPreviewLayerConnection.videoOrientation = .LandscapeRight
+                case .LandscapeRight:
+                    validPreviewLayerConnection.videoOrientation = .LandscapeLeft
+                default:
+                    validPreviewLayerConnection.videoOrientation = .Portrait
                 }
-            })
+                dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                    if let validEmbedingView = self.embedingView? {
+                        validPreviewLayer.frame = validEmbedingView.bounds
+                    }
+                })
+            }
         }
     }
     
@@ -409,9 +414,8 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                     validCaptureSession.beginConfiguration()
                     self._addVideoInput()
                     self._setupStillImageOutput()
-                    if let validStillImageOutput = self.stillImageOutput? {
-                        self.captureSession?.addOutput(self.stillImageOutput)
-                    }
+                    self._setupMovieOutput()
+                    self.cameraOutputMode = self.currentCameraOutputMode
                     self._setupPreviewLayer()
                     validCaptureSession.commitConfiguration()
                     validCaptureSession.startRunning()
@@ -471,6 +475,9 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         if let validVideoBackDevice = videoBackDevice? {
             self.rearCamera = AVCaptureDeviceInput.deviceInputWithDevice(validVideoBackDevice, error: &error) as AVCaptureDeviceInput
         }
+        if let validError = error? {
+            self._show("Device setup error occured", message: validError.localizedDescription)
+        }
         self.cameraDevice = self.currentCameraDevice
     }
     
@@ -480,7 +487,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
             var error: NSError?
             let micDevice:AVCaptureDevice = AVCaptureDevice.defaultDeviceWithMediaType(AVMediaTypeAudio);
             self.mic = AVCaptureDeviceInput.deviceInputWithDevice(micDevice, error: &error) as? AVCaptureDeviceInput;
-            if let errorHappened = error {
+            if let errorHappened = error? {
                 self.mic = nil
                 self._show("Mic error", message: errorHappened.description)
             }
@@ -503,14 +510,18 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
 
     private func _setupPreviewLayer()
     {
-        self.previewLayer = AVCaptureVideoPreviewLayer(session: self.captureSession)
-        self.previewLayer?.videoGravity = AVLayerVideoGravityResizeAspectFill
+        if let validCaptureSession = self.captureSession? {
+            self.previewLayer = AVCaptureVideoPreviewLayer(session: validCaptureSession)
+            self.previewLayer?.videoGravity = AVLayerVideoGravityResizeAspectFill
+        }
     }
 
     private func _show (title: String, message: String)
     {
-        dispatch_async(dispatch_get_main_queue(), { () -> Void in
-            self.showErrorBlock(erTitle: title, erMessage: message)
-        })
+        if self.showErrorsToUsers {
+            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                self.showErrorBlock(erTitle: title, erMessage: message)
+            })
+        }
     }
 }

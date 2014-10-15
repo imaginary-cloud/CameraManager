@@ -14,6 +14,7 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var cameraView: UIView!
     @IBOutlet weak var imageView: UIImageView!
+    @IBOutlet weak var cameraButton: UIButton!
     
     override func viewDidLoad()
     {
@@ -38,15 +39,36 @@ class ViewController: UIViewController {
     
     @IBAction func recordButtonTapped(sender: UIButton)
     {
-        sender.selected = !sender.selected
-        sender.backgroundColor = sender.selected ? UIColor.redColor() : UIColor.greenColor()
-        if sender.selected {
-            self.cameraManager.startRecordingVideo()    
-        } else {
-            self.cameraManager.stopRecordingVideo({ (videoURL) -> Void in
-                println("YEEEEEEY ! ! ")
-                println(videoURL)
+        switch (self.cameraManager.cameraOutputMode) {
+        case .StillImage:
+            self.cameraManager.capturePictureWithCompletition({ (image) -> Void in
+                
             })
+        case .VideoWithMic, .VideoOnly:
+            sender.selected = !sender.selected
+            sender.setTitle(" ", forState: UIControlState.Selected)
+            sender.backgroundColor = sender.selected ? UIColor.redColor() : UIColor.greenColor()
+            if sender.selected {
+                self.cameraManager.startRecordingVideo()
+            } else {
+                self.cameraManager.stopRecordingVideo({ (videoURL) -> Void in
+                    println("YEEEEEEY ! ! ")
+                    println(videoURL)
+                })
+            }
+        }
+    }
+    
+    @IBAction func outputModeButtonTapped(sender: UIButton)
+    {
+        self.cameraManager.cameraOutputMode = self.cameraManager.cameraOutputMode == CameraOutputMode.VideoWithMic ? CameraOutputMode.StillImage : CameraOutputMode.VideoWithMic
+        switch (self.cameraManager.cameraOutputMode) {
+        case .StillImage:
+            self.cameraButton.selected = false
+            self.cameraButton.backgroundColor = UIColor.greenColor()
+            sender.setTitle("Image", forState: UIControlState.Normal)
+        case .VideoWithMic, .VideoOnly:
+            sender.setTitle("Video", forState: UIControlState.Normal)
         }
     }
     
