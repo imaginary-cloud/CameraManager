@@ -24,6 +24,10 @@ enum CameraOutputMode {
     case StillImage, VideoWithMic, VideoOnly
 }
 
+enum CameraOutputQuality {
+    case Low, Medium, High
+}
+
 /// Class for handling iDevices custom camera usage
 class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
    
@@ -101,6 +105,29 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                 self.captureSession?.commitConfiguration()
                 
                 self.currentFlashMode = newflashMode
+            }
+        }
+    }
+    
+    /// Property to change camera output quality.
+    var cameraOutputQuality: CameraOutputQuality {
+        get {
+            return self.currentCameraOutputQuality
+        }
+        set(newCameraOutputQuality) {
+            if newCameraOutputQuality != self.currentCameraOutputQuality {
+                self.captureSession?.beginConfiguration()
+                switch (newCameraOutputQuality) {
+                case CameraOutputQuality.Low:
+                    self.captureSession?.sessionPreset = AVCaptureSessionPresetLow
+                case CameraOutputQuality.Medium:
+                    self.captureSession?.sessionPreset = AVCaptureSessionPresetMedium
+                case CameraOutputQuality.High:
+                    self.captureSession?.sessionPreset = AVCaptureSessionPresetHigh
+                }
+                self.captureSession?.commitConfiguration()
+                
+                self.currentCameraOutputQuality = newCameraOutputQuality
             }
         }
     }
@@ -186,6 +213,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     private var currentCameraDevice = CameraDevice.Back
     private var currentFlashMode = CameraFlashMode.Off
     private var currentCameraOutputMode = CameraOutputMode.StillImage
+    private var currentCameraOutputQuality = CameraOutputQuality.High
     
     private var tempFilePath: NSURL = {
         let tempPath = NSTemporaryDirectory().stringByAppendingPathComponent("tempMovie").stringByAppendingPathExtension("mp4")
@@ -340,7 +368,6 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
             })
         }
     }
-
     
     // PRAGMA MARK - CameraManager()
 
