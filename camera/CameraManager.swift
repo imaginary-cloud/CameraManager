@@ -435,7 +435,6 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     {
         if self._checkIfCameraIsAvailable() {
             self.captureSession = AVCaptureSession()
-            self.captureSession?.sessionPreset = AVCaptureSessionPresetPhoto
             
             dispatch_async(sessionQueue, {
                 if let validCaptureSession = self.captureSession? {
@@ -444,6 +443,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                     self._addVideoInput()
                     self._setupOutputs()
                     self.cameraOutputMode = self.currentCameraOutputMode
+                    self.cameraOutputQuality = self.currentCameraOutputQuality
                     self._setupPreviewLayer()
                     validCaptureSession.commitConfiguration()
                     validCaptureSession.startRunning()

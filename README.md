@@ -50,6 +50,11 @@ CameraManager.sharedInstance.flashMode = .On
 CameraManager.sharedInstance.flashMode = .Auto
 ```
 
+You can specify if you want to save the files to phone library:
+```swift
+CameraManager.sharedInstance.writeFilesToPhoneLibrary = true
+```
+
 You can even setUp your custom block to handle error messages:
 ```swift
 CameraManager.sharedInstance.showErrorBlock = { (erTitle: String, erMessage: String) -> Void in
