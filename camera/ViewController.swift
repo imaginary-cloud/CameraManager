@@ -18,10 +18,14 @@ class ViewController: UIViewController {
     
     override func viewDidLoad()
     {
-        super.viewDidLoad()
-        self.cameraManager.addPreeviewLayerToView(self.cameraView, cameraOutputMode: CameraOutputMode.VideoWithMic)
+        super.viewDidLoad()        
+        self.cameraManager.addPreeviewLayerToView(self.cameraView, newCameraOutputMode: CameraOutputMode.VideoWithMic)
+        CameraManager.sharedInstance.addPreeviewLayerToView(self.cameraView)
         self.cameraManager.cameraDevice = .Front
         self.imageView.hidden = true
+        CameraManager.sharedInstance.showErrorBlock = { (erTitle: String, erMessage: String) -> Void in
+            UIAlertView(title: erTitle, message: erMessage, delegate: nil, cancelButtonTitle: "OK").show()
+        }
     }
     
     @IBAction func changeFlashMode(sender: UIButton)

@@ -34,8 +34,13 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     /// Capture sessioc to customize camera settings.
     var captureSession: AVCaptureSession?
     
-    /// Property to determine if the manager should show the error for the user.
+    /// Property to determine if the manager should show the error for the user. If you want to show the errors yourself set this to false. If you want to add custom error UI set showErrorBlock property
     var showErrorsToUsers = true
+    
+    /// A block creating UI to present error message to the user.
+    var showErrorBlock:(erTitle: String, erMessage: String) -> Void = { (erTitle: String, erMessage: String) -> Void in
+        UIAlertView(title: erTitle, message: erMessage, delegate: nil, cancelButtonTitle: "OK").show()
+    }
 
     /// The Bool property to determin if current device has front camera.
     var hasFrontCamera: Bool = {
@@ -48,11 +53,6 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         }
         return false
     }()
-    
-    /// A block creating UI to present error message to the user.
-    var showErrorBlock:(erTitle: String, erMessage: String) -> Void = { (erTitle: String, erMessage: String) -> Void in
-        UIAlertView(title: erTitle, message: erMessage, delegate: nil, cancelButtonTitle: "OK").show()
-    }
     
     /// Property to change camera device between front and back.
     var cameraDevice: CameraDevice {
@@ -175,7 +175,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                 switch newCameraOutputMode {
                 case .StillImage:
                     if (self.stillImageOutput == nil) {
-                        self._setupStillImageOutput()
+                        self._setupOutputs()
                     }
                     if let validStillImageOutput = self.stillImageOutput? {
                         self.captureSession?.addOutput(validStillImageOutput)
@@ -184,7 +184,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
 
                 case .VideoOnly, .VideoWithMic:
                     if (self.movieOutput == nil) {
-                        self._setupMovieOutput()
+                        self._setupOutputs()
                     }
                     if let validMovieOutput = self.movieOutput? {
                         self.captureSession?.addOutput(validMovieOutput)
@@ -250,7 +250,11 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     :param: view The view you want to add the preview layer to
     :param: cameraOutputMode The mode you want capturesession to run image / video / video and microphone
     */
-    func addPreeviewLayerToView(view: UIView, cameraOutputMode: CameraOutputMode)
+    func addPreeviewLayerToView(view: UIView)
+    {
+        self.addPreeviewLayerToView(view, newCameraOutputMode: self.currentCameraOutputMode)
+    }
+    func addPreeviewLayerToView(view: UIView, newCameraOutputMode: CameraOutputMode)
     {
         if let validEmbedingView = self.embedingView? {
             if let validPreviewLayer = self.previewLayer? {
@@ -259,11 +263,11 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         }
         if self.cameraIsSetup {
             self._addPreeviewLayerToView(view)
-            self.cameraOutputMode = cameraOutputMode
+            self.cameraOutputMode = newCameraOutputMode
         } else {
             self._setupCamera({ Void -> Void in
                 self._addPreeviewLayerToView(view)
-                self.cameraOutputMode = cameraOutputMode
+                self.cameraOutputMode = newCameraOutputMode
             })
         }
     }
@@ -413,8 +417,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                 if let validCaptureSession = self.captureSession? {
                     validCaptureSession.beginConfiguration()
                     self._addVideoInput()
-                    self._setupStillImageOutput()
-                    self._setupMovieOutput()
+                    self._setupOutputs()
                     self.cameraOutputMode = self.currentCameraOutputMode
                     self._setupPreviewLayer()
                     validCaptureSession.commitConfiguration()
@@ -494,20 +497,16 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         }
     }
     
-    private func _setupStillImageOutput()
+    private func _setupOutputs()
     {
         if (self.stillImageOutput == nil) {
             self.stillImageOutput = AVCaptureStillImageOutput()
         }
-    }
-    
-    private func _setupMovieOutput()
-    {
         if (self.movieOutput == nil) {
             self.movieOutput = AVCaptureMovieFileOutput()
         }
     }
-
+    
     private func _setupPreviewLayer()
     {
         if let validCaptureSession = self.captureSession? {
