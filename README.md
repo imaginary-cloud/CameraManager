@@ -4,8 +4,8 @@
 V1.0.0 (10-Oct-2014)
 
 ####About
-This is a simple class to provide all the configurations and you need to create custom camera view in your app.
-Just drag, drop and use. 
+This is a simple class to provide all the configurations you need to create custom camera view in your app. 
+Just drag, drop and use.
 
 ####How to use
 To use it you just add the preview layer to your desired view 
