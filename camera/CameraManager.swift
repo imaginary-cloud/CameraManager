@@ -54,31 +54,39 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
             return self.currentCameraDevice
         }
         set(newCameraDevice) {
-            if newCameraDevice != self.currentCameraDevice {
-                self.captureSession?.beginConfiguration()
+            if let validCaptureSession = self.captureSession {
+                validCaptureSession.beginConfiguration()
+                let inputs = validCaptureSession.inputs as [AVCaptureInput]
                 
                 switch newCameraDevice {
                 case .Front:
                     if self.hasFrontCamera {
                         if let validBackDevice = self.rearCamera? {
-                            self.captureSession?.removeInput(validBackDevice)
+                            if contains(inputs, validBackDevice) {
+                                validCaptureSession.removeInput(validBackDevice)
+                            }
                         }
                         if let validFrontDevice = self.frontCamera? {
-                            self.captureSession?.addInput(validFrontDevice)
+                            if !contains(inputs, validFrontDevice) {
+                                validCaptureSession.addInput(validFrontDevice)
+                            }
                         }
                     }
                 case .Back:
                     if let validFrontDevice = self.frontCamera? {
-                        self.captureSession?.removeInput(validFrontDevice)
+                        if contains(inputs, validFrontDevice) {
+                            validCaptureSession.removeInput(validFrontDevice)
+                        }
                     }
                     if let validBackDevice = self.rearCamera? {
-                        self.captureSession?.addInput(validBackDevice)
+                        if !contains(inputs, validBackDevice) {
+                            validCaptureSession.addInput(validBackDevice)
+                        }
                     }
                 }
-                self.captureSession?.commitConfiguration()
-                
-                self.currentCameraDevice = newCameraDevice
+                validCaptureSession.commitConfiguration()
             }
+            self.currentCameraDevice = newCameraDevice
         }
     }
     
@@ -373,7 +381,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
 
     @objc private func _orientationChanged()
     {
-        if let validPreviewLayer = self.previewLayer {
+        if let validPreviewLayer = self.previewLayer? {
             switch UIDevice.currentDevice().orientation {
             case .LandscapeLeft:
                 validPreviewLayer.connection.videoOrientation = .LandscapeRight
@@ -462,12 +470,8 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         }
         if let validVideoBackDevice = videoBackDevice? {
             self.rearCamera = AVCaptureDeviceInput.deviceInputWithDevice(validVideoBackDevice, error: &error) as AVCaptureDeviceInput
-            if !(error != nil) {
-                if let validBackDevice = self.rearCamera? {
-                    self.captureSession?.addInput(validBackDevice)
-                }
-            }
         }
+        self.cameraDevice = self.currentCameraDevice
     }
     
     private func _setupMic()
