@@ -1,17 +1,17 @@
 
 ####Camera Manager
 
-V1.0.0 (10-Oct-2014)
+V1.0.2 (15-Oct-2014)
 
 ####About
-This is a simple class to provide all the configurations you need to create custom camera view in your app. 
+This is a simple swift class to provide all the configurations you need to create custom camera view in your app. 
 Just drag, drop and use.
 
-### Installation with CocoaPods
+####Installation with CocoaPods
 
 The easiest way to install the CameraManager is with: [CocoaPods](http://cocoapods.org) 
 
-#### Podfile
+## Podfile
 
 ```ruby
 platform :ios, '7.0'
