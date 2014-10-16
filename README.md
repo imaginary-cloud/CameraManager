@@ -1,7 +1,7 @@
 
 ####Camera Manager
 
-V1.0.3 (15-Oct-2014)
+V1.0.4 (16-Oct-2014)
 
 ####About
 This is a simple swift class to provide all the configurations you need to create custom camera view in your app. 
