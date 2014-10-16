@@ -245,7 +245,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     }
     
     /**
-    Inits a capture session and adds a preview layer to the given view. Preview layer bounds will automaticaly be set to match given view.
+    Inits a capture session and adds a preview layer to the given view. Preview layer bounds will automaticaly be set to match given view. Default session is initialized with still image output.
     
     :param: view The view you want to add the preview layer to
     :param: cameraOutputMode The mode you want capturesession to run image / video / video and microphone
@@ -278,6 +278,21 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     func stopCaptureSession()
     {
         self.captureSession?.stopRunning()
+    }
+    
+    /**
+    Restarts capture session.
+    */
+    func restartCaptureSession()
+    {
+        if let validCaptureSession = self.captureSession? {
+            validCaptureSession.startRunning()
+        } else {
+            if self.cameraIsSetup {
+                self.stopAndRemoveCaptureSession()
+            }
+            self._setupCamera({Void -> Void in })
+        }
     }
     
     /**
