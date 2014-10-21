@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name             = "CameraManager"
   s.version          = "1.0.4"
-  s.summary          = "This is a simple class to provide all the configurations you need to create custom camera view in your app. Just drag, drop and use."
+  s.summary          = "This is a simple swift class to provide all the configurations you need to create custom camera view in your app. Just drag, drop and use."
   s.homepage         = "https://github.com/imaginary-cloud/CameraManager"
   s.license          = 'MIT'
   s.author           = { "nelanelanela" => "nterlecka@imaginarycloud.com" }
