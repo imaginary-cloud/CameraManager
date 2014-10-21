@@ -220,6 +220,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     private var library: ALAssetsLibrary?
     
     private var cameraIsSetup = false
+    private var cameraIsObservingDeviceOrientation = false
     
     private var currentCameraDevice = CameraDevice.Back
     private var currentFlashMode = CameraFlashMode.Off
@@ -483,12 +484,18 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     
     private func _startFollowingDeviceOrientation()
     {
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "_orientationChanged", name: UIDeviceOrientationDidChangeNotification, object: nil)
+        if !self.cameraIsObservingDeviceOrientation {
+            NSNotificationCenter.defaultCenter().addObserver(self, selector: "_orientationChanged", name: UIDeviceOrientationDidChangeNotification, object: nil)
+            self.cameraIsObservingDeviceOrientation = true
+        }
     }
     
     private func _stopFollowingDeviceOrientation()
     {
-        NSNotificationCenter.defaultCenter().removeObserver(self, name: UIDeviceOrientationDidChangeNotification, object: nil)
+        if self.cameraIsObservingDeviceOrientation {
+            NSNotificationCenter.defaultCenter().removeObserver(self, name: UIDeviceOrientationDidChangeNotification, object: nil)
+            self.cameraIsObservingDeviceOrientation = false
+        }
     }
 
     private func _addPreeviewLayerToView(view: UIView)
