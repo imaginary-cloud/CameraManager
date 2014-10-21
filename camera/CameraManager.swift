@@ -281,9 +281,9 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     }
     
     /**
-    Restarts capture session.
+    Resumes capture session.
     */
-    func restartCaptureSession()
+    func resumeCaptureSession()
     {
         if let validCaptureSession = self.captureSession? {
             validCaptureSession.startRunning()
@@ -291,7 +291,11 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
             if self.cameraIsSetup {
                 self.stopAndRemoveCaptureSession()
             }
-            self._setupCamera({Void -> Void in })
+            self._setupCamera({Void -> Void in
+                if let validEmbedingView = self.embedingView? {
+                    self._addPreeviewLayerToView(validEmbedingView)
+                }
+            })
         }
     }
     
@@ -463,8 +467,9 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                     validCaptureSession.commitConfiguration()
                     validCaptureSession.startRunning()
                     self._startFollowingDeviceOrientation()
-                    completition()
                     self.cameraIsSetup = true
+
+                    completition()
                 }
             })
         } else {

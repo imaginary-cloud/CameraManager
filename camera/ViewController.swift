@@ -10,11 +10,18 @@ import UIKit
 
 class ViewController: UIViewController {
     
+    // MARK: - Constants
+
     let cameraManager = CameraManager.sharedInstance
     
+    // MARK: - @IBOutlets
+
     @IBOutlet weak var cameraView: UIView!
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var cameraButton: UIButton!
+    
+    
+    // MARK: - UIViewController
     
     override func viewDidLoad()
     {
@@ -27,6 +34,21 @@ class ViewController: UIViewController {
         }
     }
     
+    override func viewWillAppear(animated: Bool)
+    {
+        super.viewWillAppear(animated)
+        self.cameraManager.resumeCaptureSession()
+    }
+    
+    override func viewWillDisappear(animated: Bool)
+    {
+        super.viewWillDisappear(animated)
+        self.cameraManager.stopCaptureSession()
+    }
+    
+    
+    // MARK: - @IBActions
+
     @IBAction func changeFlashMode(sender: UIButton)
     {
         self.cameraManager.flashMode = CameraFlashMode.fromRaw((self.cameraManager.flashMode.toRaw()+1)%3)!
