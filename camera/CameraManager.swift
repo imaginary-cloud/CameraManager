@@ -579,7 +579,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         }
     }
 
-    private func _show (title: String, message: String)
+    private func _show(title: String, message: String)
     {
         if self.showErrorsToUsers {
             dispatch_async(dispatch_get_main_queue(), { () -> Void in
