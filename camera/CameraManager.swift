@@ -31,7 +31,7 @@ enum CameraOutputQuality {
 /// Class for handling iDevices custom camera usage
 class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
    
-    /// Capture sessioc to customize camera settings.
+    /// Capture session to customize camera settings.
     var captureSession: AVCaptureSession?
     
     /// Property to determine if the manager should show the error for the user. If you want to show the errors yourself set this to false. If you want to add custom error UI set showErrorBlock property. Default value is true.
@@ -133,18 +133,22 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         }
         set(newCameraOutputQuality) {
             if newCameraOutputQuality != self.currentCameraOutputQuality {
-                self.captureSession?.beginConfiguration()
-                switch (newCameraOutputQuality) {
-                case CameraOutputQuality.Low:
-                    self.captureSession?.sessionPreset = AVCaptureSessionPresetLow
-                case CameraOutputQuality.Medium:
-                    self.captureSession?.sessionPreset = AVCaptureSessionPresetMedium
-                case CameraOutputQuality.High:
-                    self.captureSession?.sessionPreset = AVCaptureSessionPresetHigh
+                if let validCaptureSession = self.captureSession? {
+                    validCaptureSession.beginConfiguration()
+                    switch (newCameraOutputQuality) {
+                    case CameraOutputQuality.Low:
+                        validCaptureSession.sessionPreset = AVCaptureSessionPresetLow
+                    case CameraOutputQuality.Medium:
+                        validCaptureSession.sessionPreset = AVCaptureSessionPresetMedium
+                    case CameraOutputQuality.High:
+                        validCaptureSession.sessionPreset = AVCaptureSessionPresetHigh
+                    }
+                    validCaptureSession.commitConfiguration()
+                    
+                    self.currentCameraOutputQuality = newCameraOutputQuality
+                } else {
+                    self._show("Camera error", message: "No valid capture session found, I can't take any pictures or videos.")
                 }
-                self.captureSession?.commitConfiguration()
-                
-                self.currentCameraOutputQuality = newCameraOutputQuality
             }
         }
     }
