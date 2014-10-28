@@ -1,11 +1,11 @@
 
 ####Camera Manager
 
-V1.0.5 (22-Oct-2014)
+V1.0.6 (28-Oct-2014)
 
 ####About
 This is a simple swift class to provide all the configurations you need to create custom camera view in your app. 
-Just drag, drop and use.
+Just drag, drop and use. It supports orientation changes wih UI updates, front and rear camera selection, different flash modes inputs and outputs.
 
 ####Installation with CocoaPods
 
