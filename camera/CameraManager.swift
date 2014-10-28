@@ -204,7 +204,8 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                     }
                 }
                 self.captureSession?.commitConfiguration()
-                
+                self._orientationChanged()
+
                 self.currentCameraOutputMode = newCameraOutputMode
             }
         }
@@ -440,22 +441,42 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     
     @objc private func _orientationChanged()
     {
+        var currentConnection: AVCaptureConnection?;
+        switch self.cameraOutputMode {
+        case .StillImage:
+            currentConnection = self.stillImageOutput?.connectionWithMediaType(AVMediaTypeVideo)
+        case .VideoOnly, .VideoWithMic:
+            currentConnection = self.movieOutput?.connectionWithMediaType(AVMediaTypeVideo)
+        }
+        
         if let validPreviewLayer = self.previewLayer? {
             if let validPreviewLayerConnection = validPreviewLayer.connection? {
-                switch UIDevice.currentDevice().orientation {
-                case .LandscapeLeft:
-                    validPreviewLayerConnection.videoOrientation = .LandscapeRight
-                case .LandscapeRight:
-                    validPreviewLayerConnection.videoOrientation = .LandscapeLeft
-                default:
-                    validPreviewLayerConnection.videoOrientation = .Portrait
+                if validPreviewLayerConnection.supportsVideoOrientation {
+                    validPreviewLayerConnection.videoOrientation = self._currentVideoOrientation()
                 }
-                dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                    if let validEmbedingView = self.embedingView? {
-                        validPreviewLayer.frame = validEmbedingView.bounds
-                    }
-                })
             }
+            if let validOutputLayerConnection = currentConnection? {
+                if validOutputLayerConnection.supportsVideoOrientation {
+                    validOutputLayerConnection.videoOrientation = self._currentVideoOrientation()
+                }
+            }
+            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                if let validEmbedingView = self.embedingView? {
+                    validPreviewLayer.frame = validEmbedingView.bounds
+                }
+            })
+        }
+    }
+    
+    private func _currentVideoOrientation() -> AVCaptureVideoOrientation
+    {
+        switch UIDevice.currentDevice().orientation {
+        case .LandscapeLeft:
+            return .LandscapeRight
+        case .LandscapeRight:
+            return .LandscapeLeft
+        default:
+            return .Portrait
         }
     }
     

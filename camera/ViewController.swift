@@ -46,7 +46,6 @@ class ViewController: UIViewController {
         self.cameraManager.stopCaptureSession()
     }
     
-    
     // MARK: - @IBActions
 
     @IBAction func changeFlashMode(sender: UIButton)
