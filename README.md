@@ -5,7 +5,8 @@ V1.0.6 (28-Oct-2014)
 
 ####About
 This is a simple swift class to provide all the configurations you need to create custom camera view in your app. 
-Just drag, drop and use. It supports orientation changes wih UI updates, front and rear camera selection, different flash modes inputs and outputs.
+It follows orientation change and updates UI accordingly, supports front and rear camera selection, different flash modes, inputs and outputs.
+Just drag, drop and use. 
 
 ####Installation with CocoaPods
 
