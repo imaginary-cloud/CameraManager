@@ -111,7 +111,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                 for  device in devices  {
                     let captureDevice = device as AVCaptureDevice
                     if (captureDevice.position == AVCaptureDevicePosition.Back) {
-                        let avFlashMode = AVCaptureFlashMode.fromRaw(newflashMode.toRaw())
+                        let avFlashMode = AVCaptureFlashMode(rawValue: newflashMode.rawValue)
                         if (captureDevice.isFlashModeSupported(avFlashMode!)) {
                             captureDevice.lockForConfiguration(nil)
                             captureDevice.flashMode = avFlashMode!
@@ -237,7 +237,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         if NSFileManager.defaultManager().fileExistsAtPath(tempPath!) {
             NSFileManager.defaultManager().removeItemAtPath(tempPath!, error: nil)
         }
-        return NSURL(fileURLWithPath: tempPath!)
+        return NSURL(fileURLWithPath: tempPath!)!
         }()
     
     /// CameraManager singleton instance to use the camera.
@@ -360,7 +360,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                                         }
                                     }
                                 }
-                                imageCompletition(UIImage(data: imageData))
+                                imageCompletition(UIImage(data: imageData)!)
                             }
                         })
                     }
