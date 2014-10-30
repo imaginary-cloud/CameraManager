@@ -1,7 +1,7 @@
 
 ####Camera Manager
 
-V1.0.6 (28-Oct-2014)
+V1.0.7 (30-Oct-2014)
 
 ####About
 This is a simple swift class to provide all the configurations you need to create custom camera view in your app. 
@@ -84,4 +84,4 @@ Supports iOS 7 and above
 
 ####License
 
-Copyright © 2014 ImaginaryCloud, imaginarycloud.com. This plugin is licensed under the MIT license.
+Copyright © 2014 ImaginaryCloud, imaginarycloud.com. This library is licensed under the MIT license.
