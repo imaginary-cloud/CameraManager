@@ -26,7 +26,7 @@ class ViewController: UIViewController {
     override func viewDidLoad()
     {
         super.viewDidLoad()        
-        self.cameraManager.addPreviewLayerToView(self.cameraView, newCameraOutputMode: CameraOutputMode.VideoWithMic)
+        self.cameraManager.addPreviewLayerToView(self.cameraView, newCameraOutputMode: CameraOutputMode.StillImage)
         self.cameraManager.cameraDevice = .Front
         self.imageView.hidden = true
         CameraManager.sharedInstance.showErrorBlock = { (erTitle: String, erMessage: String) -> Void in

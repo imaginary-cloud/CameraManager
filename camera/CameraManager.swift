@@ -160,53 +160,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         }
         set(newCameraOutputMode) {
             if newCameraOutputMode != self.currentCameraOutputMode {
-                self.captureSession?.beginConfiguration()
-
-                // remove current setting
-                switch self.currentCameraOutputMode {
-                case .StillImage:
-                    if let validStillImageOutput = self.stillImageOutput? {
-                        self.captureSession?.removeOutput(validStillImageOutput)
-                    }
-                case .VideoOnly, .VideoWithMic:
-                    if let validMovieOutput = self.movieOutput? {
-                        self.captureSession?.removeOutput(validMovieOutput)
-                    }
-                    if self.currentCameraOutputMode == .VideoWithMic {
-                        if let validMic = self.mic? {
-                            self.captureSession?.removeInput(validMic)
-                        }
-                    }
-                }
-                // configure new devices
-                switch newCameraOutputMode {
-                case .StillImage:
-                    if (self.stillImageOutput == nil) {
-                        self._setupOutputs()
-                    }
-                    if let validStillImageOutput = self.stillImageOutput? {
-                        self.captureSession?.addOutput(validStillImageOutput)
-                    }
-                case .VideoOnly, .VideoWithMic:
-                    if (self.movieOutput == nil) {
-                        self._setupOutputs()
-                    }
-                    if let validMovieOutput = self.movieOutput? {
-                        self.captureSession?.addOutput(validMovieOutput)
-                    }
-                    if newCameraOutputMode == .VideoWithMic {
-                        if (self.mic == nil) {
-                            self._setupMic()
-                        }
-                        if let validMic = self.mic? {
-                            self.captureSession?.addInput(validMic)
-                        }
-                    }
-                }
-                self.captureSession?.commitConfiguration()
-                self._orientationChanged()
-
-                self.currentCameraOutputMode = newCameraOutputMode
+                self._setupOutputMode(newCameraOutputMode)
             }
         }
     }
@@ -379,7 +333,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     func startRecordingVideo()
     {
         if self.cameraOutputMode != .StillImage {
-            self.movieOutput?.startRecordingToOutputFileURL(self.tempFilePath, recordingDelegate: self)
+            self._getMovieOutput().startRecordingToOutputFileURL(self.tempFilePath, recordingDelegate: self)
         } else {
             self._show("Capture session output still image", message: "I can only take pictures")
         }
@@ -439,6 +393,38 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         }
     }
 
+    private func _getMovieOutput() -> AVCaptureMovieFileOutput
+    {
+        var shouldReinitializeMovieOutput = self.movieOutput == nil
+        if !shouldReinitializeMovieOutput {
+            if let connection = self.movieOutput!.connectionWithMediaType(AVMediaTypeVideo) {
+                shouldReinitializeMovieOutput = shouldReinitializeMovieOutput || !connection.active
+            }
+        }
+        
+        if shouldReinitializeMovieOutput {
+            self.movieOutput = AVCaptureMovieFileOutput()
+            self.captureSession?.addOutput(self.movieOutput)
+        }
+        return self.movieOutput!
+    }
+    
+    private func _getCaptureSession() -> AVCaptureSession
+    {
+        var shouldReinitializeCaptureSession = self.captureSession == nil
+        if !shouldReinitializeCaptureSession {
+            shouldReinitializeCaptureSession = shouldReinitializeCaptureSession || !self.captureSession!.running
+            shouldReinitializeCaptureSession = shouldReinitializeCaptureSession || self.captureSession!.interrupted
+        }
+        
+        if shouldReinitializeCaptureSession {
+            self.captureSession = AVCaptureSession()
+            self._setupOutputs()
+            self._setupPreviewLayer()
+        }
+        return self.captureSession!
+    }
+    
     @objc private func _orientationChanged()
     {
         var currentConnection: AVCaptureConnection?;
@@ -446,7 +432,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         case .StillImage:
             currentConnection = self.stillImageOutput?.connectionWithMediaType(AVMediaTypeVideo)
         case .VideoOnly, .VideoWithMic:
-            currentConnection = self.movieOutput?.connectionWithMediaType(AVMediaTypeVideo)
+            currentConnection = self._getMovieOutput().connectionWithMediaType(AVMediaTypeVideo)
         }
 
         if let validPreviewLayer = self.previewLayer? {
@@ -491,7 +477,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                     validCaptureSession.sessionPreset = AVCaptureSessionPresetHigh
                     self._addVideoInput()
                     self._setupOutputs()
-                    self.cameraOutputMode = self.currentCameraOutputMode
+                    self._setupOutputMode(self.currentCameraOutputMode)
                     self.cameraOutputQuality = self.currentCameraOutputQuality
                     self._setupPreviewLayer()
                     validCaptureSession.commitConfiguration()
@@ -582,7 +568,56 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
             }
         }
     }
-
+    
+    private func _setupOutputMode(newCameraOutputMode: CameraOutputMode)
+    {
+        self.captureSession?.beginConfiguration()
+        
+        if (self.currentCameraOutputMode != newCameraOutputMode) {
+            // remove current setting
+            switch self.currentCameraOutputMode {
+            case .StillImage:
+                if let validStillImageOutput = self.stillImageOutput? {
+                    self.captureSession?.removeOutput(validStillImageOutput)
+                }
+            case .VideoOnly, .VideoWithMic:
+                if let validMovieOutput = self.movieOutput? {
+                    self.captureSession?.removeOutput(validMovieOutput)
+                }
+                if self.currentCameraOutputMode == .VideoWithMic {
+                    if let validMic = self.mic? {
+                        self.captureSession?.removeInput(validMic)
+                    }
+                }
+            }
+        }
+        
+        // configure new devices
+        switch newCameraOutputMode {
+        case .StillImage:
+            if (self.stillImageOutput == nil) {
+                self._setupOutputs()
+            }
+            if let validStillImageOutput = self.stillImageOutput? {
+                self.captureSession?.addOutput(validStillImageOutput)
+            }
+        case .VideoOnly, .VideoWithMic:
+            self.captureSession?.addOutput(self._getMovieOutput())
+            
+            if newCameraOutputMode == .VideoWithMic {
+                if (self.mic == nil) {
+                    self._setupMic()
+                }
+                if let validMic = self.mic? {
+                    self.captureSession?.addInput(validMic)
+                }
+            }
+        }
+        self.captureSession?.commitConfiguration()
+        self.currentCameraOutputMode = newCameraOutputMode;
+        self._orientationChanged()
+    }
+    
     private func _setupOutputs()
     {
         if (self.stillImageOutput == nil) {
