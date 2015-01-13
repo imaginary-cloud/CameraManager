@@ -291,34 +291,32 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         if self.cameraIsSetup {
             if self.cameraOutputMode == .StillImage {
                 dispatch_async(self.sessionQueue, {
-                    if let validStillImageOutput = self.stillImageOutput? {
-                        validStillImageOutput.captureStillImageAsynchronouslyFromConnection(validStillImageOutput.connectionWithMediaType(AVMediaTypeVideo), completionHandler: { [weak self] (sample: CMSampleBuffer!, error: NSError!) -> Void in
-                            if (error? != nil) {
-                                dispatch_async(dispatch_get_main_queue(), {
-                                    if let weakSelf = self {
-                                        weakSelf._show("error", message: error.localizedDescription)
-                                    }
-                                })
-                            } else {
-                                let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(sample)
+                    self._getStillImageOutput().captureStillImageAsynchronouslyFromConnection(self._getStillImageOutput().connectionWithMediaType(AVMediaTypeVideo), completionHandler: { [weak self] (sample: CMSampleBuffer!, error: NSError!) -> Void in
+                        if (error? != nil) {
+                            dispatch_async(dispatch_get_main_queue(), {
                                 if let weakSelf = self {
-                                    if weakSelf.writeFilesToPhoneLibrary {
-                                        if let validLibrary = weakSelf.library? {
-                                            validLibrary.writeImageDataToSavedPhotosAlbum(imageData, metadata:nil, completionBlock: {
-                                                (picUrl, error) -> Void in
-                                                if (error? != nil) {
-                                                    dispatch_async(dispatch_get_main_queue(), {
-                                                        weakSelf._show("error", message: error.localizedDescription)
-                                                    })
-                                                }
-                                            })
-                                        }
+                                    weakSelf._show("error", message: error.localizedDescription)
+                                }
+                            })
+                        } else {
+                            let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(sample)
+                            if let weakSelf = self {
+                                if weakSelf.writeFilesToPhoneLibrary {
+                                    if let validLibrary = weakSelf.library? {
+                                        validLibrary.writeImageDataToSavedPhotosAlbum(imageData, metadata:nil, completionBlock: {
+                                            (picUrl, error) -> Void in
+                                            if (error? != nil) {
+                                                dispatch_async(dispatch_get_main_queue(), {
+                                                    weakSelf._show("error", message: error.localizedDescription)
+                                                })
+                                            }
+                                        })
                                     }
                                 }
-                                imageCompletition(UIImage(data: imageData)!)
                             }
-                        })
-                    }
+                            imageCompletition(UIImage(data: imageData)!)
+                        }
+                    })
                 })
             } else {
                 self._show("Capture session output mode video", message: "I can't take any picture")
@@ -405,25 +403,30 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         
         if shouldReinitializeMovieOutput {
             self.movieOutput = AVCaptureMovieFileOutput()
+            
+            self.captureSession?.beginConfiguration()
             self.captureSession?.addOutput(self.movieOutput)
+            self.captureSession?.commitConfiguration()
         }
         return self.movieOutput!
     }
     
-    private func _getCaptureSession() -> AVCaptureSession
+    private func _getStillImageOutput() -> AVCaptureStillImageOutput
     {
-        var shouldReinitializeCaptureSession = self.captureSession == nil
-        if !shouldReinitializeCaptureSession {
-            shouldReinitializeCaptureSession = shouldReinitializeCaptureSession || !self.captureSession!.running
-            shouldReinitializeCaptureSession = shouldReinitializeCaptureSession || self.captureSession!.interrupted
+        var shouldReinitializeStillImageOutput = self.stillImageOutput == nil
+        if !shouldReinitializeStillImageOutput {
+            if let connection = self.stillImageOutput!.connectionWithMediaType(AVMediaTypeVideo) {
+                shouldReinitializeStillImageOutput = shouldReinitializeStillImageOutput || !connection.active
+            }
         }
-        
-        if shouldReinitializeCaptureSession {
-            self.captureSession = AVCaptureSession()
-            self._setupOutputs()
-            self._setupPreviewLayer()
+        if shouldReinitializeStillImageOutput {
+            self.stillImageOutput = AVCaptureStillImageOutput()
+            
+            self.captureSession?.beginConfiguration()
+            self.captureSession?.addOutput(self.stillImageOutput)
+            self.captureSession?.commitConfiguration()
         }
-        return self.captureSession!
+        return self.stillImageOutput!
     }
     
     @objc private func _orientationChanged()
@@ -435,7 +438,6 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         case .VideoOnly, .VideoWithMic:
             currentConnection = self._getMovieOutput().connectionWithMediaType(AVMediaTypeVideo)
         }
-
         if let validPreviewLayer = self.previewLayer? {
             if let validPreviewLayerConnection = validPreviewLayer.connection? {
                 if validPreviewLayerConnection.supportsVideoOrientation {
