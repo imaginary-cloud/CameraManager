@@ -249,6 +249,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         if let validCaptureSession = self.captureSession? {
             if !validCaptureSession.running && self.cameraIsSetup {
                 validCaptureSession.startRunning()
+                self._startFollowingDeviceOrientation()
             }
         } else {
             if self.cameraIsSetup {

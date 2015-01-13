@@ -25,7 +25,7 @@ class ViewController: UIViewController {
     
     override func viewDidLoad()
     {
-        super.viewDidLoad()        
+        super.viewDidLoad()
         self.cameraManager.addPreviewLayerToView(self.cameraView, newCameraOutputMode: CameraOutputMode.StillImage)
         self.cameraManager.cameraDevice = .Front
         self.imageView.hidden = true
@@ -37,6 +37,8 @@ class ViewController: UIViewController {
     override func viewWillAppear(animated: Bool)
     {
         super.viewWillAppear(animated)
+        
+        self.navigationController?.navigationBar.hidden = true
         self.cameraManager.resumeCaptureSession()
     }
     
@@ -66,7 +68,11 @@ class ViewController: UIViewController {
         switch (self.cameraManager.cameraOutputMode) {
         case .StillImage:
             self.cameraManager.capturePictureWithCompletition({ (image) -> Void in
-                
+                let vc: ImageViewController? = self.storyboard?.instantiateViewControllerWithIdentifier("ImageVC") as? ImageViewController
+                if let validVC: ImageViewController = vc {
+                    validVC.image = image
+                    self.navigationController?.pushViewController(validVC, animated: true)
+                }
             })
         case .VideoWithMic, .VideoOnly:
             sender.selected = !sender.selected

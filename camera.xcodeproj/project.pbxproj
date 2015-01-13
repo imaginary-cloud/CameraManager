@@ -13,6 +13,7 @@
 		454C1F4E19E82E2500C81915 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 454C1F4D19E82E2500C81915 /* Images.xcassets */; };
 		454C1F5119E82E2500C81915 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 454C1F4F19E82E2500C81915 /* LaunchScreen.xib */; };
 		454C1F6719E8316A00C81915 /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 454C1F6619E8316A00C81915 /* CameraManager.swift */; };
+		45A23C181A656BDC00FB48F3 /* ImageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45A23C171A656BDC00FB48F3 /* ImageViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,7 @@
 		454C1F4D19E82E2500C81915 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		454C1F5019E82E2500C81915 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		454C1F6619E8316A00C81915 /* CameraManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
+		45A23C171A656BDC00FB48F3 /* ImageViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,8 +59,8 @@
 			isa = PBXGroup;
 			children = (
 				454C1F4619E82E2500C81915 /* AppDelegate.swift */,
+				45A23C191A656BE600FB48F3 /* Example app view controllers */,
 				454C1F6619E8316A00C81915 /* CameraManager.swift */,
-				454C1F4819E82E2500C81915 /* ViewController.swift */,
 				454C1F4A19E82E2500C81915 /* Main.storyboard */,
 				454C1F4D19E82E2500C81915 /* Images.xcassets */,
 				454C1F4F19E82E2500C81915 /* LaunchScreen.xib */,
@@ -73,6 +75,15 @@
 				454C1F4519E82E2500C81915 /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		45A23C191A656BE600FB48F3 /* Example app view controllers */ = {
+			isa = PBXGroup;
+			children = (
+				454C1F4819E82E2500C81915 /* ViewController.swift */,
+				45A23C171A656BDC00FB48F3 /* ImageViewController.swift */,
+			);
+			name = "Example app view controllers";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -147,6 +158,7 @@
 			files = (
 				454C1F4919E82E2500C81915 /* ViewController.swift in Sources */,
 				454C1F6719E8316A00C81915 /* CameraManager.swift in Sources */,
+				45A23C181A656BDC00FB48F3 /* ImageViewController.swift in Sources */,
 				454C1F4719E82E2500C81915 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
