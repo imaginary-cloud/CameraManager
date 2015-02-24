@@ -487,6 +487,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                     validCaptureSession.startRunning()
                     self._startFollowingDeviceOrientation()
                     self.cameraIsSetup = true
+                    self._orientationChanged()
 
                     completition()
                 }
