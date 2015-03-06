@@ -12,41 +12,41 @@ import AssetsLibrary
 
 private let _singletonSharedInstance = CameraManager()
 
-enum CameraDevice {
+public enum CameraDevice {
     case Front, Back
 }
 
-enum CameraFlashMode: Int {
+public enum CameraFlashMode: Int {
     case Off, On, Auto
 }
 
-enum CameraOutputMode {
+public enum CameraOutputMode {
     case StillImage, VideoWithMic, VideoOnly
 }
 
-enum CameraOutputQuality {
+public enum CameraOutputQuality {
     case Low, Medium, High
 }
 
 /// Class for handling iDevices custom camera usage
-class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
+public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
 
     /// Capture session to customize camera settings.
-    var captureSession: AVCaptureSession?
+    public var captureSession: AVCaptureSession?
 
     /// Property to determine if the manager should show the error for the user. If you want to show the errors yourself set this to false. If you want to add custom error UI set showErrorBlock property. Default value is true.
-    var showErrorsToUsers = true
+    public var showErrorsToUsers = true
 
     /// A block creating UI to present error message to the user.
-    var showErrorBlock:(erTitle: String, erMessage: String) -> Void = { (erTitle: String, erMessage: String) -> Void in
+    public var showErrorBlock:(erTitle: String, erMessage: String) -> Void = { (erTitle: String, erMessage: String) -> Void in
         UIAlertView(title: erTitle, message: erMessage, delegate: nil, cancelButtonTitle: "OK").show()
     }
 
     /// Property to determine if  manager should write the resources to the phone library. Default value is true.
-    var writeFilesToPhoneLibrary = true
+    public var writeFilesToPhoneLibrary = true
 
     /// The Bool property to determin if current device has front camera.
-    var hasFrontCamera: Bool = {
+    public var hasFrontCamera: Bool = {
         let devices = AVCaptureDevice.devicesWithMediaType(AVMediaTypeVideo)
         for  device in devices  {
             let captureDevice = device as AVCaptureDevice
@@ -58,7 +58,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     }()
 
     /// Property to change camera device between front and back.
-    var cameraDevice: CameraDevice {
+    public var cameraDevice: CameraDevice {
         get {
             return _cameraDevice
         }
@@ -100,7 +100,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     }
 
     /// Property to change camera flash mode.
-    var flashMode: CameraFlashMode {
+    public var flashMode: CameraFlashMode {
         get {
             return _flashMode
         }
@@ -127,7 +127,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     }
 
     /// Property to change camera output quality.
-    var cameraOutputQuality: CameraOutputQuality {
+    public var cameraOutputQuality: CameraOutputQuality {
         get {
             return _cameraOutputQuality
         }
@@ -154,7 +154,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     }
 
     /// Property to change camera output.
-    var cameraOutputMode: CameraOutputMode {
+    public var cameraOutputMode: CameraOutputMode {
         get {
             return _cameraOutputMode
         }
@@ -195,7 +195,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         }()
 
     /// CameraManager singleton instance to use the camera.
-    class var sharedInstance: CameraManager {
+    public class var sharedInstance: CameraManager {
         return _singletonSharedInstance
     }
 
@@ -210,11 +210,11 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     :param: view The view you want to add the preview layer to
     :param: cameraOutputMode The mode you want capturesession to run image / video / video and microphone
     */
-    func addPreviewLayerToView(view: UIView)
+    public func addPreviewLayerToView(view: UIView)
     {
         self.addPreviewLayerToView(view, newCameraOutputMode: _cameraOutputMode)
     }
-    func addPreviewLayerToView(view: UIView, newCameraOutputMode: CameraOutputMode)
+    public func addPreviewLayerToView(view: UIView, newCameraOutputMode: CameraOutputMode)
     {
         if let validEmbedingView = self.embedingView? {
             if let validPreviewLayer = self.previewLayer? {
@@ -235,7 +235,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     /**
     Stops running capture session but all setup devices, inputs and outputs stay for further reuse.
     */
-    func stopCaptureSession()
+    public func stopCaptureSession()
     {
         self.captureSession?.stopRunning()
         self._stopFollowingDeviceOrientation()
@@ -244,7 +244,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     /**
     Resumes capture session.
     */
-    func resumeCaptureSession()
+    public func resumeCaptureSession()
     {
         if let validCaptureSession = self.captureSession? {
             if !validCaptureSession.running && self.cameraIsSetup {
@@ -267,7 +267,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     /**
     Stops running capture session and removes all setup devices, inputs and outputs.
     */
-    func stopAndRemoveCaptureSession()
+    public func stopAndRemoveCaptureSession()
     {
         self.stopCaptureSession()
         self.cameraDevice = .Back
@@ -286,7 +286,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
 
     :param: imageCompletition Completition block containing the captured UIImage
     */
-    func capturePictureWithCompletition(imageCompletition: UIImage -> Void)
+    public func capturePictureWithCompletition(imageCompletition: UIImage -> Void)
     {
         if self.cameraIsSetup {
             if self.cameraOutputMode == .StillImage {
@@ -329,7 +329,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     /**
     Starts recording a video with or without voice as in the session preset.
     */
-    func startRecordingVideo()
+    public func startRecordingVideo()
     {
         if self.cameraOutputMode != .StillImage {
             self._getMovieOutput().startRecordingToOutputFileURL(self.tempFilePath, recordingDelegate: self)
@@ -341,7 +341,7 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     /**
     Stop recording a video. Save it to the cameraRoll and give back the url.
     */
-    func stopRecordingVideo(completition:(videoURL: NSURL) -> Void)
+    public func stopRecordingVideo(completition:(videoURL: NSURL) -> Void)
     {
         if let runningMovieOutput = self.movieOutput {
             if runningMovieOutput.recording {
@@ -354,12 +354,12 @@ class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
 
     // PRAGMA MARK - AVCaptureFileOutputRecordingDelegate
 
-    func captureOutput(captureOutput: AVCaptureFileOutput!, didStartRecordingToOutputFileAtURL fileURL: NSURL!, fromConnections connections: [AnyObject]!)
+    public func captureOutput(captureOutput: AVCaptureFileOutput!, didStartRecordingToOutputFileAtURL fileURL: NSURL!, fromConnections connections: [AnyObject]!)
     {
 
     }
 
-    func captureOutput(captureOutput: AVCaptureFileOutput!, didFinishRecordingToOutputFileAtURL outputFileURL: NSURL!, fromConnections connections: [AnyObject]!, error: NSError!)
+    public func captureOutput(captureOutput: AVCaptureFileOutput!, didFinishRecordingToOutputFileAtURL outputFileURL: NSURL!, fromConnections connections: [AnyObject]!, error: NSError!)
     {
         if (error != nil) {
             self._show("Unable to save video to the iPhone", message: error.localizedDescription)

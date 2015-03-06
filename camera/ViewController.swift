@@ -23,8 +23,7 @@ class ViewController: UIViewController {
     
     // MARK: - UIViewController
     
-    override func viewDidLoad()
-    {
+    override func viewDidLoad() {
         super.viewDidLoad()
         self.cameraManager.addPreviewLayerToView(self.cameraView, newCameraOutputMode: CameraOutputMode.StillImage)
         
