@@ -1,7 +1,7 @@
 
 ####Camera Manager
 
-V1.0.9 (6-Mar-2015)
+V1.0.9 (10-Mar-2015)
 
 ####About
 This is a simple swift class to provide all the configurations you need to create custom camera view in your app. 
@@ -15,7 +15,7 @@ The easiest way to install the CameraManager is with: [CocoaPods](http://cocoapo
 ## Podfile
 
 ```ruby
-platform :ios, '7.0'
+platform :ios, ‘8.0’
 pod 'CameraManager', '~> 1.0'
 ```
 
@@ -80,7 +80,7 @@ CameraManager.sharedInstance.stopRecordingVideo({ (videoURL) -> Void in
 
 ####Support
 
-Supports iOS 7 and above
+Supports iOS 8 and above
 
 ####License
 
