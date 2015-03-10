@@ -15,7 +15,8 @@ The easiest way to install the CameraManager is with: [CocoaPods](http://cocoapo
 ## Podfile
 
 ```ruby
-platform :ios, ‘8.0’
+use_frameworks!
+
 pod 'CameraManager', '~> 1.0'
 ```
 
