@@ -12,6 +12,10 @@ import AssetsLibrary
 
 private let _singletonSharedInstance = CameraManager()
 
+public enum CameraState {
+    case Ready, AccessDenied, NoDeviceFound
+}
+
 public enum CameraDevice {
     case Front, Back
 }
@@ -209,27 +213,33 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
 
     :param: view The view you want to add the preview layer to
     :param: cameraOutputMode The mode you want capturesession to run image / video / video and microphone
+    
+    :returns: Current state of the camera: Ready / AccessDenied / NoDeviceFound.
     */
-    public func addPreviewLayerToView(view: UIView)
+    public func addPreviewLayerToView(view: UIView) -> CameraState
     {
-        self.addPreviewLayerToView(view, newCameraOutputMode: _cameraOutputMode)
+        return self.addPreviewLayerToView(view, newCameraOutputMode: _cameraOutputMode)
     }
-    public func addPreviewLayerToView(view: UIView, newCameraOutputMode: CameraOutputMode)
+    public func addPreviewLayerToView(view: UIView, newCameraOutputMode: CameraOutputMode) -> CameraState
     {
-        if let validEmbedingView = self.embedingView? {
-            if let validPreviewLayer = self.previewLayer? {
-                validPreviewLayer.removeFromSuperlayer()
+        let currentCameraState = _checkIfCameraIsAvailable()
+        if currentCameraState == .Ready {
+            if let validEmbedingView = self.embedingView? {
+                if let validPreviewLayer = self.previewLayer? {
+                    validPreviewLayer.removeFromSuperlayer()
+                }
             }
-        }
-        if self.cameraIsSetup {
-            self._addPreeviewLayerToView(view)
-            self.cameraOutputMode = newCameraOutputMode
-        } else {
-            self._setupCamera({ Void -> Void in
+            if self.cameraIsSetup {
                 self._addPreeviewLayerToView(view)
                 self.cameraOutputMode = newCameraOutputMode
-            })
+            } else {
+                self._setupCamera({ Void -> Void in
+                    self._addPreeviewLayerToView(view)
+                    self.cameraOutputMode = newCameraOutputMode
+                })
+            }
         }
+        return currentCameraState
     }
 
     /**
@@ -471,7 +481,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
 
     private func _setupCamera(completition: Void -> Void)
     {
-        if self._checkIfCameraIsAvailable() {
+        if self._checkIfCameraIsAvailable() == .Ready {
             self.captureSession = AVCaptureSession()
 
             dispatch_async(sessionQueue, {
@@ -492,8 +502,6 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                     completition()
                 }
             })
-        } else {
-           self._show("Camera unavailable", message: "The device does not have a camera")
         }
     }
 
@@ -523,10 +531,19 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         })
     }
 
-    private func _checkIfCameraIsAvailable() -> Bool
+    private func _checkIfCameraIsAvailable() -> CameraState
     {
         let deviceHasCamera = UIImagePickerController.isCameraDeviceAvailable(UIImagePickerControllerCameraDevice.Rear) || UIImagePickerController.isCameraDeviceAvailable(UIImagePickerControllerCameraDevice.Front)
-        return deviceHasCamera
+        if deviceHasCamera {
+            let userAgreedToUseIt = AVCaptureDevice.authorizationStatusForMediaType(AVMediaTypeVideo) == .Authorized
+            if userAgreedToUseIt {
+                return .Ready
+            } else {
+                return .AccessDenied
+            }
+        } else {
+            return .NoDeviceFound
+        }
     }
 
     private func _addVideoInput()

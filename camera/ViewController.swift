@@ -25,7 +25,12 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.cameraManager.addPreviewLayerToView(self.cameraView, newCameraOutputMode: CameraOutputMode.StillImage)
+        let currentCameraState = self.cameraManager.addPreviewLayerToView(self.cameraView, newCameraOutputMode: CameraOutputMode.VideoOnly)
+        if currentCameraState == .AccessDenied {
+            UIAlertView(title: "Camera access denied", message: "You need to go to settings app and grant acces to the camera device to use it.", delegate: nil, cancelButtonTitle: "OK").show()
+        } else if (currentCameraState == .NoDeviceFound) {
+            UIAlertView(title: "Camera unavailable", message: "The device does not have a camera.", delegate: nil, cancelButtonTitle: "OK").show()
+        }
         
         self.cameraManager.cameraDevice = .Front
         self.imageView.hidden = true

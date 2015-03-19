@@ -1,7 +1,7 @@
 
 ####Camera Manager
 
-V1.0.9 (10-Mar-2015)
+V1.0.10 (19-Mar-2015)
 
 ####About
 This is a simple swift class to provide all the configurations you need to create custom camera view in your app. 
@@ -21,7 +21,7 @@ pod 'CameraManager', '~> 1.0'
 ```
 
 ####How to use
-To use it you just add the preview layer to your desired view 
+To use it you just add the preview layer to your desired view, you'll get back the state of the camera if it's unavailable, ready or the user denied assess to it.
 ```swift
 CameraManager.sharedInstance.addPreeviewLayerToView(self.cameraView)
 ```
