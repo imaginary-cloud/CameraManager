@@ -13,7 +13,7 @@ import AssetsLibrary
 private let _singletonSharedInstance = CameraManager()
 
 public enum CameraState {
-    case Ready, AccessDenied, NoDeviceFound
+    case Ready, AccessDenied, NoDeviceFound, NotDetermined
 }
 
 public enum CameraDevice {
@@ -170,7 +170,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     }
 
     private weak var embedingView: UIView?
-    private var videoCompletition: ((videoURL: NSURL) -> Void)?
+    private var videoCompletition: ((videoURL: NSURL, error: NSError?) -> Void)?
 
     private var sessionQueue: dispatch_queue_t = dispatch_queue_create("CameraSessionQueue", DISPATCH_QUEUE_SERIAL)
 
@@ -223,7 +223,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     public func addPreviewLayerToView(view: UIView, newCameraOutputMode: CameraOutputMode) -> CameraState
     {
         let currentCameraState = _checkIfCameraIsAvailable()
-        if currentCameraState == .Ready {
+        if currentCameraState == .Ready || currentCameraState == .NotDetermined {
             if let validEmbedingView = self.embedingView? {
                 if let validPreviewLayer = self.previewLayer? {
                     validPreviewLayer.removeFromSuperlayer()
@@ -262,15 +262,17 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                 self._startFollowingDeviceOrientation()
             }
         } else {
-            if self.cameraIsSetup {
-                self.stopAndRemoveCaptureSession()
-            }
-            self._setupCamera({Void -> Void in
-                if let validEmbedingView = self.embedingView? {
-                    self._addPreeviewLayerToView(validEmbedingView)
+            if self._checkIfCameraIsAvailable() == .Ready || _checkIfCameraIsAvailable() == .NotDetermined {
+                if self.cameraIsSetup {
+                    self.stopAndRemoveCaptureSession()
                 }
-                self._startFollowingDeviceOrientation()
-            })
+                self._setupCamera({Void -> Void in
+                    if let validEmbedingView = self.embedingView? {
+                        self._addPreeviewLayerToView(validEmbedingView)
+                    }
+                    self._startFollowingDeviceOrientation()
+                })
+            }
         }
     }
 
@@ -296,7 +298,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
 
     :param: imageCompletition Completition block containing the captured UIImage
     */
-    public func capturePictureWithCompletition(imageCompletition: UIImage -> Void)
+    public func capturePictureWithCompletition(imageCompletition: (UIImage?, NSError?) -> Void)
     {
         if self.cameraIsSetup {
             if self.cameraOutputMode == .StillImage {
@@ -308,6 +310,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                                     weakSelf._show("error", message: error.localizedDescription)
                                 }
                             })
+                            imageCompletition(nil, error)
                         } else {
                             let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(sample)
                             if let weakSelf = self {
@@ -324,7 +327,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                                     }
                                 }
                             }
-                            imageCompletition(UIImage(data: imageData)!)
+                            imageCompletition(UIImage(data: imageData), nil)
                         }
                     })
                 })
@@ -351,7 +354,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     /**
     Stop recording a video. Save it to the cameraRoll and give back the url.
     */
-    public func stopRecordingVideo(completition:(videoURL: NSURL) -> Void)
+    public func stopRecordingVideo(completition:(videoURL: NSURL, error: NSError?) -> Void)
     {
         if let runningMovieOutput = self.movieOutput {
             if runningMovieOutput.recording {
@@ -381,12 +384,12 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                             self._show("Unable to save video to the iPhone.", message: error!.localizedDescription)
                         } else {
                             if let validAssetURL = assetURL {
-                                self._executeVideoCompletitionWithURL(validAssetURL)
+                                self._executeVideoCompletitionWithURL(validAssetURL, error: error)
                             }
                         }
                     })
                 } else {
-                    self._executeVideoCompletitionWithURL(outputFileURL)
+                    self._executeVideoCompletitionWithURL(outputFileURL, error: error)
                 }
             }
         }
@@ -394,10 +397,10 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
 
     // PRAGMA MARK - CameraManager()
 
-    private func _executeVideoCompletitionWithURL(url: NSURL)
+    private func _executeVideoCompletitionWithURL(url: NSURL, error: NSError?)
     {
         if let validCompletition = self.videoCompletition {
-            validCompletition(videoURL: url)
+            validCompletition(videoURL: url, error: error)
             self.videoCompletition = nil
         }
     }
@@ -481,28 +484,26 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
 
     private func _setupCamera(completition: Void -> Void)
     {
-        if self._checkIfCameraIsAvailable() == .Ready {
-            self.captureSession = AVCaptureSession()
-
-            dispatch_async(sessionQueue, {
-                if let validCaptureSession = self.captureSession? {
-                    validCaptureSession.beginConfiguration()
-                    validCaptureSession.sessionPreset = AVCaptureSessionPresetHigh
-                    self._addVideoInput()
-                    self._setupOutputs()
-                    self._setupOutputMode(self._cameraOutputMode)
-                    self.cameraOutputQuality = self._cameraOutputQuality
-                    self._setupPreviewLayer()
-                    validCaptureSession.commitConfiguration()
-                    validCaptureSession.startRunning()
-                    self._startFollowingDeviceOrientation()
-                    self.cameraIsSetup = true
-                    self._orientationChanged()
-
-                    completition()
-                }
-            })
-        }
+        self.captureSession = AVCaptureSession()
+        
+        dispatch_async(sessionQueue, {
+            if let validCaptureSession = self.captureSession? {
+                validCaptureSession.beginConfiguration()
+                validCaptureSession.sessionPreset = AVCaptureSessionPresetHigh
+                self._addVideoInput()
+                self._setupOutputs()
+                self._setupOutputMode(self._cameraOutputMode)
+                self.cameraOutputQuality = self._cameraOutputQuality
+                self._setupPreviewLayer()
+                validCaptureSession.commitConfiguration()
+                validCaptureSession.startRunning()
+                self._startFollowingDeviceOrientation()
+                self.cameraIsSetup = true
+                self._orientationChanged()
+                
+                completition()
+            }
+        })
     }
 
     private func _startFollowingDeviceOrientation()
@@ -535,9 +536,13 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     {
         let deviceHasCamera = UIImagePickerController.isCameraDeviceAvailable(UIImagePickerControllerCameraDevice.Rear) || UIImagePickerController.isCameraDeviceAvailable(UIImagePickerControllerCameraDevice.Front)
         if deviceHasCamera {
-            let userAgreedToUseIt = AVCaptureDevice.authorizationStatusForMediaType(AVMediaTypeVideo) == .Authorized
+            let authorizationStatus = AVCaptureDevice.authorizationStatusForMediaType(AVMediaTypeVideo)
+            let userAgreedToUseIt = authorizationStatus == .Authorized
             if userAgreedToUseIt {
                 return .Ready
+            } else if authorizationStatus == AVAuthorizationStatus.NotDetermined {
+                AVCaptureDevice.requestAccessForMediaType(AVMediaTypeVideo, completionHandler: { (alowedAccess) -> Void in })
+                return .NotDetermined
             } else {
                 return .AccessDenied
             }
@@ -545,7 +550,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
             return .NoDeviceFound
         }
     }
-
+    
     private func _addVideoInput()
     {
         var error: NSError?
