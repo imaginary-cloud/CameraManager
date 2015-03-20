@@ -37,10 +37,13 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
 
     /// Capture session to customize camera settings.
     public var captureSession: AVCaptureSession?
-
+    
     /// Property to determine if the manager should show the error for the user. If you want to show the errors yourself set this to false. If you want to add custom error UI set showErrorBlock property. Default value is true.
     public var showErrorsToUsers = true
-
+    
+    /// Property to determine if the manager should show the camera permission popup immediatly when it's needed or you want to show it manually. Default value is true.
+    public var showAccessPermissionPopupAutomatically = true
+    
     /// A block creating UI to present error message to the user.
     public var showErrorBlock:(erTitle: String, erMessage: String) -> Void = { (erTitle: String, erMessage: String) -> Void in
         UIAlertView(title: erTitle, message: erMessage, delegate: nil, cancelButtonTitle: "OK").show()
@@ -59,7 +62,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
             }
         }
         return false
-    }()
+        }()
 
     /// Property to change camera device between front and back.
     public var cameraDevice: CameraDevice {
@@ -197,7 +200,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         }
         return NSURL(fileURLWithPath: tempPath!)!
         }()
-
+    
     /// CameraManager singleton instance to use the camera.
     public class var sharedInstance: CameraManager {
         return _singletonSharedInstance
@@ -214,7 +217,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     :param: view The view you want to add the preview layer to
     :param: cameraOutputMode The mode you want capturesession to run image / video / video and microphone
     
-    :returns: Current state of the camera: Ready / AccessDenied / NoDeviceFound.
+    :returns: Current state of the camera: Ready / AccessDenied / NoDeviceFound / NotDetermined.
     */
     public func addPreviewLayerToView(view: UIView) -> CameraState
     {
@@ -222,8 +225,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     }
     public func addPreviewLayerToView(view: UIView, newCameraOutputMode: CameraOutputMode) -> CameraState
     {
-        let currentCameraState = _checkIfCameraIsAvailable()
-        if currentCameraState == .Ready || currentCameraState == .NotDetermined {
+        if self._canLoadCamera() {
             if let validEmbedingView = self.embedingView? {
                 if let validPreviewLayer = self.previewLayer? {
                     validPreviewLayer.removeFromSuperlayer()
@@ -239,7 +241,22 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                 })
             }
         }
-        return currentCameraState
+        return self._checkIfCameraIsAvailable()
+    }
+
+    /**
+    Asks the user for camera permissions. Only works if the permissions are not yet determined.
+    
+    :param: completition Completition block with the result of permission request
+    */
+    public func askUserForCameraPermissions(completition: Bool -> Void)
+    {
+        AVCaptureDevice.requestAccessForMediaType(AVMediaTypeVideo, completionHandler: { (alowedAccess) -> Void in
+            dispatch_sync(dispatch_get_main_queue(), { () -> Void in
+                completition(alowedAccess)
+            })
+        })
+
     }
 
     /**
@@ -262,7 +279,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                 self._startFollowingDeviceOrientation()
             }
         } else {
-            if self._checkIfCameraIsAvailable() == .Ready || _checkIfCameraIsAvailable() == .NotDetermined {
+            if self._canLoadCamera() {
                 if self.cameraIsSetup {
                     self.stopAndRemoveCaptureSession()
                 }
@@ -364,6 +381,15 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         }
     }
 
+    /**
+    Current camera status.
+    
+    :returns: Current state of the camera: Ready / AccessDenied / NoDeviceFound / NotDetermined
+    */
+    public func currentCameraStatus() -> CameraState
+    {
+        return self._checkIfCameraIsAvailable()
+    }
 
     // PRAGMA MARK - AVCaptureFileOutputRecordingDelegate
 
@@ -482,6 +508,12 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         }
     }
 
+    private func _canLoadCamera() -> Bool
+    {
+        let currentCameraState = _checkIfCameraIsAvailable()
+        return currentCameraState == .Ready || (currentCameraState == .NotDetermined && self.showAccessPermissionPopupAutomatically)
+    }
+
     private func _setupCamera(completition: Void -> Void)
     {
         self.captureSession = AVCaptureSession()
@@ -541,7 +573,6 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
             if userAgreedToUseIt {
                 return .Ready
             } else if authorizationStatus == AVAuthorizationStatus.NotDetermined {
-                AVCaptureDevice.requestAccessForMediaType(AVMediaTypeVideo, completionHandler: { (alowedAccess) -> Void in })
                 return .NotDetermined
             } else {
                 return .AccessDenied

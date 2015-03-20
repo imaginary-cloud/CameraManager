@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6751" systemVersion="13F1066" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="bhK-VL-qY4">
     <dependencies>
-        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6736"/>
     </dependencies>
     <scenes>
@@ -22,9 +21,6 @@
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <color key="tintColor" red="0.54901963470000004" green="0.77647066119999997" blue="0.2470588386" alpha="1" colorSpace="deviceRGB"/>
                             </view>
-                            <imageView hidden="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="yyS-3g-UqL">
-                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
-                            </imageView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sT4-CC-oh5">
                                 <rect key="frame" x="496" y="20" width="88" height="33"/>
                                 <color key="backgroundColor" red="0.98039221759999995" green="0.0078431377190000002" blue="0.52156865600000002" alpha="1" colorSpace="deviceRGB"/>
@@ -80,38 +76,61 @@
                                     <action selector="outputModeButtonTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Bgy-rQ-cfF"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rd3-ei-B9P">
+                                <rect key="frame" x="40" y="93" width="520" height="397"/>
+                                <color key="backgroundColor" red="1" green="0.0" blue="0.46666669849999998" alpha="0.5" colorSpace="deviceRGB"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="27"/>
+                                <state key="normal">
+                                    <color key="titleColor" red="0.36078432199999999" green="0.36078432199999999" blue="0.36078432199999999" alpha="1" colorSpace="deviceRGB"/>
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="askForCameraPermissions:" destination="BYZ-38-t0r" eventType="touchUpInside" id="gbn-Ql-Lnv"/>
+                                </connections>
+                            </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tap here to enable camera access and take great pictures" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2bK-wq-6Rf">
+                                <rect key="frame" x="40" y="93" width="520" height="397"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="25"/>
+                                <color key="textColor" red="0.36078432199999999" green="0.36078432199999999" blue="0.36078432199999999" alpha="1" colorSpace="deviceRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <gestureRecognizers/>
                         <constraints>
-                            <constraint firstItem="yyS-3g-UqL" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="2RH-Jf-TPm"/>
+                            <constraint firstItem="2bK-wq-6Rf" firstAttribute="top" secondItem="rd3-ei-B9P" secondAttribute="top" id="0KQ-L2-vRf"/>
                             <constraint firstItem="19j-xT-Ttb" firstAttribute="height" secondItem="3WP-Xo-FaJ" secondAttribute="height" id="3Fa-ID-yp6"/>
                             <constraint firstItem="19j-xT-Ttb" firstAttribute="width" secondItem="3WP-Xo-FaJ" secondAttribute="width" id="8aO-Xm-KH2"/>
                             <constraint firstItem="EI2-CK-oqA" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="E1I-Yh-igT"/>
-                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="yyS-3g-UqL" secondAttribute="bottom" id="INX-TM-tak"/>
-                            <constraint firstAttribute="trailing" secondItem="yyS-3g-UqL" secondAttribute="trailing" id="JEu-x6-qah"/>
+                            <constraint firstItem="2bK-wq-6Rf" firstAttribute="bottom" secondItem="rd3-ei-B9P" secondAttribute="bottom" id="J9p-Wn-xC4"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="EI2-CK-oqA" secondAttribute="bottom" id="JW8-WC-69E"/>
                             <constraint firstItem="19j-xT-Ttb" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="K6V-FG-8Ms"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="FSo-n8-ZwV" secondAttribute="bottom" constant="20" id="KgN-t9-iTh"/>
                             <constraint firstAttribute="trailing" secondItem="sT4-CC-oh5" secondAttribute="trailing" constant="16" id="Q92-5b-7Z7"/>
-                            <constraint firstItem="yyS-3g-UqL" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="SyJ-SX-ooI"/>
                             <constraint firstItem="EI2-CK-oqA" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="Y9T-eB-SQS"/>
+                            <constraint firstItem="2bK-wq-6Rf" firstAttribute="trailing" secondItem="rd3-ei-B9P" secondAttribute="trailing" id="add-TX-ds6"/>
                             <constraint firstItem="3WP-Xo-FaJ" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="aur-kS-Ri3"/>
                             <constraint firstAttribute="centerX" secondItem="3WP-Xo-FaJ" secondAttribute="centerX" id="c8T-oR-vKi"/>
+                            <constraint firstAttribute="trailing" secondItem="rd3-ei-B9P" secondAttribute="trailing" constant="40" id="dJE-jw-ZNY"/>
                             <constraint firstAttribute="centerX" secondItem="FSo-n8-ZwV" secondAttribute="centerX" id="dQf-Ne-km4"/>
                             <constraint firstItem="19j-xT-Ttb" firstAttribute="width" secondItem="sT4-CC-oh5" secondAttribute="width" id="dei-D3-qWh"/>
                             <constraint firstItem="sT4-CC-oh5" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="i1Z-3m-ytG"/>
+                            <constraint firstItem="FSo-n8-ZwV" firstAttribute="top" secondItem="rd3-ei-B9P" secondAttribute="bottom" constant="40" id="kF0-CG-srv"/>
                             <constraint firstAttribute="trailing" secondItem="EI2-CK-oqA" secondAttribute="trailing" id="m1R-4g-dGU"/>
                             <constraint firstItem="19j-xT-Ttb" firstAttribute="height" secondItem="sT4-CC-oh5" secondAttribute="height" id="mpG-Ir-vxB"/>
+                            <constraint firstItem="rd3-ei-B9P" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="40" id="n5z-dZ-b1l"/>
                             <constraint firstItem="19j-xT-Ttb" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="16" id="uuM-vU-IPX"/>
+                            <constraint firstItem="2bK-wq-6Rf" firstAttribute="leading" secondItem="rd3-ei-B9P" secondAttribute="leading" id="vNM-yq-5jd"/>
+                            <constraint firstItem="rd3-ei-B9P" firstAttribute="top" secondItem="3WP-Xo-FaJ" secondAttribute="bottom" constant="40" id="wmQ-Ff-zje"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="EiR-i7-mkA"/>
                     <nil key="simulatedTopBarMetrics"/>
                     <connections>
+                        <outlet property="askForPermissionsButton" destination="rd3-ei-B9P" id="Itb-t1-HpD"/>
+                        <outlet property="askForPermissionsLabel" destination="2bK-wq-6Rf" id="GdV-Gq-uSS"/>
                         <outlet property="cameraButton" destination="FSo-n8-ZwV" id="ITk-de-2LY"/>
                         <outlet property="cameraView" destination="EI2-CK-oqA" id="bUS-Rk-omr"/>
-                        <outlet property="imageView" destination="yyS-3g-UqL" id="CZo-cW-NXH"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

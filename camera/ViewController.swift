@@ -17,25 +17,32 @@ class ViewController: UIViewController {
     // MARK: - @IBOutlets
 
     @IBOutlet weak var cameraView: UIView!
-    @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var cameraButton: UIButton!
+    @IBOutlet weak var askForPermissionsButton: UIButton!
+    @IBOutlet weak var askForPermissionsLabel: UILabel!
     
     
     // MARK: - UIViewController
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        let currentCameraState = self.cameraManager.addPreviewLayerToView(self.cameraView, newCameraOutputMode: CameraOutputMode.VideoOnly)
+        
+        self.cameraManager.showAccessPermissionPopupAutomatically = false
+        
+        self.askForPermissionsButton.hidden = true
+        self.askForPermissionsLabel.hidden = true
+
+        let currentCameraState = self.cameraManager.currentCameraStatus()
+
         if currentCameraState == .AccessDenied {
             UIAlertView(title: "Camera access denied", message: "You need to go to settings app and grant acces to the camera device to use it.", delegate: nil, cancelButtonTitle: "OK").show()
-        } else if (currentCameraState == .NoDeviceFound) {
+        } else if currentCameraState == .NoDeviceFound {
             UIAlertView(title: "Camera unavailable", message: "The device does not have a camera.", delegate: nil, cancelButtonTitle: "OK").show()
-        }
-        
-        self.cameraManager.cameraDevice = .Front
-        self.imageView.hidden = true
-        CameraManager.sharedInstance.showErrorBlock = { (erTitle: String, erMessage: String) -> Void in
-            UIAlertView(title: erTitle, message: erMessage, delegate: nil, cancelButtonTitle: "OK").show()
+        } else if currentCameraState == .NotDetermined {
+            self.askForPermissionsButton.hidden = false
+            self.askForPermissionsLabel.hidden = false
+        } else if (currentCameraState == .Ready) {
+            self.addCameraToView()
         }
     }
     
@@ -53,6 +60,18 @@ class ViewController: UIViewController {
         self.cameraManager.stopCaptureSession()
     }
     
+    
+    // MARK: - ViewController
+    
+    private func addCameraToView()
+    {
+        self.cameraManager.addPreviewLayerToView(self.cameraView, newCameraOutputMode: CameraOutputMode.VideoWithMic)
+        self.cameraManager.cameraDevice = .Front
+        CameraManager.sharedInstance.showErrorBlock = { (erTitle: String, erMessage: String) -> Void in
+            UIAlertView(title: erTitle, message: erMessage, delegate: nil, cancelButtonTitle: "OK").show()
+        }
+    }
+
     // MARK: - @IBActions
 
     @IBAction func changeFlashMode(sender: UIButton)
@@ -120,6 +139,19 @@ class ViewController: UIViewController {
         case .Back:
             sender.setTitle("Back", forState: UIControlState.Normal)
         }
+    }
+    
+    @IBAction func askForCameraPermissions(sender: UIButton)
+    {
+        self.cameraManager.askUserForCameraPermissions({ permissionGranted in
+            self.askForPermissionsButton.hidden = true
+            self.askForPermissionsLabel.hidden = true
+            self.askForPermissionsButton.alpha = 0
+            self.askForPermissionsLabel.alpha = 0
+            if permissionGranted {
+                self.addCameraToView()
+            }
+        })
     }
 }
 
