@@ -38,18 +38,18 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     /// Capture session to customize camera settings.
     public var captureSession: AVCaptureSession?
     
-    /// Property to determine if the manager should show the error for the user. If you want to show the errors yourself set this to false. If you want to add custom error UI set showErrorBlock property. Default value is true.
-    public var showErrorsToUsers = true
+    /// Property to determine if the manager should show the error for the user. If you want to show the errors yourself set this to false. If you want to add custom error UI set showErrorBlock property. Default value is false.
+    public var showErrorsToUsers = false
     
     /// Property to determine if the manager should show the camera permission popup immediatly when it's needed or you want to show it manually. Default value is true.
     public var showAccessPermissionPopupAutomatically = true
     
     /// A block creating UI to present error message to the user.
     public var showErrorBlock:(erTitle: String, erMessage: String) -> Void = { (erTitle: String, erMessage: String) -> Void in
-        UIAlertView(title: erTitle, message: erMessage, delegate: nil, cancelButtonTitle: "OK").show()
+        UIAlertView(title: erTitle, message: erMessage, delegate: nil, cancelButtonTitle: NSLocalizedString("Ok", comment:"")).show()
     }
 
-    /// Property to determine if  manager should write the resources to the phone library. Default value is true.
+    /// Property to determine if manager should write the resources to the phone library. Default value is true.
     public var writeFilesToPhoneLibrary = true
 
     /// The Bool property to determin if current device has front camera.
@@ -154,7 +154,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
 
                     _cameraOutputQuality = newCameraOutputQuality
                 } else {
-                    self._show("Camera error", message: "No valid capture session found, I can't take any pictures or videos.")
+                    self._show(NSLocalizedString("Camera error", comment:""), message: NSLocalizedString("No valid capture session found, I can't take any pictures or videos.", comment:""))
                 }
             }
         }
@@ -324,7 +324,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                         if (error? != nil) {
                             dispatch_async(dispatch_get_main_queue(), {
                                 if let weakSelf = self {
-                                    weakSelf._show("error", message: error.localizedDescription)
+                                    weakSelf._show(NSLocalizedString("Error", comment:""), message: error.localizedDescription)
                                 }
                             })
                             imageCompletition(nil, error)
@@ -337,7 +337,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                                             (picUrl, error) -> Void in
                                             if (error? != nil) {
                                                 dispatch_async(dispatch_get_main_queue(), {
-                                                    weakSelf._show("error", message: error.localizedDescription)
+                                                    weakSelf._show(NSLocalizedString("Error", comment:""), message: error.localizedDescription)
                                                 })
                                             }
                                         })
@@ -349,10 +349,10 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                     })
                 })
             } else {
-                self._show("Capture session output mode video", message: "I can't take any picture")
+                self._show(NSLocalizedString("Capture session output mode video", comment:""), message: NSLocalizedString("I can't take any picture", comment:""))
             }
         } else {
-            self._show("No capture session setup", message: "I can't take any picture")
+            self._show(NSLocalizedString("No capture session setup", comment:""), message: NSLocalizedString("I can't take any picture", comment:""))
         }
     }
 
@@ -364,7 +364,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         if self.cameraOutputMode != .StillImage {
             self._getMovieOutput().startRecordingToOutputFileURL(self.tempFilePath, recordingDelegate: self)
         } else {
-            self._show("Capture session output still image", message: "I can only take pictures")
+            self._show(NSLocalizedString("Capture session output still image", comment:""), message: NSLocalizedString("I can only take pictures", comment:""))
         }
     }
 
@@ -401,13 +401,13 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     public func captureOutput(captureOutput: AVCaptureFileOutput!, didFinishRecordingToOutputFileAtURL outputFileURL: NSURL!, fromConnections connections: [AnyObject]!, error: NSError!)
     {
         if (error != nil) {
-            self._show("Unable to save video to the iPhone", message: error.localizedDescription)
+            self._show(NSLocalizedString("Unable to save video to the iPhone", comment:""), message: error.localizedDescription)
         } else {
             if let validLibrary = self.library? {
                 if self.writeFilesToPhoneLibrary {
                     validLibrary.writeVideoAtPathToSavedPhotosAlbum(outputFileURL, completionBlock: { (assetURL: NSURL?, error: NSError?) -> Void in
                         if (error != nil) {
-                            self._show("Unable to save video to the iPhone.", message: error!.localizedDescription)
+                            self._show(NSLocalizedString("Unable to save video to the iPhone.", comment:""), message: error!.localizedDescription)
                         } else {
                             if let validAssetURL = assetURL {
                                 self._executeVideoCompletitionWithURL(validAssetURL, error: error)
@@ -575,9 +575,11 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
             } else if authorizationStatus == AVAuthorizationStatus.NotDetermined {
                 return .NotDetermined
             } else {
+                self._show(NSLocalizedString("Camera access denied", comment:""), message:NSLocalizedString("You need to go to settings app and grant acces to the camera device to use it.", comment:""))
                 return .AccessDenied
             }
         } else {
+            self._show(NSLocalizedString("Camera unavailable", comment:""), message:NSLocalizedString("The device does not have a camera.", comment:""))
             return .NoDeviceFound
         }
     }
@@ -607,7 +609,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                 }
             }
             if let validError = error? {
-                self._show("Device setup error occured", message: validError.localizedDescription)
+                self._show(NSLocalizedString("Device setup error occured", comment:""), message: validError.localizedDescription)
             }
         }
         self.cameraDevice = _cameraDevice
@@ -621,7 +623,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
             self.mic = AVCaptureDeviceInput.deviceInputWithDevice(micDevice, error: &error) as? AVCaptureDeviceInput;
             if let errorHappened = error? {
                 self.mic = nil
-                self._show("Mic error", message: errorHappened.description)
+                self._show(NSLocalizedString("Mic error", comment:""), message: errorHappened.description)
             }
         }
     }
