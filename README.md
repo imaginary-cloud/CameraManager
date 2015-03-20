@@ -71,7 +71,7 @@ CameraManager.sharedInstance.showErrorBlock = { (erTitle: String, erMessage: Str
 
 To shoot image all you need to do is call:
 ```swift
-CameraManager.sharedInstance.capturePictureWithCompletition({ (image) -> Void in
+CameraManager.sharedInstance.capturePictureWithCompletition({ (image, error) -> Void in
 	self.myImage = image             
 })
 ```
@@ -79,7 +79,7 @@ CameraManager.sharedInstance.capturePictureWithCompletition({ (image) -> Void in
 To record video you do:
 ```swift
 CameraManager.sharedInstance.startRecordingVideo()
-CameraManager.sharedInstance.stopRecordingVideo({ (videoURL) -> Void in
+CameraManager.sharedInstance.stopRecordingVideo({ (videoURL, error) -> Void in
 	NSFileManager.defaultManager().copyItemAtURL(videoURL, toURL: self.myVideoURL, error: &error)
 })
 ```
