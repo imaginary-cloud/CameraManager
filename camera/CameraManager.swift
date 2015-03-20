@@ -35,13 +35,20 @@ public enum CameraOutputQuality {
 /// Class for handling iDevices custom camera usage
 public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
 
+    // PRAGMA MARK - Public properties
+
+    /// CameraManager singleton instance to use the camera.
+    public class var sharedInstance: CameraManager {
+        return _singletonSharedInstance
+    }
+    
     /// Capture session to customize camera settings.
     public var captureSession: AVCaptureSession?
     
     /// Property to determine if the manager should show the error for the user. If you want to show the errors yourself set this to false. If you want to add custom error UI set showErrorBlock property. Default value is false.
     public var showErrorsToUsers = false
     
-    /// Property to determine if the manager should show the camera permission popup immediatly when it's needed or you want to show it manually. Default value is true.
+    /// Property to determine if the manager should show the camera permission popup immediatly when it's needed or you want to show it manually. Default value is true. Be carful cause using the camera requires permission, if you set this value to false and don't ask manually you won't be able to use the camera.
     public var showAccessPermissionPopupAutomatically = true
     
     /// A block creating UI to present error message to the user.
@@ -52,7 +59,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     /// Property to determine if manager should write the resources to the phone library. Default value is true.
     public var writeFilesToPhoneLibrary = true
 
-    /// The Bool property to determin if current device has front camera.
+    /// The Bool property to determine if current device has front camera.
     public var hasFrontCamera: Bool = {
         let devices = AVCaptureDevice.devicesWithMediaType(AVMediaTypeVideo)
         for  device in devices  {
@@ -172,6 +179,8 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         }
     }
 
+    // PRAGMA MARK - Private properties
+
     private weak var embedingView: UIView?
     private var videoCompletition: ((videoURL: NSURL, error: NSError?) -> Void)?
 
@@ -201,15 +210,8 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         return NSURL(fileURLWithPath: tempPath!)!
         }()
     
-    /// CameraManager singleton instance to use the camera.
-    public class var sharedInstance: CameraManager {
-        return _singletonSharedInstance
-    }
-
-    deinit {
-        self.stopAndRemoveCaptureSession()
-        self._stopFollowingDeviceOrientation()
-    }
+    
+    // PRAGMA MARK - CameraManager
 
     /**
     Inits a capture session and adds a preview layer to the given view. Preview layer bounds will automaticaly be set to match given view. Default session is initialized with still image output.
@@ -390,7 +392,18 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     {
         return self._checkIfCameraIsAvailable()
     }
-
+    
+    /**
+    Change current flash mode to next value from available ones.
+    
+    :returns: Current flash mode: Off / On / Auto
+    */
+    public func changeFlashMode() -> CameraFlashMode
+    {
+        self.flashMode = CameraFlashMode(rawValue: (self.flashMode.rawValue+1)%3)!
+        return self.flashMode
+    }
+    
     // PRAGMA MARK - AVCaptureFileOutputRecordingDelegate
 
     public func captureOutput(captureOutput: AVCaptureFileOutput!, didStartRecordingToOutputFileAtURL fileURL: NSURL!, fromConnections connections: [AnyObject]!)
@@ -705,5 +718,10 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                 self.showErrorBlock(erTitle: title, erMessage: message)
             })
         }
+    }
+    
+    deinit {
+        self.stopAndRemoveCaptureSession()
+        self._stopFollowingDeviceOrientation()
     }
 }

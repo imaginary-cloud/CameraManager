@@ -72,8 +72,7 @@ class ViewController: UIViewController {
 
     @IBAction func changeFlashMode(sender: UIButton)
     {
-        self.cameraManager.flashMode = CameraFlashMode(rawValue: (self.cameraManager.flashMode.rawValue+1)%3)!
-        switch (self.cameraManager.flashMode) {
+        switch (self.cameraManager.changeFlashMode()) {
         case .Off:
             sender.setTitle("Flash Off", forState: UIControlState.Normal)
         case .On:

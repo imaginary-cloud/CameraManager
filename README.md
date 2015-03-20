@@ -52,6 +52,12 @@ CameraManager.sharedInstance.flashMode = .On
 CameraManager.sharedInstance.flashMode = .Auto
 ```
 
+To change flash mode to the next available one you can use this handy function which will also return current value for you to update the UI accordingly:
+```swift
+CameraManager.sharedInstance.changeFlashMode()
+```
+
+
 You can specify if you want to save the files to phone library:
 ```swift
 CameraManager.sharedInstance.writeFilesToPhoneLibrary = true
