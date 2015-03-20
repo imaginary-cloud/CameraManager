@@ -1,7 +1,7 @@
 
 ####Camera Manager
 
-V1.0.10 (19-Mar-2015)
+V1.0.11 (20-Mar-2015)
 
 ####About
 This is a simple swift class to provide all the configurations you need to create custom camera view in your app. 
@@ -55,6 +55,11 @@ CameraManager.sharedInstance.flashMode = .Auto
 You can specify if you want to save the files to phone library:
 ```swift
 CameraManager.sharedInstance.writeFilesToPhoneLibrary = true
+```
+
+You can specify if you want the user to be asked about camera permissions automatically when you first try to use the camera or manually:
+```swift
+CameraManager.sharedInstance.showAccessPermissionPopupAutomatically = false
 ```
 
 You can even setUp your custom block to handle error messages:
