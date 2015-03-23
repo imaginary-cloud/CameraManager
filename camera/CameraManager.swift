@@ -28,7 +28,7 @@ public enum CameraOutputMode {
     case StillImage, VideoWithMic, VideoOnly
 }
 
-public enum CameraOutputQuality {
+public enum CameraOutputQuality: Int {
     case Low, Medium, High
 }
 
@@ -133,22 +133,8 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         }
         set(newCameraOutputQuality) {
             if newCameraOutputQuality != _cameraOutputQuality {
-                if let validCaptureSession = self.captureSession? {
-                    validCaptureSession.beginConfiguration()
-                    switch (newCameraOutputQuality) {
-                    case CameraOutputQuality.Low:
-                        validCaptureSession.sessionPreset = AVCaptureSessionPresetLow
-                    case CameraOutputQuality.Medium:
-                        validCaptureSession.sessionPreset = AVCaptureSessionPresetMedium
-                    case CameraOutputQuality.High:
-                        validCaptureSession.sessionPreset = AVCaptureSessionPresetHigh
-                    }
-                    validCaptureSession.commitConfiguration()
-
-                    _cameraOutputQuality = newCameraOutputQuality
-                } else {
-                    self._show(NSLocalizedString("Camera error", comment:""), message: NSLocalizedString("No valid capture session found, I can't take any pictures or videos.", comment:""))
-                }
+                _cameraOutputQuality = newCameraOutputQuality
+                self._updateCameraQualityMode(newCameraOutputQuality)
             }
         }
     }
@@ -233,16 +219,25 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     }
 
     /**
-    Asks the user for camera permissions. Only works if the permissions are not yet determined.
+    Asks the user for camera permissions. Only works if the permissions are not yet determined. Note that it'll also automaticaly ask about the microphone permissions if you selected VideoWithMic output.
     
     :param: completition Completition block with the result of permission request
     */
     public func askUserForCameraPermissions(completition: Bool -> Void)
     {
         AVCaptureDevice.requestAccessForMediaType(AVMediaTypeVideo, completionHandler: { (alowedAccess) -> Void in
-            dispatch_sync(dispatch_get_main_queue(), { () -> Void in
-                completition(alowedAccess)
-            })
+            if self.cameraOutputMode == .VideoWithMic {
+                AVCaptureDevice.requestAccessForMediaType(AVMediaTypeAudio, completionHandler: { (alowedAccess) -> Void in
+                    dispatch_sync(dispatch_get_main_queue(), { () -> Void in
+                        completition(alowedAccess)
+                    })
+                })
+            } else {
+                dispatch_sync(dispatch_get_main_queue(), { () -> Void in
+                    completition(alowedAccess)
+                })
+
+            }
         })
 
     }
@@ -388,6 +383,17 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     {
         self.flashMode = CameraFlashMode(rawValue: (self.flashMode.rawValue+1)%3)!
         return self.flashMode
+    }
+    
+    /**
+    Change current output quality mode to next value from available ones.
+    
+    :returns: Current quality mode: Low / Medium / High
+    */
+    public func changeQualityMode() -> CameraOutputQuality
+    {
+        self.cameraOutputQuality = CameraOutputQuality(rawValue: (self.cameraOutputQuality.rawValue+1)%3)!
+        return self.cameraOutputQuality
     }
     
     // PRAGMA MARK - AVCaptureFileOutputRecordingDelegate
@@ -551,6 +557,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                 self._setupPreviewLayer()
                 validCaptureSession.commitConfiguration()
                 self._updateFlasMode(self.flashMode)
+                self._updateCameraQualityMode(self.cameraOutputQuality)
                 validCaptureSession.startRunning()
                 self._startFollowingDeviceOrientation()
                 self.cameraIsSetup = true
@@ -697,6 +704,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         }
         self.captureSession?.commitConfiguration()
         _cameraOutputMode = newCameraOutputMode;
+        self._updateCameraQualityMode(self.cameraOutputQuality)
         self._orientationChanged()
     }
     
@@ -720,7 +728,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
             self.previewLayer?.videoGravity = AVLayerVideoGravityResizeAspectFill
         }
     }
-
+    
     private func _updateFlasMode(flashMode: CameraFlashMode)
     {
         self.captureSession?.beginConfiguration()
@@ -737,6 +745,34 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
             }
         }
         self.captureSession?.commitConfiguration()
+    }
+    
+    private func _updateCameraQualityMode(newCameraOutputQuality: CameraOutputQuality)
+    {
+        if let validCaptureSession = self.captureSession? {
+            var sessionPreset = AVCaptureSessionPresetLow
+            switch (newCameraOutputQuality) {
+            case CameraOutputQuality.Low:
+                sessionPreset = AVCaptureSessionPresetLow
+            case CameraOutputQuality.Medium:
+                sessionPreset = AVCaptureSessionPresetMedium
+            case CameraOutputQuality.High:
+                if self.cameraOutputMode == .StillImage {
+                    sessionPreset = AVCaptureSessionPresetPhoto
+                } else {
+                    sessionPreset = AVCaptureSessionPresetHigh
+                }
+            }
+            if validCaptureSession.canSetSessionPreset(sessionPreset) {
+                validCaptureSession.beginConfiguration()
+                validCaptureSession.sessionPreset = sessionPreset
+                validCaptureSession.commitConfiguration()
+            } else {
+                self._show(NSLocalizedString("Preset not supported", comment:""), message: NSLocalizedString("Camera preset not supported. Please try another one.", comment:""))
+            }
+        } else {
+            self._show(NSLocalizedString("Camera error", comment:""), message: NSLocalizedString("No valid capture session found, I can't take any pictures or videos.", comment:""))
+        }
     }
 
     private func _show(title: String, message: String)

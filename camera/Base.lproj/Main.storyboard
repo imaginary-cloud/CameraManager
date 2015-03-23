@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6751" systemVersion="13F1066" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="bhK-VL-qY4">
     <dependencies>
+        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6736"/>
+        <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
     </dependencies>
     <scenes>
         <!--Camera-->
@@ -21,31 +23,6 @@
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <color key="tintColor" red="0.54901963470000004" green="0.77647066119999997" blue="0.2470588386" alpha="1" colorSpace="deviceRGB"/>
                             </view>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sT4-CC-oh5">
-                                <rect key="frame" x="496" y="20" width="88" height="33"/>
-                                <color key="backgroundColor" red="0.98039221759999995" green="0.0078431377190000002" blue="0.52156865600000002" alpha="1" colorSpace="deviceRGB"/>
-                                <state key="normal" title="Front">
-                                    <color key="titleColor" red="1" green="0.87630701789999998" blue="0.35755069969999997" alpha="1" colorSpace="calibratedRGB"/>
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                                <connections>
-                                    <action selector="changeCameraDevice:" destination="BYZ-38-t0r" eventType="touchUpInside" id="KDu-mr-jHd"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="19j-xT-Ttb">
-                                <rect key="frame" x="16" y="20" width="88" height="33"/>
-                                <color key="backgroundColor" red="0.54901963470000004" green="0.77647066119999997" blue="0.2470588386" alpha="1" colorSpace="deviceRGB"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="88" id="7mm-eo-7Ng"/>
-                                    <constraint firstAttribute="height" constant="33" id="jff-rD-TUp"/>
-                                </constraints>
-                                <state key="normal" title="Flash off">
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                                <connections>
-                                    <action selector="changeFlashMode:" destination="BYZ-38-t0r" eventType="touchUpInside" id="e2b-Lg-iqO"/>
-                                </connections>
-                            </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="FSo-n8-ZwV">
                                 <rect key="frame" x="275" y="530" width="50" height="50"/>
                                 <color key="backgroundColor" red="0.54901963470000004" green="0.77647066119999997" blue="0.2470588386" alpha="1" colorSpace="deviceRGB"/>
@@ -66,18 +43,8 @@
                                     <action selector="recordButtonTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Ggq-m1-AQB"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3WP-Xo-FaJ">
-                                <rect key="frame" x="256" y="20" width="88" height="33"/>
-                                <color key="backgroundColor" red="1" green="0.87630701789999998" blue="0.35755069969999997" alpha="1" colorSpace="calibratedRGB"/>
-                                <state key="normal" title="Video">
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                                <connections>
-                                    <action selector="outputModeButtonTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Bgy-rQ-cfF"/>
-                                </connections>
-                            </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rd3-ei-B9P">
-                                <rect key="frame" x="40" y="93" width="520" height="397"/>
+                                <rect key="frame" x="4" y="84" width="592" height="512"/>
                                 <color key="backgroundColor" red="1" green="0.0" blue="0.46666669849999998" alpha="0.5" colorSpace="deviceRGB"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="27"/>
                                 <state key="normal">
@@ -88,8 +55,77 @@
                                     <action selector="askForCameraPermissions:" destination="BYZ-38-t0r" eventType="touchUpInside" id="gbn-Ql-Lnv"/>
                                 </connections>
                             </button>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="jaF-q9-Eli">
+                                <rect key="frame" x="0.0" y="20" width="600" height="60"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="19j-xT-Ttb">
+                                        <rect key="frame" x="0.0" y="0.0" width="150" height="60"/>
+                                        <color key="backgroundColor" red="0.67058825489999996" green="0.67058825489999996" blue="0.67058825489999996" alpha="0.70000000000000007" colorSpace="deviceRGB"/>
+                                        <state key="normal" title="Flash off">
+                                            <color key="titleColor" red="0.0" green="0.50196081400000003" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="changeFlashMode:" destination="BYZ-38-t0r" eventType="touchUpInside" id="e2b-Lg-iqO"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3WP-Xo-FaJ">
+                                        <rect key="frame" x="150" y="0.0" width="150" height="60"/>
+                                        <color key="backgroundColor" red="1" green="0.0" blue="0.46666669849999998" alpha="0.70000000000000007" colorSpace="deviceRGB"/>
+                                        <state key="normal" title="Video">
+                                            <color key="titleColor" red="0.0" green="0.50196081400000003" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="outputModeButtonTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Bgy-rQ-cfF"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sT4-CC-oh5">
+                                        <rect key="frame" x="300" y="0.0" width="150" height="60"/>
+                                        <color key="backgroundColor" red="0.67058825489999996" green="0.67058825489999996" blue="0.67058825489999996" alpha="0.70000000000000007" colorSpace="deviceRGB"/>
+                                        <state key="normal" title="Back">
+                                            <color key="titleColor" red="0.0" green="0.50196081400000003" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="changeCameraDevice:" destination="BYZ-38-t0r" eventType="touchUpInside" id="KDu-mr-jHd"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="JCk-74-YkH">
+                                        <rect key="frame" x="450" y="0.0" width="150" height="60"/>
+                                        <color key="backgroundColor" red="1" green="0.0" blue="0.46666669849999998" alpha="0.70000000000000007" colorSpace="deviceRGB"/>
+                                        <state key="normal" title="High">
+                                            <color key="titleColor" red="0.0" green="0.50196081400000003" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="changeCameraQuality:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Bt4-RC-Mrl"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstItem="19j-xT-Ttb" firstAttribute="width" secondItem="3WP-Xo-FaJ" secondAttribute="width" id="0JS-OH-a4X"/>
+                                    <constraint firstItem="3WP-Xo-FaJ" firstAttribute="leading" secondItem="19j-xT-Ttb" secondAttribute="trailing" id="7Y0-vo-2GG"/>
+                                    <constraint firstItem="sT4-CC-oh5" firstAttribute="width" secondItem="3WP-Xo-FaJ" secondAttribute="width" id="Anx-2O-O5g"/>
+                                    <constraint firstItem="19j-xT-Ttb" firstAttribute="top" secondItem="jaF-q9-Eli" secondAttribute="top" id="Faq-Kx-fdW"/>
+                                    <constraint firstAttribute="bottom" secondItem="3WP-Xo-FaJ" secondAttribute="bottom" id="Jk9-HY-RKV"/>
+                                    <constraint firstItem="JCk-74-YkH" firstAttribute="top" secondItem="jaF-q9-Eli" secondAttribute="top" id="Jxn-jp-3u1"/>
+                                    <constraint firstItem="19j-xT-Ttb" firstAttribute="width" secondItem="jaF-q9-Eli" secondAttribute="width" multiplier="1:4" id="R5r-hS-YXf"/>
+                                    <constraint firstAttribute="trailing" secondItem="JCk-74-YkH" secondAttribute="trailing" id="U8V-vs-AHd"/>
+                                    <constraint firstAttribute="bottom" secondItem="sT4-CC-oh5" secondAttribute="bottom" id="X9n-5F-9S6"/>
+                                    <constraint firstAttribute="bottom" secondItem="19j-xT-Ttb" secondAttribute="bottom" id="XIm-83-qDg"/>
+                                    <constraint firstItem="19j-xT-Ttb" firstAttribute="leading" secondItem="jaF-q9-Eli" secondAttribute="leading" id="YKC-TE-A4C"/>
+                                    <constraint firstItem="sT4-CC-oh5" firstAttribute="top" secondItem="jaF-q9-Eli" secondAttribute="top" id="dt8-f3-OG0"/>
+                                    <constraint firstItem="sT4-CC-oh5" firstAttribute="leading" secondItem="3WP-Xo-FaJ" secondAttribute="trailing" id="f9i-42-p49"/>
+                                    <constraint firstAttribute="bottom" secondItem="JCk-74-YkH" secondAttribute="bottom" id="jye-Mv-9Rq"/>
+                                    <constraint firstItem="JCk-74-YkH" firstAttribute="leading" secondItem="sT4-CC-oh5" secondAttribute="trailing" id="mhQ-5m-h5c"/>
+                                    <constraint firstAttribute="height" constant="60" id="mlL-sQ-rnK"/>
+                                    <constraint firstItem="3WP-Xo-FaJ" firstAttribute="top" secondItem="jaF-q9-Eli" secondAttribute="top" id="oeK-QK-BDl"/>
+                                </constraints>
+                            </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tap here to enable camera access and take great pictures" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2bK-wq-6Rf">
-                                <rect key="frame" x="40" y="93" width="520" height="397"/>
+                                <rect key="frame" x="4" y="84" width="592" height="512"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="25"/>
                                 <color key="textColor" red="0.36078432199999999" green="0.36078432199999999" blue="0.36078432199999999" alpha="1" colorSpace="deviceRGB"/>
                                 <nil key="highlightedColor"/>
@@ -99,29 +135,22 @@
                         <gestureRecognizers/>
                         <constraints>
                             <constraint firstItem="2bK-wq-6Rf" firstAttribute="top" secondItem="rd3-ei-B9P" secondAttribute="top" id="0KQ-L2-vRf"/>
-                            <constraint firstItem="19j-xT-Ttb" firstAttribute="height" secondItem="3WP-Xo-FaJ" secondAttribute="height" id="3Fa-ID-yp6"/>
-                            <constraint firstItem="19j-xT-Ttb" firstAttribute="width" secondItem="3WP-Xo-FaJ" secondAttribute="width" id="8aO-Xm-KH2"/>
+                            <constraint firstAttribute="trailing" secondItem="jaF-q9-Eli" secondAttribute="trailing" id="2fZ-BE-g5j"/>
+                            <constraint firstItem="2bK-wq-6Rf" firstAttribute="top" secondItem="jaF-q9-Eli" secondAttribute="bottom" constant="4" id="8fE-gJ-Hi7"/>
                             <constraint firstItem="EI2-CK-oqA" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="E1I-Yh-igT"/>
+                            <constraint firstItem="rd3-ei-B9P" firstAttribute="bottom" secondItem="EI2-CK-oqA" secondAttribute="bottom" constant="-4" id="GKS-w4-B8J"/>
                             <constraint firstItem="2bK-wq-6Rf" firstAttribute="bottom" secondItem="rd3-ei-B9P" secondAttribute="bottom" id="J9p-Wn-xC4"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="EI2-CK-oqA" secondAttribute="bottom" id="JW8-WC-69E"/>
-                            <constraint firstItem="19j-xT-Ttb" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="K6V-FG-8Ms"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="FSo-n8-ZwV" secondAttribute="bottom" constant="20" id="KgN-t9-iTh"/>
-                            <constraint firstAttribute="trailing" secondItem="sT4-CC-oh5" secondAttribute="trailing" constant="16" id="Q92-5b-7Z7"/>
+                            <constraint firstItem="jaF-q9-Eli" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" constant="20" id="Tv6-Ak-cSA"/>
                             <constraint firstItem="EI2-CK-oqA" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="Y9T-eB-SQS"/>
                             <constraint firstItem="2bK-wq-6Rf" firstAttribute="trailing" secondItem="rd3-ei-B9P" secondAttribute="trailing" id="add-TX-ds6"/>
-                            <constraint firstItem="3WP-Xo-FaJ" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="aur-kS-Ri3"/>
-                            <constraint firstAttribute="centerX" secondItem="3WP-Xo-FaJ" secondAttribute="centerX" id="c8T-oR-vKi"/>
-                            <constraint firstAttribute="trailing" secondItem="rd3-ei-B9P" secondAttribute="trailing" constant="40" id="dJE-jw-ZNY"/>
+                            <constraint firstAttribute="trailing" secondItem="rd3-ei-B9P" secondAttribute="trailing" constant="4" id="dJE-jw-ZNY"/>
                             <constraint firstAttribute="centerX" secondItem="FSo-n8-ZwV" secondAttribute="centerX" id="dQf-Ne-km4"/>
-                            <constraint firstItem="19j-xT-Ttb" firstAttribute="width" secondItem="sT4-CC-oh5" secondAttribute="width" id="dei-D3-qWh"/>
-                            <constraint firstItem="sT4-CC-oh5" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="i1Z-3m-ytG"/>
-                            <constraint firstItem="FSo-n8-ZwV" firstAttribute="top" secondItem="rd3-ei-B9P" secondAttribute="bottom" constant="40" id="kF0-CG-srv"/>
+                            <constraint firstItem="jaF-q9-Eli" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="eAr-PL-deK"/>
                             <constraint firstAttribute="trailing" secondItem="EI2-CK-oqA" secondAttribute="trailing" id="m1R-4g-dGU"/>
-                            <constraint firstItem="19j-xT-Ttb" firstAttribute="height" secondItem="sT4-CC-oh5" secondAttribute="height" id="mpG-Ir-vxB"/>
-                            <constraint firstItem="rd3-ei-B9P" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="40" id="n5z-dZ-b1l"/>
-                            <constraint firstItem="19j-xT-Ttb" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="16" id="uuM-vU-IPX"/>
+                            <constraint firstItem="rd3-ei-B9P" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="4" id="n5z-dZ-b1l"/>
                             <constraint firstItem="2bK-wq-6Rf" firstAttribute="leading" secondItem="rd3-ei-B9P" secondAttribute="leading" id="vNM-yq-5jd"/>
-                            <constraint firstItem="rd3-ei-B9P" firstAttribute="top" secondItem="3WP-Xo-FaJ" secondAttribute="bottom" constant="40" id="wmQ-Ff-zje"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="EiR-i7-mkA"/>
@@ -149,7 +178,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="v1g-94-paQ">
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="v1g-94-paQ">
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                             </imageView>
                         </subviews>

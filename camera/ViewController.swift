@@ -147,6 +147,18 @@ class ViewController: UIViewController {
             }
         })
     }
+    
+    @IBAction func changeCameraQuality(sender: UIButton)
+    {
+        switch (self.cameraManager.changeQualityMode()) {
+        case .High:
+            sender.setTitle("High", forState: UIControlState.Normal)
+        case .Low:
+            sender.setTitle("Low", forState: UIControlState.Normal)
+        case .Medium:
+            sender.setTitle("Medium", forState: UIControlState.Normal)
+        }
+    }
 }
 
 
