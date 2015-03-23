@@ -62,7 +62,6 @@ class ViewController: UIViewController {
     private func addCameraToView()
     {
         self.cameraManager.addPreviewLayerToView(self.cameraView, newCameraOutputMode: CameraOutputMode.VideoWithMic)
-        self.cameraManager.cameraDevice = .Front
         CameraManager.sharedInstance.showErrorBlock = { (erTitle: String, erMessage: String) -> Void in
             UIAlertView(title: erTitle, message: erMessage, delegate: nil, cancelButtonTitle: "OK").show()
         }

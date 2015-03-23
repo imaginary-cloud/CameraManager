@@ -120,22 +120,8 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         }
         set(newflashMode) {
             if newflashMode != _flashMode {
-                self.captureSession?.beginConfiguration()
-                let devices = AVCaptureDevice.devicesWithMediaType(AVMediaTypeVideo)
-                for  device in devices  {
-                    let captureDevice = device as AVCaptureDevice
-                    if (captureDevice.position == AVCaptureDevicePosition.Back) {
-                        let avFlashMode = AVCaptureFlashMode(rawValue: newflashMode.rawValue)
-                        if (captureDevice.isFlashModeSupported(avFlashMode!)) {
-                            captureDevice.lockForConfiguration(nil)
-                            captureDevice.flashMode = avFlashMode!
-                            captureDevice.unlockForConfiguration()
-                        }
-                    }
-                }
-                self.captureSession?.commitConfiguration()
-
                 _flashMode = newflashMode
+                self._updateFlasMode(newflashMode)
             }
         }
     }
@@ -408,11 +394,16 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
 
     public func captureOutput(captureOutput: AVCaptureFileOutput!, didStartRecordingToOutputFileAtURL fileURL: NSURL!, fromConnections connections: [AnyObject]!)
     {
-
+        self.captureSession?.beginConfiguration()
+        if self.flashMode != .Off {
+            self._updateTorch(self.flashMode)
+        }
+        self.captureSession?.commitConfiguration()
     }
 
     public func captureOutput(captureOutput: AVCaptureFileOutput!, didFinishRecordingToOutputFileAtURL outputFileURL: NSURL!, fromConnections connections: [AnyObject]!, error: NSError!)
     {
+        self._updateTorch(.Off)
         if (error != nil) {
             self._show(NSLocalizedString("Unable to save video to the iPhone", comment:""), message: error.localizedDescription)
         } else {
@@ -436,6 +427,24 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
 
     // PRAGMA MARK - CameraManager()
 
+    private func _updateTorch(flashMode: CameraFlashMode)
+    {
+        self.captureSession?.beginConfiguration()
+        let devices = AVCaptureDevice.devicesWithMediaType(AVMediaTypeVideo)
+        for  device in devices  {
+            let captureDevice = device as AVCaptureDevice
+            if (captureDevice.position == AVCaptureDevicePosition.Back) {
+                let avTorchMode = AVCaptureTorchMode(rawValue: flashMode.rawValue)
+                if (captureDevice.isTorchModeSupported(avTorchMode!)) {
+                    captureDevice.lockForConfiguration(nil)
+                    captureDevice.torchMode = avTorchMode!
+                    captureDevice.unlockForConfiguration()
+                }
+            }
+        }
+        self.captureSession?.commitConfiguration()
+    }
+    
     private func _executeVideoCompletitionWithURL(url: NSURL, error: NSError?)
     {
         if let validCompletition = self.videoCompletition {
@@ -541,6 +550,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                 self.cameraOutputQuality = self._cameraOutputQuality
                 self._setupPreviewLayer()
                 validCaptureSession.commitConfiguration()
+                self._updateFlasMode(self.flashMode)
                 validCaptureSession.startRunning()
                 self._startFollowingDeviceOrientation()
                 self.cameraIsSetup = true
@@ -709,6 +719,24 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
             self.previewLayer = AVCaptureVideoPreviewLayer(session: validCaptureSession)
             self.previewLayer?.videoGravity = AVLayerVideoGravityResizeAspectFill
         }
+    }
+
+    private func _updateFlasMode(flashMode: CameraFlashMode)
+    {
+        self.captureSession?.beginConfiguration()
+        let devices = AVCaptureDevice.devicesWithMediaType(AVMediaTypeVideo)
+        for  device in devices  {
+            let captureDevice = device as AVCaptureDevice
+            if (captureDevice.position == AVCaptureDevicePosition.Back) {
+                let avFlashMode = AVCaptureFlashMode(rawValue: flashMode.rawValue)
+                if (captureDevice.isFlashModeSupported(avFlashMode!)) {
+                    captureDevice.lockForConfiguration(nil)
+                    captureDevice.flashMode = avFlashMode!
+                    captureDevice.unlockForConfiguration()
+                }
+            }
+        }
+        self.captureSession?.commitConfiguration()
     }
 
     private func _show(title: String, message: String)
