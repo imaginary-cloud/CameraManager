@@ -1,7 +1,7 @@
 
 ####Camera Manager
 
-V1.0.11 (20-Mar-2015)
+V1.0.12 (23-Mar-2015)
 
 ####About
 This is a simple swift class to provide all the configurations you need to create custom camera view in your app. 
@@ -45,7 +45,7 @@ CameraManager.sharedInstance.cameraOutputQuality = .Medium
 CameraManager.sharedInstance.cameraOutputQuality = .High
 ```
 
-And flash mode:
+And flash mode (it will also set corresponding torch mode for video shoot):
 ```swift
 CameraManager.sharedInstance.flashMode = .Off
 CameraManager.sharedInstance.flashMode = .On
