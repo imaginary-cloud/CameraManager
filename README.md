@@ -52,6 +52,11 @@ CameraManager.sharedInstance.flashMode = .On
 CameraManager.sharedInstance.flashMode = .Auto
 ```
 
+To check if the device supports flash call:
+```swift
+CameraManager.sharedInstance.hasFlash
+```
+
 To change flash mode to the next available one you can use this handy function which will also return current value for you to update the UI accordingly:
 ```swift
 CameraManager.sharedInstance.changeFlashMode()

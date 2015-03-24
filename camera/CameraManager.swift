@@ -70,7 +70,19 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         }
         return false
         }()
-
+    
+    /// The Bool property to determine if current device has flash.
+    public var hasFlash: Bool = {
+        let devices = AVCaptureDevice.devicesWithMediaType(AVMediaTypeVideo)
+        for  device in devices  {
+            let captureDevice = device as AVCaptureDevice
+            if (captureDevice.position == .Back) {
+                return captureDevice.hasFlash
+            }
+        }
+        return false
+        }()
+    
     /// Property to change camera device between front and back.
     public var cameraDevice: CameraDevice {
         get {

@@ -17,7 +17,10 @@ class ViewController: UIViewController {
     // MARK: - @IBOutlets
 
     @IBOutlet weak var cameraView: UIView!
+    
     @IBOutlet weak var cameraButton: UIButton!
+    @IBOutlet weak var flashModeButton: UIButton!
+    
     @IBOutlet weak var askForPermissionsButton: UIButton!
     @IBOutlet weak var askForPermissionsLabel: UILabel!
     
@@ -39,6 +42,10 @@ class ViewController: UIViewController {
             self.askForPermissionsLabel.hidden = false
         } else if (currentCameraState == .Ready) {
             self.addCameraToView()
+        }
+        if !self.cameraManager.hasFlash {
+            self.flashModeButton.enabled = false
+            self.flashModeButton.setTitle("No flash", forState: UIControlState.Normal)
         }
     }
     
