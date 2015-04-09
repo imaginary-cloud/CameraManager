@@ -95,7 +95,7 @@ class ViewController: UIViewController {
             self.cameraManager.capturePictureWithCompletition({ (image, error) -> Void in
                 let vc: ImageViewController? = self.storyboard?.instantiateViewControllerWithIdentifier("ImageVC") as? ImageViewController
                 if let validVC: ImageViewController = vc {
-                    if let capturedImage = image? {
+                    if let capturedImage = image {
                         validVC.image = capturedImage
                         self.navigationController?.pushViewController(validVC, animated: true)
                     }
@@ -110,7 +110,7 @@ class ViewController: UIViewController {
             } else {
                 self.cameraManager.stopRecordingVideo({ (videoURL, error) -> Void in
                     println(videoURL)
-                    if let errorOccured = error? {
+                    if let errorOccured = error {
                         UIAlertView(title: "Error occured", message: errorOccured.localizedDescription, delegate: nil, cancelButtonTitle: "OK").show()
                     }
                 })
