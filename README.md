@@ -1,18 +1,16 @@
 
-####Camera Manager
+# Camera Manager
+[![CocoaPods](https://img.shields.io/cocoapods/v/CameraManager.svg)](https://github.com/imaginary-cloud/CameraManager) [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 
-V1.0.12 (23-Mar-2015)
-
-####About
-This is a simple swift class to provide all the configurations you need to create custom camera view in your app. 
+This is a simple Swift class to provide all the configurations you need to create custom camera view in your app. 
 It follows orientation change and updates UI accordingly, supports front and rear camera selection, different flash modes, inputs and outputs.
 Just drag, drop and use. 
 
-####Installation with CocoaPods
+## Installation with CocoaPods
 
 The easiest way to install the CameraManager is with: [CocoaPods](http://cocoapods.org) 
 
-## Podfile
+### Podfile
 
 ```ruby
 use_frameworks!
@@ -20,7 +18,18 @@ use_frameworks!
 pod 'CameraManager', '~> 1.0'
 ```
 
-####How to use
+## Installation with Carthage
+
+[Carthage](https://github.com/Carthage/Carthage) is another dependency management tool written in Swift.
+
+Add the following line to your Cartfile:
+
+```
+github "imaginary-cloud/CameraManager" >= 1.0
+```
+And run `carthage update` to build the dynamic framework.
+
+## How to use
 To use it you just add the preview layer to your desired view, you'll get back the state of the camera if it's unavailable, ready or the user denied assess to it.
 ```swift
 CameraManager.sharedInstance.addPreeviewLayerToView(self.cameraView)
@@ -95,10 +104,10 @@ CameraManager.sharedInstance.stopRecordingVideo({ (videoURL, error) -> Void in
 })
 ```
 
-####Support
+## Support
 
-Supports iOS 8 and above
+Supports iOS 8 and above. Xcode 6.3 is required to build the latest code written in Swift 1.2.
 
-####License
+## License
 
-Copyright © 2014 ImaginaryCloud, imaginarycloud.com. This library is licensed under the MIT license.
+Copyright © 2015 ImaginaryCloud, imaginarycloud.com. This library is licensed under the MIT license.
