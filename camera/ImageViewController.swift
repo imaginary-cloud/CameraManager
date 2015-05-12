@@ -17,7 +17,7 @@ class ImageViewController: UIViewController {
         super.viewDidLoad()
         self.navigationController?.navigationBar.hidden = false
 
-        if let validImage = self.image? {
+        if let validImage = self.image {
             self.imageView.image = validImage
         }
     }
