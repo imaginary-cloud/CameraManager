@@ -85,7 +85,7 @@ CameraManager.sharedInstance.showAccessPermissionPopupAutomatically = false
 You can even setUp your custom block to handle error messages:
 ```swift
 CameraManager.sharedInstance.showErrorBlock = { (erTitle: String, erMessage: String) -> Void in
-    UIAlertView(title: erTitle, message: erMessage, delegate: nil, cancelButtonTitle: "OK").show()
+    UIViewController.presentViewController(UIAlertController(title: erTitle, message: erMessage, preferredStyle: .Alert))
 }
 ```
 
