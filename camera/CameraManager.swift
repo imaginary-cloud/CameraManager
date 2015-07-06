@@ -35,7 +35,7 @@ public enum CameraOutputQuality: Int {
 /// Class for handling iDevices custom camera usage
 public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
 
-    // PRAGMA MARK - Public properties
+    // MARK: - Public properties
 
     /// CameraManager singleton instance to use the camera.
     public class var sharedInstance: CameraManager {
@@ -163,7 +163,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         }
     }
 
-    // PRAGMA MARK - Private properties
+    // MARK: - Private properties
 
     private weak var embedingView: UIView?
     private var videoCompletition: ((videoURL: NSURL, error: NSError?) -> Void)?
@@ -195,7 +195,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         }()
     
     
-    // PRAGMA MARK - CameraManager
+    // MARK: - CameraManager
 
     /**
     Inits a capture session and adds a preview layer to the given view. Preview layer bounds will automaticaly be set to match given view. Default session is initialized with still image output.
@@ -408,7 +408,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         return self.cameraOutputQuality
     }
     
-    // PRAGMA MARK - AVCaptureFileOutputRecordingDelegate
+    // MARK: - AVCaptureFileOutputRecordingDelegate
 
     public func captureOutput(captureOutput: AVCaptureFileOutput!, didStartRecordingToOutputFileAtURL fileURL: NSURL!, fromConnections connections: [AnyObject]!)
     {
@@ -443,7 +443,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         }
     }
 
-    // PRAGMA MARK - CameraManager()
+    // MARK: - CameraManager()
 
     private func _updateTorch(flashMode: CameraFlashMode)
     {
