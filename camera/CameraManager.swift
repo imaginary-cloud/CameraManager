@@ -53,7 +53,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     
     /// A block creating UI to present error message to the user.
     public var showErrorBlock:(erTitle: String, erMessage: String) -> Void = { (erTitle: String, erMessage: String) -> Void in
-        UIAlertView(title: erTitle, message: erMessage, delegate: nil, cancelButtonTitle: NSLocalizedString("Ok", comment:"")).show()
+        UIViewController.presentViewController(UIAlertController(title: erTitle, message: erMessage, preferredStyle: .Alert))
     }
 
     /// Property to determine if manager should write the resources to the phone library. Default value is true.
