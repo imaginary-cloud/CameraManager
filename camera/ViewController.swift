@@ -36,7 +36,7 @@ class ViewController: UIViewController {
         self.askForPermissionsLabel.hidden = true
 
         let currentCameraState = self.cameraManager.currentCameraStatus()
-
+        
         if currentCameraState == .NotDetermined {
             self.askForPermissionsButton.hidden = false
             self.askForPermissionsLabel.hidden = false
@@ -47,6 +47,7 @@ class ViewController: UIViewController {
             self.flashModeButton.enabled = false
             self.flashModeButton.setTitle("No flash", forState: UIControlState.Normal)
         }
+        
     }
     
     override func viewWillAppear(animated: Bool)
@@ -69,8 +70,20 @@ class ViewController: UIViewController {
     private func addCameraToView()
     {
         self.cameraManager.addPreviewLayerToView(self.cameraView, newCameraOutputMode: CameraOutputMode.VideoWithMic)
-        CameraManager.sharedInstance.showErrorBlock = { (erTitle: String, erMessage: String) -> Void in
-            UIAlertView(title: erTitle, message: erMessage, delegate: nil, cancelButtonTitle: "OK").show()
+        CameraManager.sharedInstance.showErrorBlock = { (erTitle: String, erMessage: String) -> Void in            
+            
+//            var alertController = UIAlertController(title: erTitle, message: erMessage, preferredStyle: .Alert)
+//            alertController.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Default, handler: { (alertAction) -> Void in
+//                //
+//            }))
+//            
+//            let topController = UIApplication.sharedApplication().keyWindow?.rootViewController
+//            
+//            if (topController != nil) {
+//                topController?.presentViewController(alertController, animated: true, completion: { () -> Void in
+//                    //
+//                })
+//            }
         }
     }
 
@@ -78,6 +91,8 @@ class ViewController: UIViewController {
 
     @IBAction func changeFlashMode(sender: UIButton)
     {
+        
+        
         switch (self.cameraManager.changeFlashMode()) {
         case .Off:
             sender.setTitle("Flash Off", forState: UIControlState.Normal)
@@ -110,8 +125,8 @@ class ViewController: UIViewController {
             } else {
                 self.cameraManager.stopRecordingVideo({ (videoURL, error) -> Void in
                     println(videoURL)
-                    if let errorOccured = error {
-                        UIAlertView(title: "Error occured", message: errorOccured.localizedDescription, delegate: nil, cancelButtonTitle: "OK").show()
+                    if let errorOccured = error {                        
+                        self.cameraManager.showErrorBlock(erTitle: "Error occurred", erMessage: errorOccured.localizedDescription)
                     }
                 })
             }
