@@ -201,6 +201,7 @@
 		454C1F3919E82E2500C81915 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 0700;
 				LastUpgradeCheck = 0600;
 				ORGANIZATIONNAME = imaginaryCloud;
 				TargetAttributes = {
@@ -478,6 +479,7 @@
 				D71DE89C1AD677A8001E62F1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
