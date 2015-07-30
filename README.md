@@ -6,16 +6,28 @@ This is a simple Swift class to provide all the configurations you need to creat
 It follows orientation change and updates UI accordingly, supports front and rear camera selection, different flash modes, inputs and outputs.
 Just drag, drop and use. 
 
+Now it's compatibile with latest Swift syntax if you're using any Swift version prior to 2.0 make sure to use one of the previously tagged releases.
+
 ## Installation with CocoaPods
 
 The easiest way to install the CameraManager is with: [CocoaPods](http://cocoapods.org) 
 
 ### Podfile
 
+If you want Swift 2.0 syntax use:
+
 ```ruby
 use_frameworks!
 
-pod 'CameraManager', '~> 1.0'
+pod 'CameraManager', '~> 2.0'
+```
+
+If you want Swift 1.2 syntax use:
+
+```ruby
+use_frameworks!
+
+pod 'CameraManager', '~> 1.0.14'
 ```
 
 ## Installation with Carthage
@@ -24,9 +36,18 @@ pod 'CameraManager', '~> 1.0'
 
 Add the following line to your Cartfile:
 
+If you want Swift 2.0 syntax use:
+
 ```
 github "imaginary-cloud/CameraManager" >= 1.0
 ```
+
+If you want Swift 1.2 syntax use:
+
+```
+github "imaginary-cloud/CameraManager" >= 2.0
+```
+
 And run `carthage update` to build the dynamic framework.
 
 ## How to use
