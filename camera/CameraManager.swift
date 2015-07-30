@@ -109,24 +109,24 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                 case .Front:
                     if self.hasFrontCamera {
                         if let validBackDevice = self.rearCamera {
-                            if contains(inputs, validBackDevice) {
+                            if inputs.contains(validBackDevice) {
                                 validCaptureSession.removeInput(validBackDevice)
                             }
                         }
                         if let validFrontDevice = self.frontCamera {
-                            if !contains(inputs, validFrontDevice) {
+                            if !inputs.contains(validFrontDevice) {
                                 validCaptureSession.addInput(validFrontDevice)
                             }
                         }
                     }
                 case .Back:
                     if let validFrontDevice = self.frontCamera {
-                        if contains(inputs, validFrontDevice) {
+                        if inputs.contains(validFrontDevice) {
                             validCaptureSession.removeInput(validFrontDevice)
                         }
                     }
                     if let validBackDevice = self.rearCamera {
-                        if !contains(inputs, validBackDevice) {
+                        if !inputs.contains(validBackDevice) {
                             validCaptureSession.addInput(validBackDevice)
                         }
                     }
@@ -201,9 +201,13 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     private var tempFilePath: NSURL = {
         let tempPath = NSTemporaryDirectory().stringByAppendingPathComponent("tempMovie").stringByAppendingPathExtension("mp4")
         if NSFileManager.defaultManager().fileExistsAtPath(tempPath!) {
-            NSFileManager.defaultManager().removeItemAtPath(tempPath!, error: nil)
+            do {
+                try NSFileManager.defaultManager().removeItemAtPath(tempPath!)
+            } catch {
+                
+            }
         }
-        return NSURL(fileURLWithPath: tempPath!)!
+        return NSURL(fileURLWithPath: tempPath!)
         }()
     
     
@@ -224,7 +228,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     public func addPreviewLayerToView(view: UIView, newCameraOutputMode: CameraOutputMode) -> CameraState
     {
         if self._canLoadCamera() {
-            if let validEmbedingView = self.embedingView {
+            if let _ = self.embedingView {
                 if let validPreviewLayer = self.previewLayer {
                     validPreviewLayer.removeFromSuperlayer()
                 }
@@ -466,7 +470,11 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
             if (captureDevice.position == AVCaptureDevicePosition.Back) {
                 let avTorchMode = AVCaptureTorchMode(rawValue: flashMode.rawValue)
                 if (captureDevice.isTorchModeSupported(avTorchMode!)) {
-                    captureDevice.lockForConfiguration(nil)
+                    do {
+                        try captureDevice.lockForConfiguration()
+                    } catch {
+                        return;
+                    }
                     captureDevice.torchMode = avTorchMode!
                     captureDevice.unlockForConfiguration()
                 }
@@ -612,9 +620,12 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     {
         self.embedingView = view
         dispatch_async(dispatch_get_main_queue(), { () -> Void in
-            self.previewLayer?.frame = view.layer.bounds
+            guard let _ = self.previewLayer else {
+                return
+            }
+            self.previewLayer!.frame = view.layer.bounds
             view.clipsToBounds = true
-            view.layer.addSublayer(self.previewLayer)
+            view.layer.addSublayer(self.previewLayer!)
         })
     }
 
@@ -640,8 +651,6 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     
     private func _addVideoInput()
     {
-        var error: NSError?
-
         if (self.frontCamera == nil) || (self.rearCamera == nil) {
             var videoFrontDevice: AVCaptureDevice?
             var videoBackDevice: AVCaptureDevice?
@@ -652,18 +661,20 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                     videoFrontDevice = device as? AVCaptureDevice
                 }
             }
-            if (self.frontCamera == nil) {
-                if let validVideoFrontDevice = videoFrontDevice {
-                    self.frontCamera = AVCaptureDeviceInput.deviceInputWithDevice(validVideoFrontDevice, error: &error) as! AVCaptureDeviceInput
+            do {
+                if (self.frontCamera == nil) {
+                    if let validVideoFrontDevice = videoFrontDevice {
+                        try self.frontCamera = AVCaptureDeviceInput(device: validVideoFrontDevice)
+                    }
                 }
-            }
-            if (self.rearCamera == nil) {
-                if let validVideoBackDevice = videoBackDevice {
-                    self.rearCamera = AVCaptureDeviceInput.deviceInputWithDevice(validVideoBackDevice, error: &error) as! AVCaptureDeviceInput
+                if (self.rearCamera == nil) {
+                    if let validVideoBackDevice = videoBackDevice {
+                        try self.rearCamera = AVCaptureDeviceInput(device: validVideoBackDevice)
+                    }
                 }
-            }
-            if let validError = error {
-                self._show(NSLocalizedString("Device setup error occured", comment:""), message: validError.localizedDescription)
+            } catch let outError {
+                self._show(NSLocalizedString("Device setup error occured", comment:""), message: "\(outError)")
+                return
             }
         }
         self.cameraDevice = _cameraDevice
@@ -672,12 +683,12 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     private func _setupMic()
     {
         if (self.mic == nil) {
-            var error: NSError?
-            let micDevice:AVCaptureDevice = AVCaptureDevice.defaultDeviceWithMediaType(AVMediaTypeAudio);
-            self.mic = AVCaptureDeviceInput.deviceInputWithDevice(micDevice, error: &error) as? AVCaptureDeviceInput;
-            if let errorHappened = error {
+            let micDevice:AVCaptureDevice = AVCaptureDevice.defaultDeviceWithMediaType(AVMediaTypeAudio)
+            do {
+                try self.mic = AVCaptureDeviceInput(device: micDevice)
+            } catch let outError {
                 self.mic = nil
-                self._show(NSLocalizedString("Mic error", comment:""), message: errorHappened.description)
+                self._show(NSLocalizedString("Mic error", comment:""), message: "\(outError)")
             }
         }
     }
@@ -762,7 +773,11 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
             if (captureDevice.position == AVCaptureDevicePosition.Back) {
                 let avFlashMode = AVCaptureFlashMode(rawValue: flashMode.rawValue)
                 if (captureDevice.isFlashModeSupported(avFlashMode!)) {
-                    captureDevice.lockForConfiguration(nil)
+                    do {
+                        try captureDevice.lockForConfiguration()
+                    } catch {
+                        return
+                    }
                     captureDevice.flashMode = avFlashMode!
                     captureDevice.unlockForConfiguration()
                 }

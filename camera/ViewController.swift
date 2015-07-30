@@ -124,7 +124,6 @@ class ViewController: UIViewController {
                 self.cameraManager.startRecordingVideo()
             } else {
                 self.cameraManager.stopRecordingVideo({ (videoURL, error) -> Void in
-                    println(videoURL)
                     if let errorOccured = error {                        
                         self.cameraManager.showErrorBlock(erTitle: "Error occurred", erMessage: errorOccured.localizedDescription)
                     }
