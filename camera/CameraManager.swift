@@ -199,15 +199,15 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     private var _cameraOutputQuality = CameraOutputQuality.High
 
     private var tempFilePath: NSURL = {
-        let tempPath = NSTemporaryDirectory().stringByAppendingPathComponent("tempMovie").stringByAppendingPathExtension("mp4")
-        if NSFileManager.defaultManager().fileExistsAtPath(tempPath!) {
+        let tempPath = NSURL(fileURLWithPath: NSTemporaryDirectory()).URLByAppendingPathComponent("tempMovie").URLByAppendingPathExtension("mp4").absoluteString
+        if NSFileManager.defaultManager().fileExistsAtPath(tempPath) {
             do {
-                try NSFileManager.defaultManager().removeItemAtPath(tempPath!)
+                try NSFileManager.defaultManager().removeItemAtPath(tempPath)
             } catch {
                 
             }
         }
-        return NSURL(fileURLWithPath: tempPath!)
+        return NSURL(fileURLWithPath: tempPath)
         }()
     
     
