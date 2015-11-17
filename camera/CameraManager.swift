@@ -207,7 +207,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                 
             }
         }
-        return NSURL(fileURLWithPath: tempPath)
+        return NSURL(string: tempPath)!
         }()
     
     
