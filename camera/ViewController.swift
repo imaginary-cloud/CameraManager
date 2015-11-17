@@ -50,16 +50,14 @@ class ViewController: UIViewController {
         
     }
     
-    override func viewWillAppear(animated: Bool)
-    {
+    override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
         self.navigationController?.navigationBar.hidden = true
         self.cameraManager.resumeCaptureSession()
     }
     
-    override func viewWillDisappear(animated: Bool)
-    {
+    override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(animated)
         self.cameraManager.stopCaptureSession()
     }
@@ -91,8 +89,6 @@ class ViewController: UIViewController {
 
     @IBAction func changeFlashMode(sender: UIButton)
     {
-        
-        
         switch (self.cameraManager.changeFlashMode()) {
         case .Off:
             sender.setTitle("Flash Off", forState: UIControlState.Normal)
@@ -103,8 +99,8 @@ class ViewController: UIViewController {
         }
     }
     
-    @IBAction func recordButtonTapped(sender: UIButton)
-    {
+    @IBAction func recordButtonTapped(sender: UIButton) {
+        
         switch (self.cameraManager.cameraOutputMode) {
         case .StillImage:
             self.cameraManager.capturePictureWithCompletition({ (image, error) -> Void in
@@ -132,8 +128,8 @@ class ViewController: UIViewController {
         }
     }
     
-    @IBAction func outputModeButtonTapped(sender: UIButton)
-    {
+    @IBAction func outputModeButtonTapped(sender: UIButton) {
+        
         self.cameraManager.cameraOutputMode = self.cameraManager.cameraOutputMode == CameraOutputMode.VideoWithMic ? CameraOutputMode.StillImage : CameraOutputMode.VideoWithMic
         switch (self.cameraManager.cameraOutputMode) {
         case .StillImage:
@@ -145,8 +141,8 @@ class ViewController: UIViewController {
         }
     }
     
-    @IBAction func changeCameraDevice(sender: UIButton)
-    {
+    @IBAction func changeCameraDevice(sender: UIButton) {
+        
         self.cameraManager.cameraDevice = self.cameraManager.cameraDevice == CameraDevice.Front ? CameraDevice.Back : CameraDevice.Front
         switch (self.cameraManager.cameraDevice) {
         case .Front:
@@ -156,8 +152,8 @@ class ViewController: UIViewController {
         }
     }
     
-    @IBAction func askForCameraPermissions(sender: UIButton)
-    {
+    @IBAction func askForCameraPermissions(sender: UIButton) {
+        
         self.cameraManager.askUserForCameraPermissions({ permissionGranted in
             self.askForPermissionsButton.hidden = true
             self.askForPermissionsLabel.hidden = true
@@ -169,8 +165,8 @@ class ViewController: UIViewController {
         })
     }
     
-    @IBAction func changeCameraQuality(sender: UIButton)
-    {
+    @IBAction func changeCameraQuality(sender: UIButton) {
+        
         switch (self.cameraManager.changeQualityMode()) {
         case .High:
             sender.setTitle("High", forState: UIControlState.Normal)
