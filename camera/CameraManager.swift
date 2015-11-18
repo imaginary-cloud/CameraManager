@@ -95,23 +95,12 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
             _updateCameraDevice(cameraDevice)
         }
     }
-    
-    /// Property to check video recording duration when in progress
-    public var recordedDuration : CMTime { return movieOutput?.recordedDuration ?? kCMTimeZero }
-    
-    /// Property to check video recording file size when in progress
-    public var recordedFileSize : Int64 { return movieOutput?.recordedFileSize ?? 0 }
-
 
     /// Property to change camera flash mode.
-    public var flashMode: CameraFlashMode {
-        get {
-            return _flashMode
-        }
-        set(newflashMode) {
-            if newflashMode != _flashMode {
-                _flashMode = newflashMode
-                _updateFlasMode(newflashMode)
+    public var flashMode = CameraFlashMode.Off {
+        didSet {
+            if flashMode != oldValue {
+                _updateFlasMode(flashMode)
             }
         }
     }
@@ -140,6 +129,12 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
             }
         }
     }
+    
+    /// Property to check video recording duration when in progress
+    public var recordedDuration : CMTime { return movieOutput?.recordedDuration ?? kCMTimeZero }
+    
+    /// Property to check video recording file size when in progress
+    public var recordedFileSize : Int64 { return movieOutput?.recordedFileSize ?? 0 }
 
     // MARK: - Private properties
 
@@ -170,7 +165,6 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     private var cameraIsSetup = false
     private var cameraIsObservingDeviceOrientation = false
 
-    private var _flashMode = CameraFlashMode.Off
     private var _cameraOutputMode = CameraOutputMode.StillImage
     private var _cameraOutputQuality = CameraOutputQuality.High
 
