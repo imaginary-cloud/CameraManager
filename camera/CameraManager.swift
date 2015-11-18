@@ -92,7 +92,9 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     /// Property to change camera device between front and back.
     public var cameraDevice = CameraDevice.Back {
         didSet {
-            _updateCameraDevice(cameraDevice)
+            if cameraDevice != oldValue {
+                _updateCameraDevice(cameraDevice)
+            }
         }
     }
 
@@ -106,14 +108,10 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     }
 
     /// Property to change camera output quality.
-    public var cameraOutputQuality: CameraOutputQuality {
-        get {
-            return _cameraOutputQuality
-        }
-        set(newCameraOutputQuality) {
-            if newCameraOutputQuality != _cameraOutputQuality {
-                _cameraOutputQuality = newCameraOutputQuality
-                _updateCameraQualityMode(newCameraOutputQuality)
+    public var cameraOutputQuality = CameraOutputQuality.High {
+        didSet {
+            if cameraOutputQuality != oldValue {
+                _updateCameraQualityMode(cameraOutputQuality)
             }
         }
     }
@@ -166,7 +164,6 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     private var cameraIsObservingDeviceOrientation = false
 
     private var _cameraOutputMode = CameraOutputMode.StillImage
-    private var _cameraOutputQuality = CameraOutputQuality.High
 
     private var tempFilePath: NSURL = {
         let tempPath = NSURL(fileURLWithPath: NSTemporaryDirectory()).URLByAppendingPathComponent("tempMovie").URLByAppendingPathExtension("mp4").absoluteString
@@ -528,10 +525,9 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
             if let validCaptureSession = self.captureSession {
                 validCaptureSession.beginConfiguration()
                 validCaptureSession.sessionPreset = AVCaptureSessionPresetHigh
-                self._updateCameraDevice(.Back)
+                self._updateCameraDevice(self.cameraDevice)
                 self._setupOutputs()
                 self._setupOutputMode(self._cameraOutputMode)
-                self.cameraOutputQuality = self._cameraOutputQuality
                 self._setupPreviewLayer()
                 validCaptureSession.commitConfiguration()
                 self._updateFlasMode(self.flashMode)
