@@ -10,8 +10,6 @@ import UIKit
 import AVFoundation
 import AssetsLibrary
 
-private let _singletonSharedInstance = CameraManager()
-
 public enum CameraState {
     case Ready, AccessDenied, NoDeviceFound, NotDetermined
 }
@@ -36,11 +34,6 @@ public enum CameraOutputQuality: Int {
 public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
 
     // MARK: - Public properties
-
-    /// CameraManager singleton instance to use the camera.
-    public class var sharedInstance: CameraManager {
-        return _singletonSharedInstance
-    }
     
     /// Capture session to customize camera settings.
     public var captureSession: AVCaptureSession?
@@ -131,10 +124,11 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     /// Property to check video recording file size when in progress
     public var recordedFileSize : Int64 { return movieOutput?.recordedFileSize ?? 0 }
 
+    
     // MARK: - Private properties
 
     private weak var embedingView: UIView?
-    private var videoCompletition: ((videoURL: NSURL, error: NSError?) -> Void)?
+    private var videoCompletition: ((videoURL: NSURL?, error: NSError?) -> Void)?
 
     private var sessionQueue: dispatch_queue_t = dispatch_queue_create("CameraSessionQueue", DISPATCH_QUEUE_SERIAL)
 
@@ -334,7 +328,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     /**
     Stop recording a video. Save it to the cameraRoll and give back the url.
     */
-    public func stopRecordingVideo(completition:(videoURL: NSURL, error: NSError?) -> Void) {
+    public func stopRecordingVideo(completition:(videoURL: NSURL?, error: NSError?) -> Void) {
         if let runningMovieOutput = movieOutput {
             if runningMovieOutput.recording {
                 videoCompletition = completition
@@ -392,6 +386,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                     validLibrary.writeVideoAtPathToSavedPhotosAlbum(outputFileURL, completionBlock: { (assetURL: NSURL?, error: NSError?) -> Void in
                         if (error != nil) {
                             self._show(NSLocalizedString("Unable to save video to the iPhone.", comment:""), message: error!.localizedDescription)
+                            self._executeVideoCompletitionWithURL(nil, error: error)
                         } else {
                             if let validAssetURL = assetURL {
                                 self._executeVideoCompletitionWithURL(validAssetURL, error: error)
@@ -428,7 +423,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         captureSession?.commitConfiguration()
     }
     
-    private func _executeVideoCompletitionWithURL(url: NSURL, error: NSError?) {
+    private func _executeVideoCompletitionWithURL(url: NSURL?, error: NSError?) {
         if let validCompletition = videoCompletition {
             validCompletition(videoURL: url, error: error)
             videoCompletition = nil
