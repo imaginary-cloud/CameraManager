@@ -136,6 +136,13 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
             _cameraDevice = newCameraDevice
         }
     }
+    
+    /// Property to check video recording duration when in progress
+    public var recordedDuration : CMTime { return movieOutput?.recordedDuration ?? kCMTimeZero }
+    
+    /// Property to check video recording file size when in progress
+    public var recordedFileSize : Int64 { return movieOutput?.recordedFileSize ?? 0 }
+
 
     /// Property to change camera flash mode.
     public var flashMode: CameraFlashMode {
