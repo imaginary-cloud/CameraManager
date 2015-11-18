@@ -90,44 +90,9 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         }()
     
     /// Property to change camera device between front and back.
-    public var cameraDevice: CameraDevice {
-        get {
-            return _cameraDevice
-        }
-        set(newCameraDevice) {
-            if let validCaptureSession = captureSession {
-                validCaptureSession.beginConfiguration()
-                let inputs = validCaptureSession.inputs as! [AVCaptureInput]
-
-                switch newCameraDevice {
-                case .Front:
-                    if hasFrontCamera {
-                        if let validBackDevice = _deviceInputFromDevice(backCameraDevice) {
-                            if inputs.contains(validBackDevice) {
-                                validCaptureSession.removeInput(validBackDevice)
-                            }
-                        }
-                        if let validFrontDevice = _deviceInputFromDevice(frontCameraDevice) {
-                            if !inputs.contains(validFrontDevice) {
-                                validCaptureSession.addInput(validFrontDevice)
-                            }
-                        }
-                    }
-                case .Back:
-                    if let validFrontDevice = _deviceInputFromDevice(frontCameraDevice) {
-                        if inputs.contains(validFrontDevice) {
-                            validCaptureSession.removeInput(validFrontDevice)
-                        }
-                    }
-                    if let validBackDevice = _deviceInputFromDevice(backCameraDevice) {
-                        if !inputs.contains(validBackDevice) {
-                            validCaptureSession.addInput(validBackDevice)
-                        }
-                    }
-                }
-                validCaptureSession.commitConfiguration()
-            }
-            _cameraDevice = newCameraDevice
+    public var cameraDevice = CameraDevice.Back {
+        didSet {
+            _updateCameraDevice(cameraDevice)
         }
     }
     
@@ -205,7 +170,6 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     private var cameraIsSetup = false
     private var cameraIsObservingDeviceOrientation = false
 
-    private var _cameraDevice = CameraDevice.Back
     private var _flashMode = CameraFlashMode.Off
     private var _cameraOutputMode = CameraOutputMode.StillImage
     private var _cameraOutputQuality = CameraOutputQuality.High
@@ -570,7 +534,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
             if let validCaptureSession = self.captureSession {
                 validCaptureSession.beginConfiguration()
                 validCaptureSession.sessionPreset = AVCaptureSessionPresetHigh
-                self._addVideoInput()
+                self._updateCameraDevice(.Back)
                 self._setupOutputs()
                 self._setupOutputMode(self._cameraOutputMode)
                 self.cameraOutputQuality = self._cameraOutputQuality
@@ -631,10 +595,6 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
             _show(NSLocalizedString("Camera unavailable", comment:""), message:NSLocalizedString("The device does not have a camera.", comment:""))
             return .NoDeviceFound
         }
-    }
-    
-    private func _addVideoInput() {
-        cameraDevice = _cameraDevice
     }
     
     private func _setupOutputMode(newCameraOutputMode: CameraOutputMode) {
@@ -699,6 +659,42 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         if let validCaptureSession = captureSession {
             previewLayer = AVCaptureVideoPreviewLayer(session: validCaptureSession)
             previewLayer?.videoGravity = AVLayerVideoGravityResizeAspectFill
+        }
+    }
+    
+    private func _updateCameraDevice(deviceType: CameraDevice) {
+        if let validCaptureSession = captureSession {
+            validCaptureSession.beginConfiguration()
+            let inputs = validCaptureSession.inputs as! [AVCaptureInput]
+            
+            for input in inputs {
+                if let deviceInput = input as? AVCaptureDeviceInput {
+                    if deviceInput.device == backCameraDevice && cameraDevice == .Front {
+                        validCaptureSession.removeInput(deviceInput)
+                        break;
+                    } else if deviceInput.device == frontCameraDevice && cameraDevice == .Back {
+                        validCaptureSession.removeInput(deviceInput)
+                        break;
+                    }
+                }
+            }
+            switch cameraDevice {
+            case .Front:
+                if hasFrontCamera {
+                    if let validFrontDevice = _deviceInputFromDevice(frontCameraDevice) {
+                        if !inputs.contains(validFrontDevice) {
+                            validCaptureSession.addInput(validFrontDevice)
+                        }
+                    }
+                }
+            case .Back:
+                if let validBackDevice = _deviceInputFromDevice(backCameraDevice) {
+                    if !inputs.contains(validBackDevice) {
+                        validCaptureSession.addInput(validBackDevice)
+                    }
+                }
+            }
+            validCaptureSession.commitConfiguration()
         }
     }
     
