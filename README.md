@@ -19,7 +19,7 @@ If you want Swift 2.0 syntax use:
 ```ruby
 use_frameworks!
 
-pod 'CameraManager', '~> 3.0’
+pod 'CameraManager', '~> 2.0’
 ```
 
 If you want Swift 1.2 syntax use:
