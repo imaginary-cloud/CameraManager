@@ -19,7 +19,7 @@ If you want Swift 2.0 syntax use:
 ```ruby
 use_frameworks!
 
-pod 'CameraManager', '~> 3.0’
+pod 'CameraManager', '~> 2.1’
 ```
 
 If you want Swift 1.2 syntax use:
@@ -39,7 +39,7 @@ Add the following line to your Cartfile:
 If you want Swift 2.0 syntax use:
 
 ```
-github "imaginary-cloud/CameraManager" >= 3.0
+github "imaginary-cloud/CameraManager" >= 2.1
 ```
 
 If you want Swift 1.2 syntax use:
