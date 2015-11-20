@@ -53,7 +53,7 @@ And run `carthage update` to build the dynamic framework.
 ## How to use
 To use it you just add the preview layer to your desired view, you'll get back the state of the camera if it's unavailable, ready or the user denied assess to it.
 ```swift
-let cameraManager
+let cameraManager = CameraManager()
 cameraManager.addPreviewLayerToView(self.cameraView)
 ```
 You can set input device to front or back camera:
