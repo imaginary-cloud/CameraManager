@@ -188,11 +188,11 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                 }
             }
             if cameraIsSetup {
-                _addPreeviewLayerToView(view)
+                _addPreviewLayerToView(view)
                 cameraOutputMode = newCameraOutputMode
             } else {
                 _setupCamera({ Void -> Void in
-                    self._addPreeviewLayerToView(view)
+                    self._addPreviewLayerToView(view)
                     self.cameraOutputMode = newCameraOutputMode
                 })
             }
@@ -247,7 +247,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                 }
                 _setupCamera({Void -> Void in
                     if let validEmbedingView = self.embedingView {
-                        self._addPreeviewLayerToView(validEmbedingView)
+                        self._addPreviewLayerToView(validEmbedingView)
                     }
                     self._startFollowingDeviceOrientation()
                 })
@@ -548,7 +548,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         }
     }
 
-    private func _addPreeviewLayerToView(view: UIView) {
+    private func _addPreviewLayerToView(view: UIView) {
         embedingView = view
         dispatch_async(dispatch_get_main_queue(), { () -> Void in
             guard let _ = self.previewLayer else {
