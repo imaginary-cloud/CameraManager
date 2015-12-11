@@ -58,7 +58,16 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     /// Property to determine if manager should write the resources to the phone library. Default value is true.
     public var writeFilesToPhoneLibrary = true
     
-    public var shouldRespondToOrientationChanges = true
+    /// Property to determine if manager should follow device orientation. Default value is true.
+    public var shouldRespondToOrientationChanges = true {
+        didSet {
+            if shouldRespondToOrientationChanges {
+                _startFollowingDeviceOrientation()
+            } else {
+                _stopFollowingDeviceOrientation()
+            }
+        }
+    }
 
     /// The Bool property to determine if current device has front camera.
     public var hasFrontCamera: Bool = {
