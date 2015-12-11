@@ -57,6 +57,8 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
 
     /// Property to determine if manager should write the resources to the phone library. Default value is true.
     public var writeFilesToPhoneLibrary = true
+    
+    public var shouldRespondToOrientationChanges = true
 
     /// The Bool property to determine if current device has front camera.
     public var hasFrontCamera: Bool = {
@@ -186,11 +188,11 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                 }
             }
             if cameraIsSetup {
-                _addPreeviewLayerToView(view)
+                _addPreviewLayerToView(view)
                 cameraOutputMode = newCameraOutputMode
             } else {
                 _setupCamera({ Void -> Void in
-                    self._addPreeviewLayerToView(view)
+                    self._addPreviewLayerToView(view)
                     self.cameraOutputMode = newCameraOutputMode
                 })
             }
@@ -245,7 +247,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                 }
                 _setupCamera({Void -> Void in
                     if let validEmbedingView = self.embedingView {
-                        self._addPreeviewLayerToView(validEmbedingView)
+                        self._addPreviewLayerToView(validEmbedingView)
                     }
                     self._startFollowingDeviceOrientation()
                 })
@@ -533,7 +535,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     }
 
     private func _startFollowingDeviceOrientation() {
-        if !cameraIsObservingDeviceOrientation {
+        if shouldRespondToOrientationChanges && !cameraIsObservingDeviceOrientation {
             NSNotificationCenter.defaultCenter().addObserver(self, selector: "_orientationChanged", name: UIDeviceOrientationDidChangeNotification, object: nil)
             cameraIsObservingDeviceOrientation = true
         }
@@ -546,7 +548,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         }
     }
 
-    private func _addPreeviewLayerToView(view: UIView) {
+    private func _addPreviewLayerToView(view: UIView) {
         embedingView = view
         dispatch_async(dispatch_get_main_queue(), { () -> Void in
             guard let _ = self.previewLayer else {
