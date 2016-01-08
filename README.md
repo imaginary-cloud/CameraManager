@@ -51,7 +51,7 @@ github "imaginary-cloud/CameraManager" >= 1.0
 And run `carthage update` to build the dynamic framework.
 
 ## How to use
-To use it you just add the preview layer to your desired view, you'll get back the state of the camera if it's unavailable, ready or the user denied assess to it.
+To use it you just add the preview layer to your desired view, you'll get back the state of the camera if it's unavailable, ready or the user denied assess to it. Have in mind that in order to retain the AVCaptureSession you will need to retain cameraManager instance somwhere, ex. as an instance constant.
 ```swift
 let cameraManager = CameraManager()
 cameraManager.addPreviewLayerToView(self.cameraView)
