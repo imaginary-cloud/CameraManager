@@ -476,7 +476,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         
         if shouldReinitializeMovieOutput {
             movieOutput = AVCaptureMovieFileOutput()
-//            movieOutput?.movieFragmentInterval = kCMTimeInvalid            
+            movieOutput!.movieFragmentInterval = kCMTimeInvalid
 
             captureSession?.beginConfiguration()
             captureSession?.addOutput(movieOutput)
@@ -663,6 +663,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         }
         if (movieOutput == nil) {
             movieOutput = AVCaptureMovieFileOutput()
+            movieOutput!.movieFragmentInterval = kCMTimeInvalid
         }
         if library == nil {
             library = ALAssetsLibrary()
