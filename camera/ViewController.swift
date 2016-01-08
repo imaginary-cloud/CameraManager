@@ -68,20 +68,12 @@ class ViewController: UIViewController {
     private func addCameraToView()
     {
         cameraManager.addPreviewLayerToView(cameraView, newCameraOutputMode: CameraOutputMode.VideoWithMic)
-        cameraManager.showErrorBlock = { (erTitle: String, erMessage: String) -> Void in
+        cameraManager.showErrorBlock = { [weak self] (erTitle: String, erMessage: String) -> Void in
+        
+            let alertController = UIAlertController(title: erTitle, message: erMessage, preferredStyle: .Alert)
+            alertController.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Default, handler: { (alertAction) -> Void in  }))
             
-//            var alertController = UIAlertController(title: erTitle, message: erMessage, preferredStyle: .Alert)
-//            alertController.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Default, handler: { (alertAction) -> Void in
-//                //
-//            }))
-//            
-//            let topController = UIApplication.sharedApplication().keyWindow?.rootViewController
-//            
-//            if (topController != nil) {
-//                topController?.presentViewController(alertController, animated: true, completion: { () -> Void in
-//                    //
-//                })
-//            }
+            self?.presentViewController(alertController, animated: true, completion: nil)
         }
     }
 

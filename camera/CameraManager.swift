@@ -206,7 +206,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         return addPreviewLayerToView(view, newCameraOutputMode: cameraOutputMode)
     }
     public func addPreviewLayerToView(view: UIView, newCameraOutputMode: CameraOutputMode) -> CameraState {
-        return addPreviewLayerToView(view, newCameraOutputMode: cameraOutputMode, completition: nil)
+        return addPreviewLayerToView(view, newCameraOutputMode: newCameraOutputMode, completition: nil)
     }
     public func addPreviewLayerToView(view: UIView, newCameraOutputMode: CameraOutputMode, completition: (Void -> Void)?) -> CameraState {
         if _canLoadCamera() {
@@ -476,7 +476,8 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         
         if shouldReinitializeMovieOutput {
             movieOutput = AVCaptureMovieFileOutput()
-            
+//            movieOutput?.movieFragmentInterval = kCMTimeInvalid            
+
             captureSession?.beginConfiguration()
             captureSession?.addOutput(movieOutput)
             captureSession?.commitConfiguration()
