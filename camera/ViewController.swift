@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CameraManager
 
 class ViewController: UIViewController {
     

@@ -153,7 +153,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     
     // MARK: - Private properties
 
-    private weak var embedingView: UIView?
+    private weak var embeddingView: UIView?
     private var videoCompletition: ((videoURL: NSURL?, error: NSError?) -> Void)?
 
     private var sessionQueue: dispatch_queue_t = dispatch_queue_create("CameraSessionQueue", DISPATCH_QUEUE_SERIAL)
@@ -179,6 +179,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
 
     private var cameraIsSetup = false
     private var cameraIsObservingDeviceOrientation = false
+    private var zoomScale = CGFloat(1.0)
 
     private var tempFilePath: NSURL = {
         let tempPath = NSURL(fileURLWithPath: NSTemporaryDirectory()).URLByAppendingPathComponent("tempMovie").URLByAppendingPathExtension("mp4").absoluteString
@@ -188,7 +189,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
             } catch { }
         }
         return NSURL(string: tempPath)!
-        }()
+    }()
     
     
     // MARK: - CameraManager
@@ -210,7 +211,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     }
     public func addPreviewLayerToView(view: UIView, newCameraOutputMode: CameraOutputMode, completition: (Void -> Void)?) -> CameraState {
         if _canLoadCamera() {
-            if let _ = embedingView {
+            if let _ = embeddingView {
                 if let validPreviewLayer = previewLayer {
                     validPreviewLayer.removeFromSuperlayer()
                 }
@@ -280,8 +281,8 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                     stopAndRemoveCaptureSession()
                 }
                 _setupCamera({Void -> Void in
-                    if let validEmbedingView = self.embedingView {
-                        self._addPreviewLayerToView(validEmbedingView)
+                    if let validEmbeddingView = self.embeddingView {
+                        self._addPreviewLayerToView(validEmbeddingView)
                     }
                     self._startFollowingDeviceOrientation()
                 })
@@ -438,6 +439,43 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
 
     // MARK: - CameraManager()
 
+    private func attachZoom(view: UIView) {
+        let pinch = UIPinchGestureRecognizer(target: self, action: "_zoom:")
+        view.addGestureRecognizer(pinch)
+    }
+
+    @objc
+    private func _zoom(recognizer: UIPinchGestureRecognizer) {
+        guard let view = embeddingView,
+            previewLayer = previewLayer
+            else { return }
+
+        var allTouchesOnPreviewLayer = true
+        let numTouch = recognizer.numberOfTouches()
+
+        for var i = 0; i < numTouch; i++ {
+            let location = recognizer.locationOfTouch(i, inView: view)
+            let convertedTouch = previewLayer.convertPoint(location, fromLayer: previewLayer.superlayer)
+            if !previewLayer.containsPoint(convertedTouch) {
+                allTouchesOnPreviewLayer = false
+                break
+            }
+        }
+        if allTouchesOnPreviewLayer {
+            do {
+                let captureDevice = AVCaptureDevice.devices().first as? AVCaptureDevice
+                try captureDevice?.lockForConfiguration()
+                if recognizer.scale >= 1.0 {
+                    captureDevice?.videoZoomFactor = recognizer.scale
+                    zoomScale = recognizer.scale
+                }
+                captureDevice?.unlockForConfiguration()
+            } catch {
+                print("Error locking configuration")
+            }
+        }
+    }
+
     private func _updateTorch(flashMode: CameraFlashMode) {
         captureSession?.beginConfiguration()
         let devices = AVCaptureDevice.devicesWithMediaType(AVMediaTypeVideo)
@@ -522,8 +560,8 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
                 }
             }
             dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                if let validEmbedingView = self.embedingView {
-                    validPreviewLayer.frame = validEmbedingView.bounds
+                if let validEmbeddingView = self.embeddingView {
+                    validPreviewLayer.frame = validEmbeddingView.bounds
                 }
             })
         }
@@ -584,7 +622,8 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
     }
 
     private func _addPreviewLayerToView(view: UIView) {
-        embedingView = view
+        embeddingView = view
+        attachZoom(view)
         dispatch_async(dispatch_get_main_queue(), { () -> Void in
             guard let _ = self.previewLayer else {
                 return
