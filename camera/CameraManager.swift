@@ -31,7 +31,7 @@ public enum CameraOutputQuality: Int {
 }
 
 /// Class for handling iDevices custom camera usage
-public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
+public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGestureRecognizerDelegate {
 
     // MARK: - Public properties
     
@@ -139,6 +139,8 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
             if cameraIsSetup {
                 if cameraOutputMode != oldValue {
                     _setupOutputMode(cameraOutputMode, oldCameraOutputMode: oldValue)
+                    _setupMaxZoomScale()
+                    _zoom(0)
                 }
             }
         }
@@ -179,7 +181,10 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
 
     private var cameraIsSetup = false
     private var cameraIsObservingDeviceOrientation = false
-    private var zoomScale = CGFloat(1.0)
+
+    private var zoomScale       = CGFloat(1.0)
+    private var beginZoomScale  = CGFloat(1.0)
+    private var maxZoomScale    = CGFloat(1.0)
 
     private var tempFilePath: NSURL = {
         let tempPath = NSURL(fileURLWithPath: NSTemporaryDirectory()).URLByAppendingPathComponent("tempMovie").URLByAppendingPathExtension("mp4").absoluteString
@@ -437,15 +442,25 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
         }
     }
 
-    // MARK: - CameraManager()
-
+    // MARK: - UIGestureRecognizerDelegate
+    
     private func attachZoom(view: UIView) {
-        let pinch = UIPinchGestureRecognizer(target: self, action: "_zoom:")
+        let pinch = UIPinchGestureRecognizer(target: self, action: "_zoomStart:")
         view.addGestureRecognizer(pinch)
+        pinch.delegate = self
+    }
+    
+    public func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer) -> Bool {
+        
+        if gestureRecognizer.isKindOfClass(UIPinchGestureRecognizer) {
+            beginZoomScale = zoomScale;
+        }
+        
+        return true
     }
 
     @objc
-    private func _zoom(recognizer: UIPinchGestureRecognizer) {
+    private func _zoomStart(recognizer: UIPinchGestureRecognizer) {
         guard let view = embeddingView,
             previewLayer = previewLayer
             else { return }
@@ -462,19 +477,25 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
             }
         }
         if allTouchesOnPreviewLayer {
-            do {
-                let captureDevice = AVCaptureDevice.devices().first as? AVCaptureDevice
-                try captureDevice?.lockForConfiguration()
-                if recognizer.scale >= 1.0 {
-                    captureDevice?.videoZoomFactor = recognizer.scale
-                    zoomScale = recognizer.scale
-                }
-                captureDevice?.unlockForConfiguration()
-            } catch {
-                print("Error locking configuration")
-            }
+            _zoom(recognizer.scale)
         }
     }
+    
+    private func _zoom(scale: CGFloat) {
+        do {
+            let captureDevice = AVCaptureDevice.devices().first as? AVCaptureDevice
+            try captureDevice?.lockForConfiguration()
+            
+            zoomScale = max(1.0, min(beginZoomScale * scale, maxZoomScale))
+            captureDevice?.videoZoomFactor = zoomScale
+            
+            captureDevice?.unlockForConfiguration()
+        } catch {
+            print("Error locking configuration")
+        }
+    }
+    
+    // MARK: - CameraManager()
 
     private func _updateTorch(flashMode: CameraFlashMode) {
         captureSession?.beginConfiguration()
@@ -632,6 +653,21 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate {
             view.clipsToBounds = true
             view.layer.addSublayer(self.previewLayer!)
         })
+    }
+    
+    private func _setupMaxZoomScale() {
+        if cameraDevice == .Back {
+            if let maxZoom = backCameraDevice?.activeFormat.videoMaxZoomFactor {
+                beginZoomScale = CGFloat(1.0)
+                maxZoomScale = maxZoom
+            }
+        }
+        else {
+            if let maxZoom = frontCameraDevice?.activeFormat.videoMaxZoomFactor {
+                beginZoomScale = CGFloat(1.0)
+                maxZoomScale = maxZoom
+            }
+        }
     }
 
     private func _checkIfCameraIsAvailable() -> CameraState {
