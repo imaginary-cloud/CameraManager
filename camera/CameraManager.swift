@@ -106,6 +106,8 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
             if cameraIsSetup {
                 if cameraDevice != oldValue {
                     _updateCameraDevice(cameraDevice)
+                    _setupMaxZoomScale()
+                    _zoom(0)
                 }
             }
         }
@@ -485,11 +487,13 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
         do {
             let captureDevice = AVCaptureDevice.devices().first as? AVCaptureDevice
             try captureDevice?.lockForConfiguration()
-            
+
             zoomScale = max(1.0, min(beginZoomScale * scale, maxZoomScale))
-            captureDevice?.videoZoomFactor = zoomScale
             
+            captureDevice?.videoZoomFactor = zoomScale
+
             captureDevice?.unlockForConfiguration()
+            
         } catch {
             print("Error locking configuration")
         }
@@ -656,18 +660,17 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
     }
     
     private func _setupMaxZoomScale() {
+        var maxZoom = CGFloat(1.0)
+        beginZoomScale = CGFloat(1.0)
+        
         if cameraDevice == .Back {
-            if let maxZoom = backCameraDevice?.activeFormat.videoMaxZoomFactor {
-                beginZoomScale = CGFloat(1.0)
-                maxZoomScale = maxZoom
-            }
+            maxZoom = (backCameraDevice?.activeFormat.videoMaxZoomFactor)!
         }
-        else {
-            if let maxZoom = frontCameraDevice?.activeFormat.videoMaxZoomFactor {
-                beginZoomScale = CGFloat(1.0)
-                maxZoomScale = maxZoom
-            }
+        else if cameraDevice == .Front {
+            maxZoom = (frontCameraDevice?.activeFormat.videoMaxZoomFactor)!
         }
+
+        maxZoomScale = maxZoom
     }
 
     private func _checkIfCameraIsAvailable() -> CameraState {
