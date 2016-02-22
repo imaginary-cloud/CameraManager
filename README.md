@@ -39,7 +39,7 @@ Add the following line to your Cartfile:
 If you want Swift 2.0 syntax use:
 
 ```
-github "imaginary-cloud/CameraManager" >= 2.1
+github "imaginary-cloud/CameraManager" >= 2.2
 ```
 
 If you want Swift 1.2 syntax use:
@@ -144,4 +144,4 @@ Supports iOS 8 and above. Xcode 7.0 is required to build the latest code written
 
 ## License
 
-Copyright © 2015 ImaginaryCloud, imaginarycloud.com. This library is licensed under the MIT license.
+Copyright © 2016 ImaginaryCloud, imaginarycloud.com. This library is licensed under the MIT license.
