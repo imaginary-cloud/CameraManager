@@ -5,5 +5,8 @@
 import PackageDescription
 
 let package = Package(
-  name: "CameraManager"
+  name: "CameraManager",
+  targets: [
+        Target(name: "camera", dependencies: [.Target(name: "CameraManager")])
+    ]
 )
