@@ -2,15 +2,15 @@
 # Camera Manager
 [![CocoaPods](https://img.shields.io/cocoapods/v/CameraManager.svg)](https://github.com/imaginary-cloud/CameraManager) [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 
-This is a simple Swift class to provide all the configurations you need to create custom camera view in your app. 
+This is a simple Swift class to provide all the configurations you need to create custom camera view in your app.
 It follows orientation change and updates UI accordingly, supports front and rear camera selection, pinch to zoom, different flash modes, inputs and outputs.
-Just drag, drop and use. 
+Just drag, drop and use.
 
-Now it's compatibile with latest Swift syntax if you're using any Swift version prior to 2.0 make sure to use one of the previously tagged releases.
+Now it's compatible with latest Swift syntax if you're using any Swift version prior to 2.0 make sure to use one of the previously tagged releases.
 
 ## Installation with CocoaPods
 
-The easiest way to install the CameraManager is with: [CocoaPods](http://cocoapods.org) 
+The easiest way to install the CameraManager is with: [CocoaPods](http://cocoapods.org)
 
 ### Podfile
 
@@ -28,6 +28,20 @@ If you want Swift 1.2 syntax use:
 use_frameworks!
 
 pod 'CameraManager', '~> 1.0.14'
+```
+
+## Installation with Swift Package Manager
+
+[Swift Package Manager](https://swift.org/package-manager/) The Swift Package Manager is a tool for managing the distribution of Swift code.
+
+```
+import PackageDescription
+
+let package = Package(
+    dependencies: [
+        .Package(url: "https://github.com/imaginary-cloud/CameraManager", majorVersion: 2, minor: 0)
+    ]
+)
 ```
 
 ## Installation with Carthage
@@ -58,8 +72,8 @@ cameraManager.addPreviewLayerToView(self.cameraView)
 ```
 You can set input device to front or back camera:
 ```swift
-cameraManager.cameraDevice = .Front 
-cameraManager.cameraDevice = .Back 
+cameraManager.cameraDevice = .Front
+cameraManager.cameraDevice = .Back
 ```
 
 You can set output format to Image, video or video with audio:
@@ -105,15 +119,15 @@ cameraManager.showAccessPermissionPopupAutomatically = false
 ```
 
 You can even setUp your custom block to handle error messages:
-It can be customised to be presented on the Window root view controller, for example.
+It can be customized to be presented on the Window root view controller, for example.
 ```swift
 cameraManager.showErrorBlock = { (erTitle: String, erMessage: String) -> Void in
     var alertController = UIAlertController(title: erTitle, message: erMessage, preferredStyle: .Alert)
     alertController.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Default, handler: { (alertAction) -> Void in
     }))
-        
+
     let topController = UIApplication.sharedApplication().keyWindow?.rootViewController
-        
+
     if (topController != nil) {
         topController?.presentViewController(alertController, animated: true, completion: { () -> Void in
             //
