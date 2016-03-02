@@ -32,7 +32,7 @@ pod 'CameraManager', '~> 1.0.14'
 
 ## Installation with Swift Package Manager
 
-[Swift Package Manager](https://swift.org/package-manager/) The Swift Package Manager is a tool for managing the distribution of Swift code.
+The [Swift Package Manager](https://swift.org/package-manager/) is a tool for managing the distribution of Swift code.
 
 ```
 import PackageDescription
