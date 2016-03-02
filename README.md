@@ -34,6 +34,8 @@ pod 'CameraManager', '~> 1.0.14'
 
 The [Swift Package Manager](https://swift.org/package-manager/) is a tool for managing the distribution of Swift code.
 
+Add `CameraManager` as a dependency in your `Package.swift` file:
+
 ```
 import PackageDescription
 
