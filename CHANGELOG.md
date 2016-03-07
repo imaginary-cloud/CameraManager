@@ -1,0 +1,219 @@
+# Change Log
+All notable changes to this project will be documented in this file.
+This project adheres to [Semantic Versioning](http://semver.org/).
+
+## [2.2.2] - 2016-03-07
+
+### Added
+
+- `CHANGELOG.md` file.
+
+
+## [2.2.1] - 2016-03-02
+
+### Added
+
+- Initial support for the Swift Package Manager.
+
+## [2.2.0] - 2016-02-19
+
+### Added
+
+- Zoom support.
+
+### Changed
+
+- Fixed spelling of `embeddingView`.
+
+## [2.1.3] - 2016-01-08
+
+### Changed
+
+- No sound in video with more than 10 seconds fixed.
+
+- Fixed `NewCameraOutputMode` not passed during init.
+
+## [2.1.2] - 2015-12-24
+
+### Added
+
+- Property `cameraIsReady`.
+
+- Completion block `addPreviewLayerToView`.
+
+## [2.1.1] - 2015-12-11
+
+### Added
+
+- Ability to disable responding to device orientation changes.
+
+## [2.1.0] - 2015-11-20
+
+### Added
+
+- Properties `recordedDuration` and `recordedFileSize`.
+
+## [2.0.2] - 2015-11-17
+
+### Changed
+
+- Fixes iOS 9.0.1 bug.
+
+## [2.0.1] - 2015-09-17
+
+### Changed
+
+- Syntax updates.
+
+## [2.0.0] - 2015-07-30
+
+### Changed
+
+- Syntax update for Swift 2.0.
+
+## [1.0.14] - 2015-07-17
+
+### Changed
+
+- Small fixes.
+
+## [1.0.13] - 2015-05-12
+
+
+### Added
+
+- Support for installing via Carthage.
+
+- Property `hasFlash`.
+
+### Changed
+
+- Syntax update for Swift 1.2.
+
+## [1.0.12] - 2015-03-23
+
+### Added
+
+- Incremental flash mode.
+
+- Content localization.
+
+### Changed
+
+- Torch is set to correct state according to the current flash mode.
+
+- `README.md` update.
+
+## [1.0.11] - 2015-03-20
+
+### Added
+
+- Property `showAccessPermissionPopupAutomatically`, to determine if you want the user to be asked about camera permissions automatically or manually.
+
+- Error handling in capture completion blocks.
+
+## [1.0.10] - 2015-03-19
+
+### Added
+
+- Camera state returned when adding the preview layer.
+
+### Changed
+
+- `README.md` update.
+
+## [1.0.9] - 2015-03-10
+
+### Changed
+
+- CameraManager class made public.
+
+## [1.0.8] - 2015-02-24
+
+### Changed
+
+- Fixes wrong orientation when camera preview starts in landscape mode.
+
+- Fixed crash when trying to capture a still image.
+
+- Fixed orientation detection failure after stop and resume of a capture session.
+
+- Fixed bug which prevented from recording audio.
+
+## [1.0.7] - 2014-10-30
+
+### Added
+
+- Version compatible with XCode 6.1.
+
+### Changed
+
+- `README.md` update.
+
+- Swift syntax updates to resolve compile errors.
+
+## [1.0.6] - 2014-10-28
+
+### Added
+
+- Check for valid capture session.
+
+### Changed
+
+- Fixed video orientation change.
+
+## [1.0.5] - 2014-10-22
+
+### Changed
+
+- Enhanced Camera lifecyle.
+
+- Orientation observers only added if needed.
+
+## [1.0.4] - 2014-10-16
+
+### Added
+
+- Restart session.
+
+### Changed
+
+- `README.md` update.
+
+## [1.0.3] - 2014-10-15
+
+### Added
+
+-  Property `writeFilesToPhoneLibrary` to conditionally write to user library.
+
+### Changed
+
+- Resources only recreated when needed.
+
+- `README.md` update.
+
+## [1.0.2] - 2014-10-15
+
+### Added
+
+- `CameraManager.podspec` file.
+
+## [1.0.1] - 2014-10-15
+
+### Changed
+
+- Optional initializer for `addPreviewLayerToView`
+
+## [1.0.0] - 2014-10-15
+
+### Added
+
+- Front and back camera selection.
+
+- Support for multiple flash modes.
+
+- Video recording, with or without mic.
+
+- Support for multiple camera output quality.
+
+- Preview layer follows interface orientation changes.
