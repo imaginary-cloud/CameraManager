@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.2.2] - 2016-03-07
+## [2.2.2](https://github.com/imaginary-cloud/CameraManager/tree/2.2.2) - 2016-03-07
 
 ### Added
 
