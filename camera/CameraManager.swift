@@ -357,6 +357,37 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
             _show(NSLocalizedString("No capture session setup", comment:""), message: NSLocalizedString("I can't take any picture", comment:""))
         }
     }
+    
+    /**
+     Captures still image from currently running capture session.
+     
+     :param: imageCompletition Completition block containing the captured imageData
+     */
+    public func capturePictureDataWithCompletition(imageCompletition: (NSData?, NSError?) -> Void) {
+        if cameraIsSetup {
+            if cameraOutputMode == .StillImage {
+                dispatch_async(sessionQueue, {
+                    self._getStillImageOutput().captureStillImageAsynchronouslyFromConnection(self._getStillImageOutput().connectionWithMediaType(AVMediaTypeVideo), completionHandler: { [weak self] (sample: CMSampleBuffer!, error: NSError!) -> Void in
+                        if (error != nil) {
+                            dispatch_async(dispatch_get_main_queue(), {
+                                if let weakSelf = self {
+                                    weakSelf._show(NSLocalizedString("Error", comment:""), message: error.localizedDescription)
+                                }
+                            })
+                            imageCompletition(nil, error)
+                        } else {
+                            let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(sample)
+                            imageCompletition(imageData, nil)
+                        }
+                        })
+                })
+            } else {
+                _show(NSLocalizedString("Capture session output mode video", comment:""), message: NSLocalizedString("I can't take any picture", comment:""))
+            }
+        } else {
+            _show(NSLocalizedString("No capture session setup", comment:""), message: NSLocalizedString("I can't take any picture", comment:""))
+        }
+    }
 
     /**
     Starts recording a video with or without voice as in the session preset.
