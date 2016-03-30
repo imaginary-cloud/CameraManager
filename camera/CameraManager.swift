@@ -319,40 +319,33 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
     :param: imageCompletition Completition block containing the captured UIImage
     */
     public func capturePictureWithCompletition(imageCompletition: (UIImage?, NSError?) -> Void) {
-        if cameraIsSetup {
-            if cameraOutputMode == .StillImage {
-                dispatch_async(sessionQueue, {
-                    self._getStillImageOutput().captureStillImageAsynchronouslyFromConnection(self._getStillImageOutput().connectionWithMediaType(AVMediaTypeVideo), completionHandler: { [unowned self] (sample: CMSampleBuffer!, error: NSError!) -> Void in
-                        if (error != nil) {
-                            dispatch_async(dispatch_get_main_queue(), {
-                                self._show(NSLocalizedString("Error", comment:""), message: error.localizedDescription)
-                            })
-                            imageCompletition(nil, error)
-                        } else {
-                            let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(sample)
-                            if self.writeFilesToPhoneLibrary == true {
-                                if let validLibrary = self.library {
-                                    validLibrary.writeImageDataToSavedPhotosAlbum(imageData, metadata:nil, completionBlock: {
-                                        (picUrl, error) -> Void in
-                                        if (error != nil) {
-                                            dispatch_async(dispatch_get_main_queue(), {
-                                                self._show(NSLocalizedString("Error", comment:""), message: error.localizedDescription)
-                                            })
-                                        }
-                                    })
-                                }
-                            }
-                            
-                            imageCompletition(UIImage(data: imageData), nil)
-                        }
-                    })
-                })
-            } else {
-                _show(NSLocalizedString("Capture session output mode video", comment:""), message: NSLocalizedString("I can't take any picture", comment:""))
+        self.capturePictureDataWithCompletition { data, error in
+            
+            guard error == nil, let imageData = data else {
+                imageCompletition(nil, error)
+                return
             }
-        } else {
-            _show(NSLocalizedString("No capture session setup", comment:""), message: NSLocalizedString("I can't take any picture", comment:""))
+            
+            if self.writeFilesToPhoneLibrary == true, let library = self.library  {
+                
+                library.writeImageDataToSavedPhotosAlbum(imageData, metadata:nil, completionBlock: { picUrl, error in
+                    
+                    guard error != nil else {
+                        return
+                    }
+                    
+                    dispatch_async(dispatch_get_main_queue(), {
+                        self._show(NSLocalizedString("Error", comment:""), message: error.localizedDescription)
+                    })
+                    
+                })
+                
+            }
+            
+            imageCompletition(UIImage(data: imageData), nil)
+            
         }
+    
     }
     
     /**
@@ -361,27 +354,37 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
      :param: imageCompletition Completition block containing the captured imageData
      */
     public func capturePictureDataWithCompletition(imageCompletition: (NSData?, NSError?) -> Void) {
-        if cameraIsSetup {
-            if cameraOutputMode == .StillImage {
-                dispatch_async(sessionQueue, {
-                    self._getStillImageOutput().captureStillImageAsynchronouslyFromConnection(self._getStillImageOutput().connectionWithMediaType(AVMediaTypeVideo), completionHandler: { [unowned self] (sample: CMSampleBuffer!, error: NSError!) -> Void in
-                        if (error != nil) {
-                            dispatch_async(dispatch_get_main_queue(), {
-                                self._show(NSLocalizedString("Error", comment:""), message: error.localizedDescription)
-                            })
-                            imageCompletition(nil, error)
-                        } else {
-                            let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(sample)
-                            imageCompletition(imageData, nil)
-                        }
-                        })
-                })
-            } else {
-                _show(NSLocalizedString("Capture session output mode video", comment:""), message: NSLocalizedString("I can't take any picture", comment:""))
-            }
-        } else {
+ 
+        guard cameraIsSetup else {
             _show(NSLocalizedString("No capture session setup", comment:""), message: NSLocalizedString("I can't take any picture", comment:""))
+            return
         }
+        
+        guard cameraOutputMode == .StillImage else {
+            _show(NSLocalizedString("Capture session output mode video", comment:""), message: NSLocalizedString("I can't take any picture", comment:""))
+            return
+        }
+        
+        dispatch_async(sessionQueue, {
+            self._getStillImageOutput().captureStillImageAsynchronouslyFromConnection(self._getStillImageOutput().connectionWithMediaType(AVMediaTypeVideo), completionHandler: { [unowned self] sample, error in
+                
+                
+                guard error == nil else {
+                    dispatch_async(dispatch_get_main_queue(), {
+                        self._show(NSLocalizedString("Error", comment:""), message: error.localizedDescription)
+                    })
+                    imageCompletition(nil, error)
+                    return
+                }
+                
+                let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(sample)
+                
+            
+                imageCompletition(imageData, nil)
+    
+            })
+        })
+        
     }
 
     /**
