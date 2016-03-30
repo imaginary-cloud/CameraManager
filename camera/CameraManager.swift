@@ -322,30 +322,27 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
         if cameraIsSetup {
             if cameraOutputMode == .StillImage {
                 dispatch_async(sessionQueue, {
-                    self._getStillImageOutput().captureStillImageAsynchronouslyFromConnection(self._getStillImageOutput().connectionWithMediaType(AVMediaTypeVideo), completionHandler: { [weak self] (sample: CMSampleBuffer!, error: NSError!) -> Void in
+                    self._getStillImageOutput().captureStillImageAsynchronouslyFromConnection(self._getStillImageOutput().connectionWithMediaType(AVMediaTypeVideo), completionHandler: { [unowned self] (sample: CMSampleBuffer!, error: NSError!) -> Void in
                         if (error != nil) {
                             dispatch_async(dispatch_get_main_queue(), {
-                                if let weakSelf = self {
-                                    weakSelf._show(NSLocalizedString("Error", comment:""), message: error.localizedDescription)
-                                }
+                                self._show(NSLocalizedString("Error", comment:""), message: error.localizedDescription)
                             })
                             imageCompletition(nil, error)
                         } else {
                             let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(sample)
-                            if let weakSelf = self {
-                                if weakSelf.writeFilesToPhoneLibrary {
-                                    if let validLibrary = weakSelf.library {
-                                        validLibrary.writeImageDataToSavedPhotosAlbum(imageData, metadata:nil, completionBlock: {
-                                            (picUrl, error) -> Void in
-                                            if (error != nil) {
-                                                dispatch_async(dispatch_get_main_queue(), {
-                                                    weakSelf._show(NSLocalizedString("Error", comment:""), message: error.localizedDescription)
-                                                })
-                                            }
-                                        })
-                                    }
+                            if self.writeFilesToPhoneLibrary == true {
+                                if let validLibrary = self.library {
+                                    validLibrary.writeImageDataToSavedPhotosAlbum(imageData, metadata:nil, completionBlock: {
+                                        (picUrl, error) -> Void in
+                                        if (error != nil) {
+                                            dispatch_async(dispatch_get_main_queue(), {
+                                                self._show(NSLocalizedString("Error", comment:""), message: error.localizedDescription)
+                                            })
+                                        }
+                                    })
                                 }
                             }
+                            
                             imageCompletition(UIImage(data: imageData), nil)
                         }
                     })
@@ -367,12 +364,10 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
         if cameraIsSetup {
             if cameraOutputMode == .StillImage {
                 dispatch_async(sessionQueue, {
-                    self._getStillImageOutput().captureStillImageAsynchronouslyFromConnection(self._getStillImageOutput().connectionWithMediaType(AVMediaTypeVideo), completionHandler: { [weak self] (sample: CMSampleBuffer!, error: NSError!) -> Void in
+                    self._getStillImageOutput().captureStillImageAsynchronouslyFromConnection(self._getStillImageOutput().connectionWithMediaType(AVMediaTypeVideo), completionHandler: { [unowned self] (sample: CMSampleBuffer!, error: NSError!) -> Void in
                         if (error != nil) {
                             dispatch_async(dispatch_get_main_queue(), {
-                                if let weakSelf = self {
-                                    weakSelf._show(NSLocalizedString("Error", comment:""), message: error.localizedDescription)
-                                }
+                                self._show(NSLocalizedString("Error", comment:""), message: error.localizedDescription)
                             })
                             imageCompletition(nil, error)
                         } else {
