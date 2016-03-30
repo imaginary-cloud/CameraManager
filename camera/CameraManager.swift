@@ -476,7 +476,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
     // MARK: - UIGestureRecognizerDelegate
     
     private func attachZoom(view: UIView) {
-        let pinch = UIPinchGestureRecognizer(target: self, action: "_zoomStart:")
+        let pinch = UIPinchGestureRecognizer(target: self, action: #selector(CameraManager._zoomStart(_:)))
         view.addGestureRecognizer(pinch)
         pinch.delegate = self
     }
@@ -499,7 +499,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
         var allTouchesOnPreviewLayer = true
         let numTouch = recognizer.numberOfTouches()
 
-        for var i = 0; i < numTouch; i++ {
+        for i in 0 ..< numTouch {
             let location = recognizer.locationOfTouch(i, inView: view)
             let convertedTouch = previewLayer.convertPoint(location, fromLayer: previewLayer.superlayer)
             if !previewLayer.containsPoint(convertedTouch) {
@@ -663,7 +663,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
 
     private func _startFollowingDeviceOrientation() {
         if shouldRespondToOrientationChanges && !cameraIsObservingDeviceOrientation {
-            NSNotificationCenter.defaultCenter().addObserver(self, selector: "_orientationChanged", name: UIDeviceOrientationDidChangeNotification, object: nil)
+            NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(CameraManager._orientationChanged), name: UIDeviceOrientationDidChangeNotification, object: nil)
             cameraIsObservingDeviceOrientation = true
         }
     }
