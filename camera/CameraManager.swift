@@ -141,9 +141,9 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
             if cameraIsSetup {
                 if cameraOutputMode != oldValue {
                     _setupOutputMode(cameraOutputMode, oldCameraOutputMode: oldValue)
-                    _setupMaxZoomScale()
-                    _zoom(0)
                 }
+                _setupMaxZoomScale()
+                _zoom(0)
             }
         }
     }
