@@ -96,7 +96,7 @@ class ViewController: UIViewController {
         
         switch (cameraManager.cameraOutputMode) {
         case .StillImage:
-            cameraManager.capturePictureWithCompletition({ (image, error) -> Void in
+            cameraManager.capturePictureWithCompletion({ (image, error) -> Void in
                 let vc: ImageViewController? = self.storyboard?.instantiateViewControllerWithIdentifier("ImageVC") as? ImageViewController
                 if let validVC: ImageViewController = vc {
                     if let capturedImage = image {
@@ -112,7 +112,7 @@ class ViewController: UIViewController {
             if sender.selected {
                 cameraManager.startRecordingVideo()
             } else {
-                cameraManager.stopRecordingVideo({ (videoURL, error) -> Void in
+                cameraManager.stopVideoRecording({ (videoURL, error) -> Void in
                     if let errorOccured = error {                        
                         self.cameraManager.showErrorBlock(erTitle: "Error occurred", erMessage: errorOccured.localizedDescription)
                     }
@@ -147,7 +147,7 @@ class ViewController: UIViewController {
     
     @IBAction func askForCameraPermissions(sender: UIButton) {
         
-        cameraManager.askUserForCameraPermissions({ permissionGranted in
+        cameraManager.askUserForCameraPermission({ permissionGranted in
             self.askForPermissionsButton.hidden = true
             self.askForPermissionsLabel.hidden = true
             self.askForPermissionsButton.alpha = 0
