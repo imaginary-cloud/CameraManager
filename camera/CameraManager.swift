@@ -586,9 +586,13 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
             movieOutput = AVCaptureMovieFileOutput()
             movieOutput!.movieFragmentInterval = kCMTimeInvalid
 
-            captureSession?.beginConfiguration()
-            captureSession?.addOutput(movieOutput)
-            captureSession?.commitConfiguration()
+            if let captureSession = captureSession {
+                if captureSession.canAddOutput(movieOutput) {
+                    captureSession.beginConfiguration()
+                    captureSession.addOutput(movieOutput)
+                    captureSession.commitConfiguration()
+                }
+            }
         }
         return movieOutput!
     }
@@ -603,9 +607,13 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
         if shouldReinitializeStillImageOutput {
             stillImageOutput = AVCaptureStillImageOutput()
             
-            captureSession?.beginConfiguration()
-            captureSession?.addOutput(stillImageOutput)
-            captureSession?.commitConfiguration()
+            if let captureSession = captureSession {
+                if captureSession.canAddOutput(stillImageOutput) {
+                    captureSession.beginConfiguration()
+                    captureSession.addOutput(stillImageOutput)
+                    captureSession.commitConfiguration()
+                }
+            }
         }
         return stillImageOutput!
     }
@@ -638,7 +646,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
     }
 
     private func _currentVideoOrientation() -> AVCaptureVideoOrientation {
-        switch UIApplication.sharedApplication().statusBarOrientation {
+        switch UIDevice.currentDevice().orientation {
         case .LandscapeLeft:
             return .LandscapeRight
         case .LandscapeRight:
@@ -764,7 +772,11 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
                 _setupOutputs()
             }
             if let validStillImageOutput = stillImageOutput {
-                captureSession?.addOutput(validStillImageOutput)
+                if let captureSession = captureSession {
+                    if captureSession.canAddOutput(validStillImageOutput) {
+                        captureSession.addOutput(validStillImageOutput)
+                    }
+                }
             }
         case .VideoOnly, .VideoWithMic:
             captureSession?.addOutput(_getMovieOutput())
