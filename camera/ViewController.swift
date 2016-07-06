@@ -97,11 +97,16 @@ class ViewController: UIViewController {
         switch (cameraManager.cameraOutputMode) {
         case .StillImage:
             cameraManager.capturePictureWithCompletion({ (image, error) -> Void in
-                let vc: ImageViewController? = self.storyboard?.instantiateViewControllerWithIdentifier("ImageVC") as? ImageViewController
-                if let validVC: ImageViewController = vc {
-                    if let capturedImage = image {
-                        validVC.image = capturedImage
-                        self.navigationController?.pushViewController(validVC, animated: true)
+                if let errorOccured = error {
+                    self.cameraManager.showErrorBlock(erTitle: "Error occurred", erMessage: errorOccured.localizedDescription)
+                }
+                else {
+                    let vc: ImageViewController? = self.storyboard?.instantiateViewControllerWithIdentifier("ImageVC") as? ImageViewController
+                    if let validVC: ImageViewController = vc {
+                        if let capturedImage = image {
+                            validVC.image = capturedImage
+                            self.navigationController?.pushViewController(validVC, animated: true)
+                        }
                     }
                 }
             })
