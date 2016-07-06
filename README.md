@@ -141,7 +141,7 @@ cameraManager.showErrorBlock = { (erTitle: String, erMessage: String) -> Void in
 
 To shoot image all you need to do is call:
 ```swift
-cameraManager.capturePictureWithCompletition({ (image, error) -> Void in
+cameraManager.capturePictureWithCompletion({ (image, error) -> Void in
 	self.myImage = image             
 })
 ```
@@ -149,7 +149,7 @@ cameraManager.capturePictureWithCompletition({ (image, error) -> Void in
 To record video you do:
 ```swift
 cameraManager.startRecordingVideo()
-cameraManager.stopRecordingVideo({ (videoURL, error) -> Void in
+cameraManager.stopVideoRecording({ (videoURL, error) -> Void in
 	NSFileManager.defaultManager().copyItemAtURL(videoURL, toURL: self.myVideoURL, error: &error)
 })
 ```
