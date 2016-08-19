@@ -15,7 +15,7 @@ class ImageViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.navigationController?.navigationBar.hidden = false
+        self.navigationController?.navigationBar.isHidden = false
 
         if let validImage = self.image {
             self.imageView.image = validImage
