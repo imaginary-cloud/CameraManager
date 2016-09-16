@@ -14,6 +14,14 @@ The easiest way to install the CameraManager is with: [CocoaPods](http://cocoapo
 
 ### Podfile
 
+If you want Swift 3.0 syntax use:
+
+```ruby
+use_frameworks!
+
+pod 'CameraManager', '~> 3.0'
+```
+
 If you want Swift 2.0 syntax use:
 
 ```ruby
@@ -51,6 +59,12 @@ let package = Package(
 [Carthage](https://github.com/Carthage/Carthage) is another dependency management tool written in Swift.
 
 Add the following line to your Cartfile:
+
+If you want Swift 3.0 syntax use:
+
+```
+github "imaginary-cloud/CameraManager" >= 3.0
+```
 
 If you want Swift 2.0 syntax use:
 

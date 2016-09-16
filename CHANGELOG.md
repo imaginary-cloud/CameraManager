@@ -2,8 +2,29 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.2.2](https://github.com/imaginary-cloud/CameraManager/tree/2.2.2) - 2016-03-07
+## [3.0.0](https://github.com/imaginary-cloud/CameraManager/tree/3.0.0) - 2016-09-16
+### Changed
 
+- Syntax update for Swift 3.0.
+
+## [2.2.4](https://github.com/imaginary-cloud/CameraManager/tree/2.2.4) - 2016-07-06
+### Added
+
+- Add error checking.
+
+### Changed
+
+- Fixes completion typos and suggests renamed functions.
+
+
+## [2.2.3](https://github.com/imaginary-cloud/CameraManager/tree/2.2.3) - 2016-05-12
+### Changed
+
+- Fixed zoom in StillImage Mode.
+
+- Minor refactoring
+
+## [2.2.2](https://github.com/imaginary-cloud/CameraManager/tree/2.2.2) - 2016-03-07
 ### Added
 
 - `CHANGELOG.md` file.
