@@ -328,7 +328,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             if self.writeFilesToPhoneLibrary == true, let library = self.library  {
                 var flippedImage = UIImage(data: imageData)!
                 if self.cameraDevice == .front {
-                    flippedImage = UIImage(cgImage: flippedImage.cgImage!, scale: (flippedImage.scale), orientation:.leftMirrored)
+                    flippedImage = UIImage(cgImage: flippedImage.cgImage!, scale: (flippedImage.scale), orientation:.rightMirrored)
                 }
 
                 library.performChanges({
