@@ -9,7 +9,6 @@
 import UIKit
 import CameraManager
 
-
 class ViewController: UIViewController {
     
     // MARK: - Constants
@@ -31,7 +30,7 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-    
+        
         cameraManager.showAccessPermissionPopupAutomatically = false
         
         askForPermissionsButton.isHidden = true
@@ -80,12 +79,6 @@ class ViewController: UIViewController {
     }
 
     // MARK: - @IBActions
-    
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let touch = touches.first {
-            cameraManager.focus(atPoint : touch.location(in: cameraView))
-        }
-    }
 
     @IBAction func changeFlashMode(_ sender: UIButton)
     {
