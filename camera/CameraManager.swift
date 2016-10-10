@@ -101,12 +101,19 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         }
         return false
     }()
+    
+    /// Property to enable or disable switch animation
+    
+    open var animateCameraDevice: Bool = true
 
     /// Property to change camera device between front and back.
     open var cameraDevice = CameraDevice.back {
         didSet {
             if cameraIsSetup {
                 if cameraDevice != oldValue {
+                    if animateCameraDevice {
+                        _doFlipAnimation()
+                    }
                     _updateCameraDevice(cameraDevice)
                     _setupMaxZoomScale()
                     _zoom(0)
@@ -834,6 +841,131 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         if let validCaptureSession = captureSession {
             previewLayer = AVCaptureVideoPreviewLayer(session: validCaptureSession)
             previewLayer?.videoGravity = AVLayerVideoGravityResizeAspectFill
+        }
+    }
+    
+    /**
+     Switches between the current and specified camera using a flip animation similar to the one used in the iOS stock camera app
+     */
+    
+    fileprivate var cameraTransitionView: UIView?
+    fileprivate var transitionAnimating = false
+    
+    open func _doFlipAnimation() {
+        
+        if transitionAnimating {
+            return
+        }
+        
+        if let validEmbeddingView = embeddingView {
+            if let validPreviewLayer = previewLayer {
+                
+                var tempView: UIView!
+                
+                if CameraManager._blurSupported() {
+                    
+                    let blurEffect = UIBlurEffect(style: .light)
+                    tempView = UIVisualEffectView(effect: blurEffect)
+                    tempView.frame = validEmbeddingView.bounds
+                }
+                else {
+                    
+                    tempView = UIView(frame: validEmbeddingView.bounds)
+                    tempView.backgroundColor = UIColor(white: 0.0, alpha: 0.5)
+                }
+                
+                validEmbeddingView.insertSubview(tempView, at: Int(validPreviewLayer.zPosition + 1))
+                
+                cameraTransitionView = validEmbeddingView.snapshotView(afterScreenUpdates: true)
+                
+                validEmbeddingView.insertSubview(cameraTransitionView!, at: Int(validEmbeddingView.layer.zPosition + 1))
+                tempView.removeFromSuperview()
+                
+                transitionAnimating = true
+                
+                validPreviewLayer.opacity = 0.0
+                
+                DispatchQueue.main.async() {
+                    self._flipCameraTransitionView()
+                }
+            }
+        }
+    }
+    
+    // Determining whether the current device actually supports blurring
+    // As seen on: http://stackoverflow.com/a/29997626/2269387
+    fileprivate class func _blurSupported() -> Bool {
+        var supported = Set<String>()
+        supported.insert("iPad")
+        supported.insert("iPad1,1")
+        supported.insert("iPhone1,1")
+        supported.insert("iPhone1,2")
+        supported.insert("iPhone2,1")
+        supported.insert("iPhone3,1")
+        supported.insert("iPhone3,2")
+        supported.insert("iPhone3,3")
+        supported.insert("iPod1,1")
+        supported.insert("iPod2,1")
+        supported.insert("iPod2,2")
+        supported.insert("iPod3,1")
+        supported.insert("iPod4,1")
+        supported.insert("iPad2,1")
+        supported.insert("iPad2,2")
+        supported.insert("iPad2,3")
+        supported.insert("iPad2,4")
+        supported.insert("iPad3,1")
+        supported.insert("iPad3,2")
+        supported.insert("iPad3,3")
+        
+        return !supported.contains(_hardwareString())
+    }
+    
+    fileprivate class func _hardwareString() -> String {
+        var name: [Int32] = [CTL_HW, HW_MACHINE]
+        var size: Int = 2
+        sysctl(&name, 2, nil, &size, &name, 0)
+        var hw_machine = [CChar](repeating: 0, count: Int(size))
+        sysctl(&name, 2, &hw_machine, &size, &name, 0)
+        
+        let hardware: String = String(cString: hw_machine)
+        return hardware
+    }
+    
+    fileprivate func _flipCameraTransitionView() {
+        
+        if let cameraTransitionView = cameraTransitionView {
+            
+            UIView.transition(with: cameraTransitionView,
+                              duration: 0.5,
+                              options: UIViewAnimationOptions.transitionFlipFromLeft,
+                              animations: nil,
+                              completion: { (finished) -> Void in
+                                self._removeCameraTransistionView()
+            })
+        }
+    }
+    
+    
+    fileprivate func _removeCameraTransistionView() {
+        
+        if let cameraTransitionView = cameraTransitionView {
+            if let validPreviewLayer = previewLayer {
+                
+                validPreviewLayer.opacity = 1.0
+            }
+            
+            UIView.animate(withDuration: 0.5,
+                           animations: { () -> Void in
+                            
+                            cameraTransitionView.alpha = 0.0
+                            
+                }, completion: { (finished) -> Void in
+                    
+                    self.transitionAnimating = false
+                    
+                    cameraTransitionView.removeFromSuperview()
+                    self.cameraTransitionView = nil
+            })
         }
     }
 
