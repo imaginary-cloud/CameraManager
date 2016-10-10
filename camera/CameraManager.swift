@@ -101,14 +101,14 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     
     /// Property to enable or disable switch animation
     
-    open var animateCameraDevice: Bool = true
+    open var animateCameraDeviceChange: Bool = true
 
     /// Property to change camera device between front and back.
     open var cameraDevice = CameraDevice.back {
         didSet {
             if cameraIsSetup {
                 if cameraDevice != oldValue {
-                    if animateCameraDevice {
+                    if animateCameraDeviceChange {
                         _doFlipAnimation()
                     }
                     _updateCameraDevice(cameraDevice)
@@ -308,6 +308,8 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
      */
     open func stopAndRemoveCaptureSession() {
         stopCaptureSession()
+        let oldAnimationValue = animateCameraDeviceChange
+        animateCameraDeviceChange = false
         cameraDevice = .back
         cameraIsSetup = false
         previewLayer = nil
@@ -317,6 +319,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         mic = nil
         stillImageOutput = nil
         movieOutput = nil
+        animateCameraDeviceChange = oldAnimationValue
     }
 
     /**
