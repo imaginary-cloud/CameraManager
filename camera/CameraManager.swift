@@ -550,6 +550,138 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             print("Error locking configuration")
         }
     }
+    
+    // MARK: - UIGestureRecognizerDelegate
+    
+    fileprivate func attachFocus(_ view: UIView) {
+        let focus = UITapGestureRecognizer(target: self, action: #selector(CameraManager._focusStart(_:)))
+        view.addGestureRecognizer(focus)
+        focus.delegate = self
+    }
+    
+    @objc fileprivate func _focusStart(_ recognizer: UITapGestureRecognizer) {
+        
+        let device: AVCaptureDevice?
+        
+        switch cameraDevice {
+        case .back:
+            device = backCameraDevice
+        case .front:
+            device = frontCameraDevice
+        }
+        
+        if let validDevice = device {
+            
+//            if validDevice.isAdjustingFocus || validDevice.isAdjustingExposure || showingFocusRectangle {
+//                
+//                return
+//            }
+            
+            if let validPreviewLayer = previewLayer,
+                let view = recognizer.view
+            {
+                let pointInPreviewLayer = view.layer.convert(recognizer.location(in: view), to: validPreviewLayer)
+                let pointOfInterest = validPreviewLayer.captureDevicePointOfInterest(for: pointInPreviewLayer)
+                
+                do {
+                    try validDevice.lockForConfiguration()
+                    
+                    _showFocusRectangleAtPoint(pointInPreviewLayer, inLayer: validPreviewLayer)
+                    
+                    if validDevice.isFocusPointOfInterestSupported {
+                        validDevice.focusPointOfInterest = pointOfInterest;
+                    }
+                    
+                    if  validDevice.isExposurePointOfInterestSupported {
+                        validDevice.exposurePointOfInterest = pointOfInterest;
+                    }
+                    
+                    if validDevice.isFocusModeSupported(.continuousAutoFocus) {
+                        validDevice.focusMode = .continuousAutoFocus
+                    }
+                    
+                    if validDevice.isExposureModeSupported(.continuousAutoExposure) {
+                        validDevice.exposureMode = .continuousAutoExposure
+                    }
+                    
+                    validDevice.unlockForConfiguration()
+                }
+                catch let error {
+                    print(error)
+                }
+            }
+        }
+    }
+    
+    fileprivate var lastFocusRectangle:CAShapeLayer? = nil
+    
+    fileprivate func _showFocusRectangleAtPoint(_ focusPoint: CGPoint, inLayer layer: CALayer) {
+        
+        if let lastFocusRectangle = lastFocusRectangle {
+            
+            lastFocusRectangle.removeFromSuperlayer()
+            self.lastFocusRectangle = nil
+        }
+        
+        let size = CGSize(width: 75, height: 75)
+        let rect = CGRect(origin: CGPoint(x: focusPoint.x - size.width / 2.0, y: focusPoint.y - size.height / 2.0), size: size)
+        
+        let endPath = UIBezierPath(rect: rect)
+        endPath.move(to: CGPoint(x: rect.minX + size.width / 2.0, y: rect.minY))
+        endPath.addLine(to: CGPoint(x: rect.minX + size.width / 2.0, y: rect.minY + 5.0))
+        endPath.move(to: CGPoint(x: rect.maxX, y: rect.minY + size.height / 2.0))
+        endPath.addLine(to: CGPoint(x: rect.maxX - 5.0, y: rect.minY + size.height / 2.0))
+        endPath.move(to: CGPoint(x: rect.minX + size.width / 2.0, y: rect.maxY))
+        endPath.addLine(to: CGPoint(x: rect.minX + size.width / 2.0, y: rect.maxY - 5.0))
+        endPath.move(to: CGPoint(x: rect.minX, y: rect.minY + size.height / 2.0))
+        endPath.addLine(to: CGPoint(x: rect.minX + 5.0, y: rect.minY + size.height / 2.0))
+        
+        let startPath = UIBezierPath(cgPath: endPath.cgPath)
+        let scaleAroundCenterTransform = CGAffineTransform(translationX: -focusPoint.x, y: -focusPoint.y).concatenating(CGAffineTransform(scaleX: 2.0, y: 2.0).concatenating(CGAffineTransform(translationX: focusPoint.x, y: focusPoint.y)))
+        startPath.apply(scaleAroundCenterTransform)
+        
+        let shapeLayer = CAShapeLayer()
+        shapeLayer.path = endPath.cgPath
+        shapeLayer.fillColor = UIColor.clear.cgColor
+        shapeLayer.strokeColor = UIColor(red:1, green:0.83, blue:0, alpha:0.95).cgColor
+        shapeLayer.lineWidth = 1.0
+        
+        layer.addSublayer(shapeLayer)
+        lastFocusRectangle = shapeLayer
+        
+        CATransaction.begin()
+        
+        CATransaction.setAnimationDuration(0.2)
+        CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut))
+        
+        CATransaction.setCompletionBlock() {
+            if shapeLayer.superlayer != nil {
+                shapeLayer.removeFromSuperlayer()
+                self.lastFocusRectangle = nil
+            }
+        }
+        
+        let appearPathAnimation = CABasicAnimation(keyPath: "path")
+        appearPathAnimation.fromValue = startPath.cgPath
+        appearPathAnimation.toValue = endPath.cgPath
+        shapeLayer.add(appearPathAnimation, forKey: "path")
+        
+        let appearOpacityAnimation = CABasicAnimation(keyPath: "opacity")
+        appearOpacityAnimation.fromValue = 0.0
+        appearOpacityAnimation.toValue = 1.0
+        shapeLayer.add(appearOpacityAnimation, forKey: "opacity")
+        
+        let disappearOpacityAnimation = CABasicAnimation(keyPath: "opacity")
+        disappearOpacityAnimation.fromValue = 1.0
+        disappearOpacityAnimation.toValue = 0.0
+        disappearOpacityAnimation.beginTime = CACurrentMediaTime() + 0.8
+        disappearOpacityAnimation.fillMode = kCAFillModeForwards
+        disappearOpacityAnimation.isRemovedOnCompletion = false
+        shapeLayer.add(disappearOpacityAnimation, forKey: "opacity")
+        
+        CATransaction.commit()
+    }
+    
 
     // MARK: - CameraManager()
 
@@ -710,6 +842,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     fileprivate func _addPreviewLayerToView(_ view: UIView) {
         embeddingView = view
         attachZoom(view)
+        attachFocus(view)
         DispatchQueue.main.async(execute: { () -> Void in
             guard let _ = self.previewLayer else {
                 return
