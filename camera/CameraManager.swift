@@ -774,9 +774,11 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             currentConnection = _getMovieOutput().connection(withMediaType: AVMediaTypeVideo)
         }
         if let validPreviewLayer = previewLayer {
-            if let validPreviewLayerConnection = validPreviewLayer.connection {
-                if validPreviewLayerConnection.isVideoOrientationSupported {
-                    validPreviewLayerConnection.videoOrientation = _currentVideoOrientation()
+            if !shouldKeepViewAtOrientationChanges {
+                if let validPreviewLayerConnection = validPreviewLayer.connection {
+                    if validPreviewLayerConnection.isVideoOrientationSupported {
+                        validPreviewLayerConnection.videoOrientation = _currentVideoOrientation()
+                    }
                 }
             }
             if let validOutputLayerConnection = currentConnection {
