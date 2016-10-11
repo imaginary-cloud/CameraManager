@@ -334,26 +334,28 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                 imageCompletion(nil, error)
                 return
             }
-
-            if self.writeFilesToPhoneLibrary == true, let library = self.library  {
-                var flippedImage = UIImage(data: imageData)!
-                if self.cameraDevice == .front {
-                    flippedImage = UIImage(cgImage: flippedImage.cgImage!, scale: (flippedImage.scale), orientation:.rightMirrored)
+            
+            self._performShutterAnimation() {
+                if self.writeFilesToPhoneLibrary == true, let library = self.library  {
+                    var flippedImage = UIImage(data: imageData)!
+                    if self.cameraDevice == .front {
+                        flippedImage = UIImage(cgImage: flippedImage.cgImage!, scale: (flippedImage.scale), orientation:.rightMirrored)
+                    }
+                    
+                    library.performChanges({
+                        PHAssetChangeRequest.creationRequestForAsset(from: flippedImage)
+                        }, completionHandler: { success, error in
+                            guard error != nil else {
+                                return
+                            }
+                            
+                            DispatchQueue.main.async(execute: {
+                                self._show(NSLocalizedString("Error", comment:""), message: (error?.localizedDescription)!)
+                            })
+                    })
                 }
-
-                library.performChanges({
-                    PHAssetChangeRequest.creationRequestForAsset(from: flippedImage)
-                    }, completionHandler: { success, error in
-                        guard error != nil else {
-                            return
-                        }
-
-                        DispatchQueue.main.async(execute: {
-                            self._show(NSLocalizedString("Error", comment:""), message: (error?.localizedDescription)!)
-                        })
-                })
+                imageCompletion(UIImage(data: imageData), nil)
             }
-            imageCompletion(UIImage(data: imageData), nil)
         }
     }
 
@@ -1136,6 +1138,37 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             }
         }
         captureSession?.commitConfiguration()
+    }
+    
+    fileprivate func _performShutterAnimation(_ completion: (() -> Void)?) {
+        
+        if let validPreviewLayer = previewLayer {
+            
+            DispatchQueue.main.async {
+                
+                let duration = 0.1
+                
+                CATransaction.begin()
+                
+                if let completion = completion {
+                    
+                    CATransaction.setCompletionBlock(completion)
+                }
+                
+                let fadeOutAnimation = CABasicAnimation(keyPath: "opacity")
+                fadeOutAnimation.fromValue = 1.0
+                fadeOutAnimation.toValue = 0.0
+                validPreviewLayer.add(fadeOutAnimation, forKey: "opacity")
+                
+                let fadeInAnimation = CABasicAnimation(keyPath: "opacity")
+                fadeInAnimation.fromValue = 0.0
+                fadeInAnimation.toValue = 1.0
+                fadeInAnimation.beginTime = CACurrentMediaTime() + duration * 2.0
+                validPreviewLayer.add(fadeInAnimation, forKey: "opacity")
+                
+                CATransaction.commit()
+            }
+        }
     }
 
     fileprivate func _updateCameraQualityMode(_ newCameraOutputQuality: CameraOutputQuality) {
