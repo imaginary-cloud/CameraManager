@@ -67,6 +67,8 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             }
         }
     }
+    
+    open var shouldKeepViewAtOrientationChanges = false
 
     /// The Bool property to determine if the camera is ready to use.
     open var cameraIsReady: Bool {
@@ -782,11 +784,13 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                     validOutputLayerConnection.videoOrientation = _currentVideoOrientation()
                 }
             }
-            DispatchQueue.main.async(execute: { () -> Void in
-                if let validEmbeddingView = self.embeddingView {
-                    validPreviewLayer.frame = validEmbeddingView.bounds
-                }
-            })
+            if !shouldKeepViewAtOrientationChanges {
+                DispatchQueue.main.async(execute: { () -> Void in
+                    if let validEmbeddingView = self.embeddingView {
+                        validPreviewLayer.frame = validEmbeddingView.bounds
+                    }
+                })
+            }
         }
     }
 
