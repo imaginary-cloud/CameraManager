@@ -29,6 +29,7 @@ public enum CameraOutputQuality: Int {
     case low, medium, high
 }
 
+
 /// Class for handling iDevices custom camera usage
 open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGestureRecognizerDelegate {
 
@@ -56,6 +57,8 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
 
     /// Property to determine if manager should write the resources to the phone library. Default value is true.
     open var writeFilesToPhoneLibrary = true
+    
+    open var allowFocus = true
 
     /// Property to determine if manager should follow device orientation. Default value is true.
     open var shouldRespondToOrientationChanges = true {
@@ -264,6 +267,27 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         })
     }
 
+    open func focus(atPoint: CGPoint) {
+        let captureDevice = AVCaptureDevice.devices().first as? AVCaptureDevice
+        if let currentDevice = captureDevice {
+            if currentDevice.isFocusModeSupported(AVCaptureFocusMode.autoFocus) && currentDevice.isFocusPointOfInterestSupported {
+                let focusPoint = self.previewLayer!.captureDevicePointOfInterest(for: atPoint)
+                do {
+                    try currentDevice.lockForConfiguration()
+                    currentDevice.focusPointOfInterest = CGPoint(x: focusPoint.x, y: focusPoint.y)
+                    currentDevice.focusMode = AVCaptureFocusMode.autoFocus
+                    if currentDevice.isExposureModeSupported(AVCaptureExposureMode.autoExpose) {
+                        currentDevice.exposureMode = AVCaptureExposureMode.autoExpose
+                    }
+                    currentDevice.unlockForConfiguration()
+                }
+                catch {
+                    fatalError("[CameraEngine] error lock configuration device")
+                }
+            }
+        }
+    }
+    
     /**
      Stops running capture session but all setup devices, inputs and outputs stay for further reuse.
      */
@@ -326,10 +350,13 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             }
 
             if self.writeFilesToPhoneLibrary == true, let library = self.library  {
-
+                var flippedImage = UIImage(data: imageData)!
+                if self.cameraDevice == .front {
+                    flippedImage = UIImage(cgImage: flippedImage.cgImage!, scale: (flippedImage.scale), orientation:.rightMirrored)
+                }
 
                 library.performChanges({
-                    PHAssetChangeRequest.creationRequestForAsset(from: UIImage(data: imageData)!)
+                    PHAssetChangeRequest.creationRequestForAsset(from: flippedImage)
                     }, completionHandler: { success, error in
                         guard error != nil else {
                             return
@@ -851,17 +878,15 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         let devices = AVCaptureDevice.devices(withMediaType: AVMediaTypeVideo)
         for  device in devices!  {
             let captureDevice = device as! AVCaptureDevice
-            if (captureDevice.position == AVCaptureDevicePosition.back) {
-                let avFlashMode = AVCaptureFlashMode(rawValue: flashMode.rawValue)
-                if (captureDevice.isFlashModeSupported(avFlashMode!)) {
-                    do {
-                        try captureDevice.lockForConfiguration()
-                    } catch {
-                        return
-                    }
-                    captureDevice.flashMode = avFlashMode!
-                    captureDevice.unlockForConfiguration()
+            let avFlashMode = AVCaptureFlashMode(rawValue: flashMode.rawValue)
+            if (captureDevice.isFlashModeSupported(avFlashMode!)) {
+                do {
+                    try captureDevice.lockForConfiguration()
+                } catch {
+                    return
                 }
+                captureDevice.flashMode = avFlashMode!
+                captureDevice.unlockForConfiguration()
             }
         }
         captureSession?.commitConfiguration()
