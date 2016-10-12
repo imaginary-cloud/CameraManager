@@ -878,17 +878,15 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         let devices = AVCaptureDevice.devices(withMediaType: AVMediaTypeVideo)
         for  device in devices!  {
             let captureDevice = device as! AVCaptureDevice
-            if (captureDevice.position == AVCaptureDevicePosition.back) {
-                let avFlashMode = AVCaptureFlashMode(rawValue: flashMode.rawValue)
-                if (captureDevice.isFlashModeSupported(avFlashMode!)) {
-                    do {
-                        try captureDevice.lockForConfiguration()
-                    } catch {
-                        return
-                    }
-                    captureDevice.flashMode = avFlashMode!
-                    captureDevice.unlockForConfiguration()
+            let avFlashMode = AVCaptureFlashMode(rawValue: flashMode.rawValue)
+            if (captureDevice.isFlashModeSupported(avFlashMode!)) {
+                do {
+                    try captureDevice.lockForConfiguration()
+                } catch {
+                    return
                 }
+                captureDevice.flashMode = avFlashMode!
+                captureDevice.unlockForConfiguration()
             }
         }
         captureSession?.commitConfiguration()
