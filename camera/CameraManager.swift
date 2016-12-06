@@ -9,6 +9,10 @@
 import UIKit
 import AVFoundation
 import Photos
+import ImageIO
+import MobileCoreServices
+import Photos
+
 public enum CameraState {
     case ready, accessDenied, noDeviceFound, notDetermined
 }
@@ -164,6 +168,8 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
 
 
     // MARK: - Private properties
+    
+    fileprivate var locationManager = LocationManager()
 
     fileprivate weak var embeddingView: UIView?
     fileprivate var videoCompletion: ((_ videoURL: URL?, _ error: NSError?) -> Void)?
@@ -345,15 +351,20 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                     }
                     
                     library.performChanges({
-                        PHAssetChangeRequest.creationRequestForAsset(from: flippedImage)
-                        }, completionHandler: { success, error in
-                            guard error != nil else {
-                                return
-                            }
-                            
-                            DispatchQueue.main.async(execute: {
-                                self._show(NSLocalizedString("Error", comment:""), message: (error?.localizedDescription)!)
-                            })
+                        let request = PHAssetChangeRequest.creationRequestForAsset(from: flippedImage)
+                        request.creationDate = Date()
+                        
+                        if let location = self.locationManager.latestLocation {
+                            request.location = location
+                        }
+                    }, completionHandler: { success, error in
+                        guard error != nil else {
+                            return
+                        }
+                        
+                        DispatchQueue.main.async(execute: {
+                            self._show(NSLocalizedString("Error", comment:""), message: (error?.localizedDescription)!)
+                        })
                     })
                 }
                 imageCompletion(UIImage(data: imageData), nil)
