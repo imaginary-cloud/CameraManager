@@ -507,7 +507,9 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
 		focusRing?.layer.zPosition = 10
 		focusRing?.alpha = 0
 		
-		view.addSubview(focusRing!)
+		DispatchQueue.main.sync {
+			view.addSubview(focusRing!)
+		}
 	}
 	
 	@objc
@@ -521,17 +523,19 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
 		if numTouch > 0 {
 			let location = recognizer.location(ofTouch: 0, in: view)
 			let convertedTouch = previewLayer.convert(location, from: previewLayer.superlayer)
-			
-			if focusRing != nil {
-				focusRing?.frame.origin.x = location.x - (focusRing!.frame.size.width / 2)
-				focusRing?.frame.origin.y = location.y - (focusRing!.frame.size.height / 2)
-				
-				_animateFocusRing()
-			}
-			
 			let relativeTouch = CGPoint(x: convertedTouch.x / previewLayer.frame.size.width, y: convertedTouch.y / previewLayer.frame.size.height)
 			
+			_setFocusRing(location)
 			_focus(relativeTouch)
+		}
+	}
+	
+	fileprivate func _setFocusRing(_ location: CGPoint) {
+		if focusRing != nil {
+			focusRing?.frame.origin.x = location.x - (focusRing!.frame.size.width / 2)
+			focusRing?.frame.origin.y = location.y - (focusRing!.frame.size.height / 2)
+			
+			_animateFocusRing()
 		}
 	}
 	
