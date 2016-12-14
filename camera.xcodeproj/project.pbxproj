@@ -206,7 +206,6 @@
 				TargetAttributes = {
 					454C1F4019E82E2500C81915 = {
 						CreatedOnToolsVersion = 6.0.1;
-						DevelopmentTeam = QM7HJTY23M;
 						LastSwiftMigration = 0800;
 					};
 					D71DE8801AD677A7001E62F1 = {
