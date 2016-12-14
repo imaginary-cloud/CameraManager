@@ -189,6 +189,8 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
 	fileprivate var beginZoomScale  = CGFloat(1.0)
 	fileprivate var maxZoomScale    = CGFloat(1.0)
 	
+	fileprivate var focusRing: UIView?
+	
 	fileprivate var tempFilePath: URL = {
 		let tempPath = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("tempMovie").appendingPathExtension("mp4").absoluteString
 		if FileManager.default.fileExists(atPath: tempPath) {
@@ -488,7 +490,97 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
 		}
 	}
 	
-	// MARK: - UIGestureRecognizerDelegate
+	// MARK: - UIGestureRecognizerDelegate - focus
+	
+	fileprivate func attachFocus(_ view: UIView) {
+		let tap = UITapGestureRecognizer(target: self, action: #selector(CameraManager._focusStart(_:)))
+		view.addGestureRecognizer(tap)
+		tap.delegate = self
+		
+		focusRing = UIView(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
+		focusRing?.backgroundColor = UIColor(white: 1.0, alpha: 0.3)
+		focusRing?.translatesAutoresizingMaskIntoConstraints = false
+		focusRing?.layer.masksToBounds = true
+		focusRing?.layer.cornerRadius = 15
+		focusRing?.layer.borderColor = UIColor.white.cgColor
+		focusRing?.layer.borderWidth = 2
+		focusRing?.layer.zPosition = 10
+		focusRing?.alpha = 0
+		
+		view.addSubview(focusRing!)
+	}
+	
+	@objc
+	fileprivate func _focusStart(_ recognizer: UITapGestureRecognizer) {
+		guard let view = embeddingView,
+			let previewLayer = previewLayer
+			else { return }
+		
+		let numTouch = recognizer.numberOfTouches
+		
+		if numTouch > 0 {
+			let location = recognizer.location(ofTouch: 0, in: view)
+			let convertedTouch = previewLayer.convert(location, from: previewLayer.superlayer)
+			
+			if focusRing != nil {
+				focusRing?.frame.origin.x = location.x - (focusRing!.frame.size.width / 2)
+				focusRing?.frame.origin.y = location.y - (focusRing!.frame.size.height / 2)
+				
+				_animateFocusRing()
+			}
+			
+			let relativeTouch = CGPoint(x: convertedTouch.x / previewLayer.frame.size.width, y: convertedTouch.y / previewLayer.frame.size.height)
+			
+			_focus(relativeTouch)
+		}
+	}
+	
+	fileprivate func _animateFocusRing() {
+		UIView.animate(withDuration: 0.2, animations: {
+			self.focusRing?.alpha = 1.0
+		}, completion: { (complete) in
+			
+			UIView.animateKeyframes(withDuration: 3.0, delay: 0.0, options: [], animations: {
+				UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 0.25) {
+					self.focusRing?.transform = CGAffineTransform(scaleX: 1.2, y: 1.2)
+				}
+				
+				UIView.addKeyframe(withRelativeStartTime: 0.25, relativeDuration: 0.25) {
+					self.focusRing?.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
+				}
+				
+				UIView.addKeyframe(withRelativeStartTime: 0.5, relativeDuration: 0.25) {
+					self.focusRing?.transform = CGAffineTransform(scaleX: 1.2, y: 1.2)
+				}
+				
+				UIView.addKeyframe(withRelativeStartTime: 0.75, relativeDuration: 0.25) {
+					self.focusRing?.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
+				}
+			}, completion: { (done) in
+				UIView.animate(withDuration: 0.7, animations: {
+					self.focusRing?.alpha = 0.0
+				})
+			})
+		})
+	}
+	
+	fileprivate func _focus(_ point: CGPoint) {
+		
+		do {
+			let captureDevice = AVCaptureDevice.devices().first as? AVCaptureDevice
+			try captureDevice?.lockForConfiguration()
+			
+			captureDevice?.focusMode = .autoFocus
+			captureDevice?.focusPointOfInterest = point
+			
+			captureDevice?.unlockForConfiguration()
+			
+		} catch {
+			print("Error locking configuration")
+		}
+	}
+	
+	// MARK: - UIGestureRecognizerDelegate - zoom
 	
 	fileprivate func attachZoom(_ view: UIView) {
 		let pinch = UIPinchGestureRecognizer(target: self, action: #selector(CameraManager._zoomStart(_:)))
@@ -702,6 +794,8 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
 	fileprivate func _addPreviewLayerToView(_ view: UIView) {
 		embeddingView = view
 		attachZoom(view)
+		attachFocus(view)
+		
 		DispatchQueue.main.async(execute: { () -> Void in
 			guard let _ = self.previewLayer else {
 				return
