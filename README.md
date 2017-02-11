@@ -3,7 +3,7 @@
 [![CocoaPods](https://img.shields.io/cocoapods/v/CameraManager.svg)](https://github.com/imaginary-cloud/CameraManager) [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 
 This is a simple Swift class to provide all the configurations you need to create custom camera view in your app.
-It follows orientation change and updates UI accordingly, supports front and rear camera selection, pinch to zoom, different flash modes, inputs and outputs.
+It follows orientation change and updates UI accordingly, supports front and rear camera selection, pinch to zoom, tap to focus, different flash modes, inputs and outputs.
 Just drag, drop and use.
 
 Now it's compatible with latest Swift syntax if you're using any Swift version prior to 2.0 make sure to use one of the previously tagged releases.
