@@ -170,7 +170,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
 
     // MARK: - Private properties
     
-    fileprivate var locationManager = LocationManager()
+    fileprivate var locationManager = CameraLocationManager()
 
     fileprivate weak var embeddingView: UIView?
     fileprivate var videoCompletion: ((_ videoURL: URL?, _ error: NSError?) -> Void)?
@@ -1024,7 +1024,9 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         }
     }
 
-    fileprivate class LocationManager: NSObject, CLLocationManagerDelegate {
+    // MARK: - CameraLocationManager()
+
+    fileprivate class CameraLocationManager: NSObject, CLLocationManagerDelegate {
         var locationManager = CLLocationManager()
         var latestLocation: CLLocation?
 
