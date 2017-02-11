@@ -2,6 +2,13 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## [3.1.0](https://github.com/imaginary-cloud/CameraManager/tree/3.1.0) - 2017-02-11
+### Added
+
+- Flip animation and tap to focus (pull request #72)
+- Icons and splash image to example
+
 ## [3.0.0](https://github.com/imaginary-cloud/CameraManager/tree/3.0.0) - 2016-09-16
 ### Changed
 
@@ -15,7 +22,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - Fixes completion typos and suggests renamed functions.
-
 
 ## [2.2.3](https://github.com/imaginary-cloud/CameraManager/tree/2.2.3) - 2016-05-12
 ### Changed

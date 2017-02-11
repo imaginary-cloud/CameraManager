@@ -19,7 +19,7 @@ If you want Swift 3.0 syntax use:
 ```ruby
 use_frameworks!
 
-pod 'CameraManager', '~> 3.0'
+pod 'CameraManager', '~> 3.1'
 ```
 
 If you want Swift 2.0 syntax use:
@@ -63,7 +63,7 @@ Add the following line to your Cartfile:
 If you want Swift 3.0 syntax use:
 
 ```
-github "imaginary-cloud/CameraManager" >= 3.0
+github "imaginary-cloud/CameraManager" >= 3.1
 ```
 
 If you want Swift 2.0 syntax use:
@@ -174,4 +174,4 @@ Supports iOS 8 and above. Xcode 7.0 is required to build the latest code written
 
 ## License
 
-Copyright © 2016 ImaginaryCloud, imaginarycloud.com. This library is licensed under the MIT license.
+Copyright © 2017 ImaginaryCloud, imaginarycloud.com. This library is licensed under the MIT license.
