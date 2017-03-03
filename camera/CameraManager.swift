@@ -84,24 +84,14 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
 
     /// The Bool property to determine if current device has front camera.
     open var hasFrontCamera: Bool = {
-        guard let devices = AVCaptureDevice.devices(withMediaType: AVMediaTypeVideo) else { return false }
-        for device in devices  {
-            if let captureDevice = device as? AVCaptureDevice, captureDevice.position == .front {
-                return true
-            }
-        }
-        return false
+        let frontDevices = AVCaptureDevice.videoDevices.filter { $0.position == .front }
+        return !frontDevices.isEmpty
     }()
 
     /// The Bool property to determine if current device has flash.
     open var hasFlash: Bool = {
-        guard let devices = AVCaptureDevice.devices(withMediaType: AVMediaTypeVideo) else { return false }
-        for device in devices  {
-            if let captureDevice = device as? AVCaptureDevice, captureDevice.position == .back {
-                return captureDevice.hasFlash
-            }
-        }
-        return false
+        let hasFlashDevices = AVCaptureDevice.videoDevices.filter { $0.hasFlash }
+        return !hasFlashDevices.isEmpty
     }()
     
     /// Property to enable or disable switch animation
@@ -176,13 +166,11 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     fileprivate var sessionQueue: DispatchQueue = DispatchQueue(label: "CameraSessionQueue", attributes: [])
 
     fileprivate lazy var frontCameraDevice: AVCaptureDevice? = {
-        guard let devices = AVCaptureDevice.devices(withMediaType: AVMediaTypeVideo) as? [AVCaptureDevice] else { return nil }
-        return devices.filter { $0.position == .front }.first
+        return AVCaptureDevice.videoDevices.filter { $0.position == .front }.first
     }()
 
     fileprivate lazy var backCameraDevice: AVCaptureDevice? = {
-        guard let devices = AVCaptureDevice.devices(withMediaType: AVMediaTypeVideo) as? [AVCaptureDevice] else { return nil }
-        return devices.filter { $0.position == .back }.first
+        return AVCaptureDevice.videoDevices.filter { $0.position == .back }.first
     }()
 
     fileprivate lazy var mic: AVCaptureDevice? = {
@@ -391,11 +379,12 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         }
 
         sessionQueue.async(execute: {
-            self._getStillImageOutput().captureStillImageAsynchronously(from: self._getStillImageOutput().connection(withMediaType: AVMediaTypeVideo), completionHandler: { [unowned self] sample, error in
+            let stillImageOutput = self._getStillImageOutput()
+            stillImageOutput.captureStillImageAsynchronously(from: stillImageOutput.connection(withMediaType: AVMediaTypeVideo), completionHandler: { [weak self] sample, error in
 
                 if let error = error {
                     DispatchQueue.main.async(execute: {
-                        self._show(NSLocalizedString("Error", comment:""), message: error.localizedDescription)
+                        self?._show(NSLocalizedString("Error", comment:""), message: error.localizedDescription)
                     })
                     imageCompletion(nil, error as NSError?)
                     return
@@ -707,9 +696,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     fileprivate func _updateTorch(_ flashMode: CameraFlashMode) {
         captureSession?.beginConfiguration()
         defer { captureSession?.commitConfiguration() }
-        guard let devices = AVCaptureDevice.devices(withMediaType: AVMediaTypeVideo) else { return }
-        let captureDevices = devices.flatMap { $0 as? AVCaptureDevice }
-        for captureDevice in captureDevices  {
+        for captureDevice in AVCaptureDevice.videoDevices  {
             guard captureDevice.position == AVCaptureDevicePosition.back else { continue }
             guard let avTorchMode = AVCaptureTorchMode(rawValue: flashMode.rawValue) else { continue }
             if (captureDevice.isTorchModeSupported(avTorchMode)) {
@@ -1166,9 +1153,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     fileprivate func _updateFlasMode(_ flashMode: CameraFlashMode) {
         captureSession?.beginConfiguration()
         defer { captureSession?.commitConfiguration() }
-        guard let devices = AVCaptureDevice.devices(withMediaType: AVMediaTypeVideo) else { return }
-        let captureDevices = devices.flatMap { $0 as? AVCaptureDevice }
-        for captureDevice in captureDevices  {
+        for captureDevice in AVCaptureDevice.videoDevices  {
             if (captureDevice.position == AVCaptureDevicePosition.back) {
                 guard let avFlashMode = AVCaptureFlashMode(rawValue: flashMode.rawValue) else { continue }
                 if (captureDevice.isFlashModeSupported(avFlashMode)) {
@@ -1276,5 +1261,13 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     deinit {
         stopAndRemoveCaptureSession()
         _stopFollowingDeviceOrientation()
+    }
+}
+
+
+fileprivate extension AVCaptureDevice {
+    fileprivate static var videoDevices: [AVCaptureDevice] {
+        guard let devices = AVCaptureDevice.devices(withMediaType: AVMediaTypeVideo) else { return [] }
+        return devices.flatMap { $0 as? AVCaptureDevice }
     }
 }
