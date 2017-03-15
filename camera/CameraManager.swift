@@ -918,7 +918,12 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                 }
             }
         case .videoOnly, .videoWithMic:
-            captureSession?.addOutput(_getMovieOutput())
+            let videoMovieOutput = _getMovieOutput()
+            if let captureSession = captureSession {
+                if captureSession.canAddOutput(videoMovieOutput) {
+                    captureSession.addOutput(videoMovieOutput)
+                }
+            }
 
             if newCameraOutputMode == .videoWithMic {
                 if let validMic = _deviceInputFromDevice(mic) {
