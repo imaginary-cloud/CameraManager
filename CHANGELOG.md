@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.1.1](https://github.com/imaginary-cloud/CameraManager/tree/3.1.1) - 2017-03-15
+### Changed
+
+- Refactor to avoid implicit unwrapped optionals (pull request #94)
 
 ## [3.1.0](https://github.com/imaginary-cloud/CameraManager/tree/3.1.0) - 2017-02-11
 ### Added
