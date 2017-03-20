@@ -545,14 +545,14 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
 
     fileprivate func _zoom(_ scale: CGFloat) {
         do {
-            let captureDevice = AVCaptureDevice.devices().first as? AVCaptureDevice
-            try captureDevice?.lockForConfiguration()
+            guard let captureDevice = AVCaptureDevice.videoDevices.first else { return }
+            try captureDevice.lockForConfiguration()
 
             zoomScale = max(1.0, min(beginZoomScale * scale, maxZoomScale))
 
-            captureDevice?.videoZoomFactor = zoomScale
+            captureDevice.videoZoomFactor = zoomScale
 
-            captureDevice?.unlockForConfiguration()
+            captureDevice.unlockForConfiguration()
 
         } catch {
             print("Error locking configuration")
