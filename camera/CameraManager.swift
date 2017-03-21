@@ -251,16 +251,16 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
      :param: completion Completion block with the result of permission request
      */
     open func askUserForCameraPermission(_ completion: @escaping (Bool) -> Void) {
-        AVCaptureDevice.requestAccess(forMediaType: AVMediaTypeVideo, completionHandler: { (alowedAccess) -> Void in
+        AVCaptureDevice.requestAccess(forMediaType: AVMediaTypeVideo, completionHandler: { (allowedAccess) -> Void in
             if self.cameraOutputMode == .videoWithMic {
-                AVCaptureDevice.requestAccess(forMediaType: AVMediaTypeAudio, completionHandler: { (alowedAccess) -> Void in
+                AVCaptureDevice.requestAccess(forMediaType: AVMediaTypeAudio, completionHandler: { (allowedAccess) -> Void in
                     DispatchQueue.main.sync(execute: { () -> Void in
-                        completion(alowedAccess)
+                        completion(allowedAccess)
                     })
                 })
             } else {
                 DispatchQueue.main.sync(execute: { () -> Void in
-                    completion(alowedAccess)
+                    completion(allowedAccess)
                 })
 
             }
