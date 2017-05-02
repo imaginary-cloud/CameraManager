@@ -257,12 +257,12 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         AVCaptureDevice.requestAccess(forMediaType: AVMediaTypeVideo, completionHandler: { (allowedAccess) -> Void in
             if self.cameraOutputMode == .videoWithMic {
                 AVCaptureDevice.requestAccess(forMediaType: AVMediaTypeAudio, completionHandler: { (allowedAccess) -> Void in
-                    DispatchQueue.main.sync(execute: { () -> Void in
+                    DispatchQueue.main.async(execute: { () -> Void in
                         completion(allowedAccess)
                     })
                 })
             } else {
-                DispatchQueue.main.sync(execute: { () -> Void in
+                DispatchQueue.main.async(execute: { () -> Void in
                     completion(allowedAccess)
                 })
                 
