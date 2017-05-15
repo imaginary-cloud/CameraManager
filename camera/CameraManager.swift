@@ -78,6 +78,20 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     
     open var shouldKeepViewAtOrientationChanges = false
     
+    /// Property to determine if manager should enable tap to focus on camera preview. Default value is true.
+    open var shouldEnableTapToFocus = true {
+        didSet {
+            focusGesture.isEnabled = shouldEnableTapToFocus
+        }
+    }
+    
+    /// Property to determine if manager should enable pinch to zoom on camera preview. Default value is true.
+    open var shouldEnablePinchToZoom = true {
+        didSet {
+            zoomGesture.isEnabled = shouldEnablePinchToZoom
+        }
+    }
+    
     /// The Bool property to determine if the camera is ready to use.
     open var cameraIsReady: Bool {
         get {
@@ -518,11 +532,12 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     }
     
     // MARK: - UIGestureRecognizerDelegate
+    fileprivate lazy var zoomGesture = UIPinchGestureRecognizer()
     
     fileprivate func attachZoom(_ view: UIView) {
-        let pinch = UIPinchGestureRecognizer(target: self, action: #selector(CameraManager._zoomStart(_:)))
-        view.addGestureRecognizer(pinch)
-        pinch.delegate = self
+        zoomGesture.addTarget(self, action: #selector(CameraManager._zoomStart(_:)))
+        view.addGestureRecognizer(zoomGesture)
+        zoomGesture.delegate = self
     }
     
     open func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
@@ -573,11 +588,12 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     }
     
     // MARK: - UIGestureRecognizerDelegate
+    fileprivate lazy var focusGesture = UITapGestureRecognizer()
     
     fileprivate func attachFocus(_ view: UIView) {
-        let focus = UITapGestureRecognizer(target: self, action: #selector(CameraManager._focusStart(_:)))
-        view.addGestureRecognizer(focus)
-        focus.delegate = self
+        focusGesture.addTarget(self, action: #selector(CameraManager._focusStart(_:)))
+        view.addGestureRecognizer(focusGesture)
+        focusGesture.delegate = self
     }
     
     @objc fileprivate func _focusStart(_ recognizer: UITapGestureRecognizer) {
