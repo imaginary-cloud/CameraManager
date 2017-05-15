@@ -532,9 +532,10 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     }
     
     // MARK: - UIGestureRecognizerDelegate
-    fileprivate lazy var zoomGesture = UIPinchGestureRecognizer(target: self, action: #selector(CameraManager._zoomStart(_:)))
+    fileprivate lazy var zoomGesture = UIPinchGestureRecognizer()
     
     fileprivate func attachZoom(_ view: UIView) {
+        zoomGesture.addTarget(self, action: #selector(CameraManager._zoomStart(_:)))
         view.addGestureRecognizer(zoomGesture)
         zoomGesture.delegate = self
     }
@@ -587,9 +588,10 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     }
     
     // MARK: - UIGestureRecognizerDelegate
-    fileprivate lazy var focusGesture = UITapGestureRecognizer(target: self, action: #selector(CameraManager._focusStart(_:)))
+    fileprivate lazy var focusGesture = UITapGestureRecognizer()
     
     fileprivate func attachFocus(_ view: UIView) {
+        focusGesture.addTarget(self, action: #selector(CameraManager._focusStart(_:)))
         view.addGestureRecognizer(focusGesture)
         focusGesture.delegate = self
     }
