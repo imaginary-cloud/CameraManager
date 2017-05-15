@@ -92,16 +92,25 @@ cameraManager.cameraDevice = .Front
 cameraManager.cameraDevice = .Back
 ```
 
+You can specify if the front camera image should be horizontally fliped:
+
+```swift
+cameraManager.shouldFlipFrontCameraImage = true
+```
+
+You can enable or disable gestures on camera preview:
+
+```swift
+cameraManager.shouldEnableTapToFocus = true
+cameraManager.shouldEnablePinchToZoom = true
+```
+
 You can set output format to Image, video or video with audio:
+
 ```swift
 cameraManager.cameraOutputMode = .StillImage
 cameraManager.cameraOutputMode = .VideoWithMic
 cameraManager.cameraOutputMode = .VideoOnly
-```
-
-You can specify if the front camera image should be horizontally fliped:
-```swift
-cameraManager.shouldFlipFrontCameraImage = true
 ```
 
 You can set the quality:
