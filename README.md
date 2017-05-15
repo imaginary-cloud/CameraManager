@@ -49,7 +49,7 @@ import PackageDescription
 
 let package = Package(
     dependencies: [
-        .Package(url: "https://github.com/imaginary-cloud/CameraManager", majorVersion: 2, minor: 2)
+        .Package(url: "https://github.com/imaginary-cloud/CameraManager", majorVersion: 3, minor: 1)
     ]
 )
 ```
@@ -97,6 +97,11 @@ You can set output format to Image, video or video with audio:
 cameraManager.cameraOutputMode = .StillImage
 cameraManager.cameraOutputMode = .VideoWithMic
 cameraManager.cameraOutputMode = .VideoOnly
+```
+
+You can specify if the front camera image should be horizontally fliped:
+```swift
+cameraManager.shouldFlipFrontCameraImage = true
 ```
 
 You can set the quality:
