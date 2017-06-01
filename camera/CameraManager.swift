@@ -172,6 +172,10 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     /// Property to check video recording file size when in progress
     open var recordedFileSize : Int64 { return movieOutput?.recordedFileSize ?? 0 }
     
+    //Properties to set focus and capture mode when tap to focus is used (_focusStart)
+    open var focusMode : AVCaptureFocusMode = .continuousAutoFocus
+    open var exposureMode: AVCaptureExposureMode = .continuousAutoExposure
+    
     
     // MARK: - Private properties
     
@@ -633,12 +637,12 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                         validDevice.exposurePointOfInterest = pointOfInterest;
                     }
                     
-                    if validDevice.isFocusModeSupported(.continuousAutoFocus) {
-                        validDevice.focusMode = .continuousAutoFocus
+                    if validDevice.isFocusModeSupported(focusMode) {
+                        validDevice.focusMode = focusMode
                     }
                     
-                    if validDevice.isExposureModeSupported(.continuousAutoExposure) {
-                        validDevice.exposureMode = .continuousAutoExposure
+                    if validDevice.isExposureModeSupported(exposureMode) {
+                        validDevice.exposureMode = exposureMode
                     }
                     
                     validDevice.unlockForConfiguration()
