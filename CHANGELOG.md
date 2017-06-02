@@ -2,6 +2,28 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.1.3](https://github.com/imaginary-cloud/CameraManager/tree/3.1.3) - 2017-05-15
+### Added
+
+- Add two new properties `shouldEnableTapToFocus` and `shouldEnablePinchToZoom` (pull request #106)
+
+## [3.1.2](https://github.com/imaginary-cloud/CameraManager/tree/3.1.2) - 2017-05-02
+### Changed
+
+- New option to flip image took by front camera (pull request #104)
+- Fixes possible hang after requesting permission (pull request #98)
+
+## [3.1.1](https://github.com/imaginary-cloud/CameraManager/tree/3.1.1) - 2017-03-15
+### Changed
+
+- Refactor to avoid implicit unwrapped optionals (pull request #94)
+
+## [3.1.0](https://github.com/imaginary-cloud/CameraManager/tree/3.1.0) - 2017-02-11
+### Added
+
+- Flip animation and tap to focus (pull request #72)
+- Icons and splash image to example
+
 ## [3.0.0](https://github.com/imaginary-cloud/CameraManager/tree/3.0.0) - 2016-09-16
 ### Changed
 
@@ -15,7 +37,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - Fixes completion typos and suggests renamed functions.
-
 
 ## [2.2.3](https://github.com/imaginary-cloud/CameraManager/tree/2.2.3) - 2016-05-12
 ### Changed
