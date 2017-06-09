@@ -328,7 +328,6 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         stopCaptureSession()
         let oldAnimationValue = animateCameraDeviceChange
         animateCameraDeviceChange = false
-        cameraDevice = .back
         cameraIsSetup = false
         previewLayer = nil
         captureSession = nil
