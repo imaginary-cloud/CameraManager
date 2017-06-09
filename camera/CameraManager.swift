@@ -126,6 +126,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                     _updateCameraDevice(cameraDevice)
                     _setupMaxZoomScale()
                     _zoom(0)
+                    _orientationChanged() //"fixes" orientation bug when in landscape mode and switching cameras https://github.com/imaginary-cloud/CameraManager/issues/64
                 }
             }
         }
