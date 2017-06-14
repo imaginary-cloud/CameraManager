@@ -111,9 +111,11 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         return !hasFlashDevices.isEmpty
     }()
     
-    /// Property to enable or disable switch animation
-    
+    /// Property to enable or disable flip animation when switch between back and front camera. Default value is true.
     open var animateCameraDeviceChange: Bool = true
+    
+    /// Property to enable or disable shutter animation when taking a picture. Default value is true.
+    open var animateShutter: Bool = true
     
     /// Property to change camera device between front and back.
     open var cameraDevice = CameraDevice.back {
@@ -352,44 +354,52 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                 return
             }
             
-            self._performShutterAnimation() {
-                guard let tempImage = UIImage(data: imageData) else {
-                    imageCompletion(nil, NSError())
-                    return
+            if self.animateShutter {
+                self._performShutterAnimation() {
+                    self._capturePicture(imageData, imageCompletion)
                 }
-                
-                let image: UIImage
-                if self.shouldFlipFrontCameraImage == true, self.cameraDevice == .front {
-                    guard let cgImage = tempImage.cgImage else {
-                        imageCompletion(nil, NSError())
-                        return
-                    }
-                    let flippedImage = UIImage(cgImage: cgImage, scale: tempImage.scale, orientation: .leftMirrored)
-                    image = flippedImage
-                } else {
-                    image = tempImage
-                }
-                
-                if self.writeFilesToPhoneLibrary == true, let library = self.library  {
-                    library.performChanges({
-                        let request = PHAssetChangeRequest.creationRequestForAsset(from: image)
-                        request.creationDate = Date()
-                        
-                        if let location = self.locationManager.latestLocation {
-                            request.location = location
-                        }
-                    }, completionHandler: { success, error in
-                        if let error = error {
-                            DispatchQueue.main.async(execute: {
-                                self._show(NSLocalizedString("Error", comment:""), message: error.localizedDescription)
-                            })
-                        }
-                    })
-                }
-                
-                imageCompletion(image, nil)
+            } else {
+                self._capturePicture(imageData, imageCompletion)
             }
         }
+    }
+    
+    fileprivate func _capturePicture(_ imageData: Data, _ imageCompletion: (UIImage?, NSError?) -> Void) {
+        guard let tempImage = UIImage(data: imageData) else {
+            imageCompletion(nil, NSError())
+            return
+        }
+        
+        let image: UIImage
+        if self.shouldFlipFrontCameraImage == true, self.cameraDevice == .front {
+            guard let cgImage = tempImage.cgImage else {
+                imageCompletion(nil, NSError())
+                return
+            }
+            let flippedImage = UIImage(cgImage: cgImage, scale: tempImage.scale, orientation: .leftMirrored)
+            image = flippedImage
+        } else {
+            image = tempImage
+        }
+        
+        if self.writeFilesToPhoneLibrary == true, let library = self.library  {
+            library.performChanges({
+                let request = PHAssetChangeRequest.creationRequestForAsset(from: image)
+                request.creationDate = Date()
+                
+                if let location = self.locationManager.latestLocation {
+                    request.location = location
+                }
+            }, completionHandler: { success, error in
+                if let error = error {
+                    DispatchQueue.main.async(execute: {
+                        self._show(NSLocalizedString("Error", comment:""), message: error.localizedDescription)
+                    })
+                }
+            })
+        }
+        
+        imageCompletion(image, nil)
     }
     
     /**
@@ -1212,7 +1222,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         if let validPreviewLayer = previewLayer {
             
             DispatchQueue.main.async {
-                
+            
                 let duration = 0.1
                 
                 CATransaction.begin()
