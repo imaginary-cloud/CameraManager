@@ -120,7 +120,13 @@ cameraManager.cameraOutputQuality = .Medium
 cameraManager.cameraOutputQuality = .High
 ```
 
-And flash mode (it will also set corresponding torch mode for video shoot):
+You can specifiy the focus and exposure mode:
+```swift
+cameraManager.focusMode = .continuousAutoFocus 
+cameraManager.exposureMode = .continuousAutoExposure 
+```
+
+You can change the flash mode (it will also set corresponding flash mode):
 ```swift
 cameraManager.flashMode = .Off
 cameraManager.flashMode = .On
@@ -137,10 +143,15 @@ To change flash mode to the next available one you can use this handy function w
 cameraManager.changeFlashMode()
 ```
 
-
 You can specify if you want to save the files to phone library:
 ```swift
 cameraManager.writeFilesToPhoneLibrary = true
+```
+
+You can specify if you want to disable animations:
+```swift
+cameraManager.animateShutter = false
+cameraManager.animateCameraDeviceChange = false
 ```
 
 You can specify if you want the user to be asked about camera permissions automatically when you first try to use the camera or manually:

@@ -628,11 +628,6 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         
         if let validDevice = device {
             
-            //            if validDevice.isAdjustingFocus || validDevice.isAdjustingExposure || showingFocusRectangle {
-            //
-            //                return
-            //            }
-            
             if let validPreviewLayer = previewLayer,
                 let view = recognizer.view
             {
