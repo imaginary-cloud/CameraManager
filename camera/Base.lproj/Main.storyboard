@@ -1,9 +1,13 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="8191" systemVersion="14F27" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="bhK-VL-qY4">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12121" systemVersion="16F73" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="bhK-VL-qY4">
+    <device id="retina4_0" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="8154"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
         <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
         <!--Camera-->
@@ -15,24 +19,24 @@
                         <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="EI2-CK-oqA" userLabel="cameraView">
-                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                <color key="tintColor" red="0.54901963470000004" green="0.77647066119999997" blue="0.2470588386" alpha="1" colorSpace="deviceRGB"/>
+                                <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                                <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <color key="tintColor" red="0.48412352800369263" green="0.74477618932723999" blue="0.19113841652870178" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </view>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="FSo-n8-ZwV">
-                                <rect key="frame" x="275" y="530" width="50" height="50"/>
-                                <color key="backgroundColor" red="0.54901963470000004" green="0.77647066119999997" blue="0.2470588386" alpha="1" colorSpace="deviceRGB"/>
+                                <rect key="frame" x="135" y="498" width="50" height="50"/>
+                                <color key="backgroundColor" red="0.48412352800369263" green="0.74477618932723999" blue="0.19113841652870178" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="50" id="Cr1-Jm-NA1"/>
                                     <constraint firstAttribute="width" constant="50" id="kaE-Cr-QzA"/>
                                 </constraints>
-                                <color key="tintColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <color key="tintColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                                 <state key="normal">
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                    <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 </state>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
@@ -44,66 +48,66 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rd3-ei-B9P">
-                                <rect key="frame" x="4" y="84" width="592" height="512"/>
-                                <color key="backgroundColor" red="1" green="0.0" blue="0.46666669849999998" alpha="0.5" colorSpace="deviceRGB"/>
+                                <rect key="frame" x="4" y="64" width="312" height="500"/>
+                                <color key="backgroundColor" red="0.9857252836227417" green="0.0" blue="0.3922838568687439" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="27"/>
                                 <state key="normal">
-                                    <color key="titleColor" red="0.36078432199999999" green="0.36078432199999999" blue="0.36078432199999999" alpha="1" colorSpace="deviceRGB"/>
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                    <color key="titleColor" red="0.28894999623298645" green="0.28894135355949402" blue="0.28894621133804321" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                    <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 </state>
                                 <connections>
                                     <action selector="askForCameraPermissions:" destination="BYZ-38-t0r" eventType="touchUpInside" id="gbn-Ql-Lnv"/>
                                 </connections>
                             </button>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="jaF-q9-Eli">
-                                <rect key="frame" x="0.0" y="20" width="600" height="60"/>
+                                <rect key="frame" x="0.0" y="0.0" width="320" height="60"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="19j-xT-Ttb">
-                                        <rect key="frame" x="0.0" y="0.0" width="150" height="60"/>
-                                        <color key="backgroundColor" red="0.67058825489999996" green="0.67058825489999996" blue="0.67058825489999996" alpha="0.70000000000000007" colorSpace="deviceRGB"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="80" height="60"/>
+                                        <color key="backgroundColor" red="0.98039215690000003" green="0.98039215690000003" blue="0.97254901959999995" alpha="0.79679247359154926" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
                                         <state key="normal" title="Flash off">
-                                            <color key="titleColor" red="0.0" green="0.50196081400000003" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                            <color key="titleColor" red="0.27843137254901962" green="0.45882352941176469" blue="0.80392156862745101" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         </state>
                                         <connections>
                                             <action selector="changeFlashMode:" destination="BYZ-38-t0r" eventType="touchUpInside" id="e2b-Lg-iqO"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3WP-Xo-FaJ">
-                                        <rect key="frame" x="150" y="0.0" width="150" height="60"/>
-                                        <color key="backgroundColor" red="1" green="0.0" blue="0.46666669849999998" alpha="0.70000000000000007" colorSpace="deviceRGB"/>
+                                        <rect key="frame" x="80" y="0.0" width="80" height="60"/>
+                                        <color key="backgroundColor" red="0.27843137254901962" green="0.45882352941176469" blue="0.80392156862745101" alpha="0.79838798415492962" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
                                         <state key="normal" title="Video">
-                                            <color key="titleColor" red="0.0" green="0.50196081400000003" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                            <color key="titleColor" red="0.98039215690000003" green="0.98039215690000003" blue="0.97254901959999995" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         </state>
                                         <connections>
                                             <action selector="outputModeButtonTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Bgy-rQ-cfF"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sT4-CC-oh5">
-                                        <rect key="frame" x="300" y="0.0" width="150" height="60"/>
-                                        <color key="backgroundColor" red="0.67058825489999996" green="0.67058825489999996" blue="0.67058825489999996" alpha="0.70000000000000007" colorSpace="deviceRGB"/>
+                                        <rect key="frame" x="160" y="0.0" width="80" height="60"/>
+                                        <color key="backgroundColor" red="0.98039215690000003" green="0.98039215690000003" blue="0.97254901959999995" alpha="0.79679247359154926" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
                                         <state key="normal" title="Back">
-                                            <color key="titleColor" red="0.0" green="0.50196081400000003" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                            <color key="titleColor" red="0.27843137254901962" green="0.45882352941176469" blue="0.80392156862745101" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         </state>
                                         <connections>
                                             <action selector="changeCameraDevice:" destination="BYZ-38-t0r" eventType="touchUpInside" id="KDu-mr-jHd"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="JCk-74-YkH">
-                                        <rect key="frame" x="450" y="0.0" width="150" height="60"/>
-                                        <color key="backgroundColor" red="1" green="0.0" blue="0.46666669849999998" alpha="0.70000000000000007" colorSpace="deviceRGB"/>
+                                        <rect key="frame" x="240" y="0.0" width="80" height="60"/>
+                                        <color key="backgroundColor" red="0.27843137254901962" green="0.45882352941176469" blue="0.80392156862745101" alpha="0.802184198943662" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
                                         <state key="normal" title="High">
-                                            <color key="titleColor" red="0.0" green="0.50196081400000003" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                            <color key="titleColor" red="0.98039215690000003" green="0.98039215690000003" blue="0.97254901959999995" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         </state>
                                         <connections>
                                             <action selector="changeCameraQuality:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Bt4-RC-Mrl"/>
                                         </connections>
                                     </button>
                                 </subviews>
-                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
                                     <constraint firstItem="19j-xT-Ttb" firstAttribute="width" secondItem="3WP-Xo-FaJ" secondAttribute="width" id="0JS-OH-a4X"/>
                                     <constraint firstItem="3WP-Xo-FaJ" firstAttribute="leading" secondItem="19j-xT-Ttb" secondAttribute="trailing" id="7Y0-vo-2GG"/>
@@ -125,13 +129,14 @@
                                 </constraints>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tap here to enable camera access and take great pictures" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2bK-wq-6Rf">
-                                <rect key="frame" x="4" y="84" width="592" height="512"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="25"/>
-                                <color key="textColor" red="0.36078432199999999" green="0.36078432199999999" blue="0.36078432199999999" alpha="1" colorSpace="deviceRGB"/>
+                                <rect key="frame" x="4" y="64" width="312" height="500"/>
+                                <color key="backgroundColor" red="0.27843137254901962" green="0.45882352941176469" blue="0.80392156862745101" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <fontDescription key="fontDescription" type="system" weight="thin" pointSize="25"/>
+                                <color key="textColor" red="0.98039215690000003" green="0.98039215690000003" blue="0.97254901959999995" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <gestureRecognizers/>
                         <constraints>
                             <constraint firstItem="2bK-wq-6Rf" firstAttribute="top" secondItem="rd3-ei-B9P" secondAttribute="top" id="0KQ-L2-vRf"/>
@@ -142,7 +147,7 @@
                             <constraint firstItem="2bK-wq-6Rf" firstAttribute="bottom" secondItem="rd3-ei-B9P" secondAttribute="bottom" id="J9p-Wn-xC4"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="EI2-CK-oqA" secondAttribute="bottom" id="JW8-WC-69E"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="FSo-n8-ZwV" secondAttribute="bottom" constant="20" id="KgN-t9-iTh"/>
-                            <constraint firstItem="jaF-q9-Eli" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" constant="20" id="Tv6-Ak-cSA"/>
+                            <constraint firstItem="jaF-q9-Eli" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="Tv6-Ak-cSA"/>
                             <constraint firstItem="EI2-CK-oqA" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="Y9T-eB-SQS"/>
                             <constraint firstItem="2bK-wq-6Rf" firstAttribute="trailing" secondItem="rd3-ei-B9P" secondAttribute="trailing" id="add-TX-ds6"/>
                             <constraint firstAttribute="trailing" secondItem="rd3-ei-B9P" secondAttribute="trailing" constant="4" id="dJE-jw-ZNY"/>
@@ -154,6 +159,7 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="EiR-i7-mkA"/>
+                    <nil key="simulatedStatusBarMetrics"/>
                     <nil key="simulatedTopBarMetrics"/>
                     <connections>
                         <outlet property="askForPermissionsButton" destination="rd3-ei-B9P" id="Itb-t1-HpD"/>
@@ -176,14 +182,14 @@
                         <viewControllerLayoutGuide type="bottom" id="qVT-yr-0bo"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="Qhk-xW-6b1">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="v1g-94-paQ">
-                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                                <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                             </imageView>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="v1g-94-paQ" firstAttribute="leading" secondItem="Qhk-xW-6b1" secondAttribute="leading" id="AJ6-Mx-ha2"/>
                             <constraint firstItem="qVT-yr-0bo" firstAttribute="top" secondItem="v1g-94-paQ" secondAttribute="bottom" id="QTs-sj-GPP"/>
@@ -191,6 +197,7 @@
                             <constraint firstItem="v1g-94-paQ" firstAttribute="top" secondItem="Qhk-xW-6b1" secondAttribute="top" id="jLa-Hd-QGr"/>
                         </constraints>
                     </view>
+                    <nil key="simulatedStatusBarMetrics"/>
                     <connections>
                         <outlet property="imageView" destination="v1g-94-paQ" id="x8J-Uk-fu3"/>
                     </connections>
@@ -204,6 +211,7 @@
             <objects>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="bhK-VL-qY4" sceneMemberID="viewController">
                     <toolbarItems/>
+                    <nil key="simulatedStatusBarMetrics"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="Gas-AK-MC9">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>

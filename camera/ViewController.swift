@@ -32,6 +32,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         
         cameraManager.showAccessPermissionPopupAutomatically = false
+        navigationController?.navigationBar.isHidden = true
         
         askForPermissionsButton.isHidden = true
         askForPermissionsLabel.isHidden = true
@@ -44,6 +45,7 @@ class ViewController: UIViewController {
         } else if (currentCameraState == .ready) {
             addCameraToView()
         }
+
         if !cameraManager.hasFlash {
             flashModeButton.isEnabled = false
             flashModeButton.setTitle("No flash", for: UIControlState())
