@@ -133,6 +133,11 @@ cameraManager.flashMode = .On
 cameraManager.flashMode = .Auto
 ```
 
+To enable location services for storing in Camera Roll. Default is false:
+```
+cameraManager.shouldUseLocationServices = true
+```
+
 To check if the device supports flash call:
 ```swift
 cameraManager.hasFlash

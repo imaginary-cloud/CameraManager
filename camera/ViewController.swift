@@ -141,6 +141,10 @@ class ViewController: UIViewController {
         }
     }
     
+    @IBAction func locateMeButtonTapped(_ sender: Any) {
+        self.cameraManager.shouldUseLocationServices = true
+    }
+    
     @IBAction func changeCameraDevice(_ sender: UIButton) {
         
         cameraManager.cameraDevice = cameraManager.cameraDevice == CameraDevice.front ? CameraDevice.back : CameraDevice.front
