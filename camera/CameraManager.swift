@@ -528,8 +528,12 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     fileprivate func saveVideoToLibrary(_ fileURL: URL) {
         if let validLibrary = library {
             validLibrary.performChanges({
+                let request = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: fileURL)
+                request?.creationDate = Date()
                 
-                PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: fileURL)
+                if let location = self.locationManager.latestLocation {
+                    request?.location = location
+                }
             }, completionHandler: { success, error in
                 if let error = error {
                     self._show(NSLocalizedString("Unable to save video to the iPhone.", comment:""), message: error.localizedDescription)
