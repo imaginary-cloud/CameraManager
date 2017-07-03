@@ -117,6 +117,15 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     /// Property to enable or disable shutter animation when taking a picture. Default value is true.
     open var animateShutter: Bool = true
     
+    /// Property to enable or disable location services. Location services in camera is used for EXIF data. Default is false
+    open var shouldUseLocationServices: Bool = false {
+        didSet {
+            if shouldUseLocationServices == true {
+                self.locationManager = CameraLocationManager()
+            }
+        }
+    }
+    
     /// Property to change camera device between front and back.
     open var cameraDevice = CameraDevice.back {
         didSet {
@@ -183,7 +192,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     
     // MARK: - Private properties
     
-    fileprivate var locationManager = CameraLocationManager()
+    fileprivate var locationManager: CameraLocationManager?
     
     fileprivate weak var embeddingView: UIView?
     fileprivate var videoCompletion: ((_ videoURL: URL?, _ error: NSError?) -> Void)?
@@ -383,7 +392,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                 let request = PHAssetChangeRequest.creationRequestForAsset(from: image)
                 request.creationDate = Date()
                 
-                if let location = self.locationManager.latestLocation {
+                if let location = self.locationManager?.latestLocation {
                     request.location = location
                 }
             }, completionHandler: { success, error in
@@ -528,8 +537,12 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     fileprivate func saveVideoToLibrary(_ fileURL: URL) {
         if let validLibrary = library {
             validLibrary.performChanges({
+                let request = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: fileURL)
+                request?.creationDate = Date()
                 
-                PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: fileURL)
+                if let location = self.locationManager?.latestLocation {
+                    request?.location = location
+                }
             }, completionHandler: { success, error in
                 if let error = error {
                     self._show(NSLocalizedString("Unable to save video to the iPhone.", comment:""), message: error.localizedDescription)
