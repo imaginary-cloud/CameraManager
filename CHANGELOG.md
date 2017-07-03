@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.0](https://github.com/imaginary-cloud/CameraManager/tree/3.2.0) - 2017-07-03
+### Added
+
+- Add location data to videos (pull request #110)
+- Optional location permissions (pull request #110)
+
 ## [3.1.4](https://github.com/imaginary-cloud/CameraManager/tree/3.1.4) - 2017-06-14
 ### Added
 
