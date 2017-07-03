@@ -25,7 +25,6 @@ class ViewController: UIViewController {
     @IBOutlet weak var askForPermissionsButton: UIButton!
     @IBOutlet weak var askForPermissionsLabel: UILabel!
     
-    
     // MARK: - UIViewController
     
     override func viewDidLoad() {
@@ -50,7 +49,6 @@ class ViewController: UIViewController {
             flashModeButton.isEnabled = false
             flashModeButton.setTitle("No flash", for: UIControlState())
         }
-        
     }
     
     override func viewWillAppear(_ animated: Bool) {
