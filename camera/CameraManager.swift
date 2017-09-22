@@ -880,8 +880,8 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     
     fileprivate func _addPreviewLayerToView(_ view: UIView) {
         embeddingView = view
-        self.attachZoom(view)
-        self.attachFocus(view)
+        attachZoom(view)
+        attachFocus(view)
         DispatchQueue.main.async(execute: { () -> Void in
             guard let previewLayer = self.previewLayer else { return }
             previewLayer.frame = view.layer.bounds
