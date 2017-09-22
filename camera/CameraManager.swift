@@ -623,9 +623,11 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     fileprivate lazy var focusGesture = UITapGestureRecognizer()
     
     fileprivate func attachFocus(_ view: UIView) {
-        focusGesture.addTarget(self, action: #selector(CameraManager._focusStart(_:)))
-        view.addGestureRecognizer(focusGesture)
-        focusGesture.delegate = self
+        DispatchQueue.main.async {
+            self.zoomGesture.addTarget(self, action: #selector(CameraManager._zoomStart(_:)))
+            view.addGestureRecognizer(self.focusGesture)
+            self.zoomGesture.delegate = self
+        }
     }
     
     @objc fileprivate func _focusStart(_ recognizer: UITapGestureRecognizer) {
@@ -878,9 +880,9 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     
     fileprivate func _addPreviewLayerToView(_ view: UIView) {
         embeddingView = view
+        self.attachZoom(view)
+        self.attachFocus(view)
         DispatchQueue.main.async(execute: { () -> Void in
-            self.attachZoom(view)
-            self.attachFocus(view)
             guard let previewLayer = self.previewLayer else { return }
             previewLayer.frame = view.layer.bounds
             view.clipsToBounds = true
