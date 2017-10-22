@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [4.0.0](https://github.com/imaginary-cloud/CameraManager/tree/4.0.0) - 2017-10-22
+### Changed
+
+- Syntax update for Swift 4.0 (pull request #125)
+
+### Fixed
+
+- Add gesture recognizers on the main thread (pull request #123)
+
 ## [3.2.0](https://github.com/imaginary-cloud/CameraManager/tree/3.2.0) - 2017-07-03
 ### Added
 
