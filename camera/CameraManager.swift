@@ -555,9 +555,11 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     fileprivate lazy var zoomGesture = UIPinchGestureRecognizer()
     
     fileprivate func attachZoom(_ view: UIView) {
-        zoomGesture.addTarget(self, action: #selector(CameraManager._zoomStart(_:)))
-        view.addGestureRecognizer(zoomGesture)
-        zoomGesture.delegate = self
+        DispatchQueue.main.async {
+            self.zoomGesture.addTarget(self, action: #selector(CameraManager._zoomStart(_:)))
+            view.addGestureRecognizer(self.zoomGesture)
+            self.zoomGesture.delegate = self
+        }
     }
     
     open func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
@@ -876,10 +878,11 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     }
     
     fileprivate func _addPreviewLayerToView(_ view: UIView) {
+        embeddingView = view
+        attachZoom(view)
+        attachFocus(view)
+        
         DispatchQueue.main.async(execute: { () -> Void in
-            self.embeddingView = view
-            self.attachZoom(view)
-            self.attachFocus(view)
             guard let previewLayer = self.previewLayer else { return }
             previewLayer.frame = view.layer.bounds
             view.clipsToBounds = true
