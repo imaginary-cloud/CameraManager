@@ -6,13 +6,21 @@ This is a simple Swift class to provide all the configurations you need to creat
 It follows orientation change and updates UI accordingly, supports front and rear camera selection, pinch to zoom, tap to focus, different flash modes, inputs and outputs.
 Just drag, drop and use.
 
-Now it's compatible with latest Swift syntax if you're using any Swift version prior to 2.0 make sure to use one of the previously tagged releases.
+Now it's compatible with latest Swift syntax, so if you're using any Swift version prior to 4.0 make sure to use one of the previously tagged releases.
 
 ## Installation with CocoaPods
 
 The easiest way to install the CameraManager is with: [CocoaPods](http://cocoapods.org)
 
 ### Podfile
+
+If you want Swift 4.0 syntax use:
+
+```ruby
+use_frameworks!
+
+pod 'CameraManager', '~> 4.0'
+```
 
 If you want Swift 3.0 syntax use:
 
@@ -49,7 +57,7 @@ import PackageDescription
 
 let package = Package(
     dependencies: [
-        .Package(url: "https://github.com/imaginary-cloud/CameraManager", majorVersion: 3, minor: 2)
+        .Package(url: "https://github.com/imaginary-cloud/CameraManager", majorVersion: 4, minor: 0)
     ]
 )
 ```
@@ -59,6 +67,12 @@ let package = Package(
 [Carthage](https://github.com/Carthage/Carthage) is another dependency management tool written in Swift.
 
 Add the following line to your Cartfile:
+
+If you want Swift 4.0 syntax use:
+
+```
+github "imaginary-cloud/CameraManager" >= 4.0
+```
 
 If you want Swift 3.0 syntax use:
 
@@ -200,7 +214,7 @@ cameraManager.stopVideoRecording({ (videoURL, error) -> Void in
 
 ## Support
 
-Supports iOS 8 and above. Xcode 8.0 is required to build the latest code written in Swift 3.0.
+Supports iOS 8 and above. Xcode 9.0 is required to build the latest code written in Swift 4.0.
 
 ## License
 
