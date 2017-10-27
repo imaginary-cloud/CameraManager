@@ -61,6 +61,9 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     
     /// Property to determine if manager should write the resources to the phone library. Default value is true.
     open var writeFilesToPhoneLibrary = true
+
+    // Allow to save location on images when saving to library. Default value is true.
+    open var saveLocationOnImages = true
     
     /// Property to determine if manager should follow device orientation. Default value is true.
     open var shouldRespondToOrientationChanges = true {
@@ -193,7 +196,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     // MARK: - Private properties
     
     fileprivate var locationManager: CameraLocationManager?
-    
+
     fileprivate weak var embeddingView: UIView?
     fileprivate var videoCompletion: ((_ videoURL: URL?, _ error: NSError?) -> Void)?
     
@@ -352,6 +355,11 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
      :param: imageCompletion Completion block containing the captured UIImage
      */
     open func capturePictureWithCompletion(_ imageCompletion: @escaping (UIImage?, NSError?) -> Void) {
+        
+        if writeFilesToPhoneLibrary && saveLocationOnImages && locationManager == nil {
+            locationManager = CameraLocationManager()
+        }
+        
         self.capturePictureDataWithCompletion { data, error in
             
             guard error == nil, let imageData = data else {
@@ -612,7 +620,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             captureDevice?.videoZoomFactor = zoomScale
             
             captureDevice?.unlockForConfiguration()
-            
+
         } catch {
             print("Error locking configuration")
         }
