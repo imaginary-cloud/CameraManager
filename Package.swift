@@ -1,6 +1,6 @@
 // Package.swift
 //
-// Copyright © 2016 ImaginaryCloud, imaginarycloud.com. This library is licensed under the MIT license.
+// Copyright © 2017 ImaginaryCloud, imaginarycloud.com. This library is licensed under the MIT license.
 
 import PackageDescription
 

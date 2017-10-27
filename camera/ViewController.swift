@@ -25,13 +25,13 @@ class ViewController: UIViewController {
     @IBOutlet weak var askForPermissionsButton: UIButton!
     @IBOutlet weak var askForPermissionsLabel: UILabel!
     
-    
     // MARK: - UIViewController
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         cameraManager.showAccessPermissionPopupAutomatically = false
+        navigationController?.navigationBar.isHidden = true
         
         askForPermissionsButton.isHidden = true
         askForPermissionsLabel.isHidden = true
@@ -44,11 +44,11 @@ class ViewController: UIViewController {
         } else if (currentCameraState == .ready) {
             addCameraToView()
         }
+
         if !cameraManager.hasFlash {
             flashModeButton.isEnabled = false
             flashModeButton.setTitle("No flash", for: UIControlState())
         }
-        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -137,6 +137,10 @@ class ViewController: UIViewController {
         case .videoWithMic, .videoOnly:
             sender.setTitle("Video", for: UIControlState())
         }
+    }
+    
+    @IBAction func locateMeButtonTapped(_ sender: Any) {
+        self.cameraManager.shouldUseLocationServices = true
     }
     
     @IBAction func changeCameraDevice(_ sender: UIButton) {
