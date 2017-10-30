@@ -2,6 +2,44 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [4.0.0](https://github.com/imaginary-cloud/CameraManager/tree/4.0.0) - 2017-10-22
+### Changed
+
+- Syntax update for Swift 4.0 (pull request #125)
+
+### Fixed
+
+- Add gesture recognizers on the main thread (pull request #123)
+
+## [3.2.0](https://github.com/imaginary-cloud/CameraManager/tree/3.2.0) - 2017-07-03
+### Added
+
+- Add location data to videos (pull request #110)
+- Optional location permissions (pull request #110)
+
+## [3.1.4](https://github.com/imaginary-cloud/CameraManager/tree/3.1.4) - 2017-06-14
+### Added
+
+- Add properties `focusMode` and `exposureMode` (pull request #106)
+- Add property `animateShutter` to disable shutter animation
+
+### Fixed
+
+- FlashMode on front camera (issue #82)
+- Zoom of front camera not working (issue #84)
+- Getting same video URL, when simultaneously recording video (issue #108)
+
+## [3.1.3](https://github.com/imaginary-cloud/CameraManager/tree/3.1.3) - 2017-05-15
+### Added
+
+- Add two new properties `shouldEnableTapToFocus` and `shouldEnablePinchToZoom` (pull request #106)
+
+## [3.1.2](https://github.com/imaginary-cloud/CameraManager/tree/3.1.2) - 2017-05-02
+### Changed
+
+- New option to flip image took by front camera (pull request #104)
+- Fixes possible hang after requesting permission (pull request #98)
+
 ## [3.1.1](https://github.com/imaginary-cloud/CameraManager/tree/3.1.1) - 2017-03-15
 ### Changed
 
