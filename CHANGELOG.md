@@ -2,6 +2,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [4.0.1](https://github.com/imaginary-cloud/CameraManager/tree/4.0.1) - 2017-11-18
+
+### Added
+
+- Add @discardableResult modifiers to addPreviewLayerToView (pull request #132)
+
+### Fixed 
+
+- Fix shouldEnableTapToFocus function (pull request #133)
+
 ## [4.0.0](https://github.com/imaginary-cloud/CameraManager/tree/4.0.0) - 2017-10-22
 ### Changed
 
