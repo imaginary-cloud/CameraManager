@@ -498,6 +498,21 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         return cameraOutputQuality
     }
     
+    /**
+     Check the camera device has flash
+     */
+    open func hasFlash(for cameraDevice: CameraDevice) -> Bool {
+        let devices = AVCaptureDevice.videoDevices
+        for device in devices {
+            if device.position == .back && cameraDevice == .back {
+                return device.hasFlash
+            } else if device.position == .front && cameraDevice == .front {
+                return device.hasFlash
+            }
+        }
+        return false
+    }
+    
     // MARK: - AVCaptureFileOutputRecordingDelegate
     public func fileOutput(captureOutput: AVCaptureFileOutput, didStartRecordingTo fileURL: URL, from connections: [AVCaptureConnection]) {
         captureSession?.beginConfiguration()
