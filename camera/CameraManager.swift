@@ -13,6 +13,7 @@ import ImageIO
 import MobileCoreServices
 import Photos
 import CoreLocation
+import CoreMotion
 
 public enum CameraState {
     case ready, accessDenied, noDeviceFound, notDetermined
@@ -227,6 +228,11 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         let tempURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("tempMovie\(Date().timeIntervalSince1970)").appendingPathExtension("mp4")
         return tempURL
     }
+    
+    fileprivate var coreMotionManager: CMMotionManager!
+    
+    /// Real device orientation from accelerometer
+    fileprivate var deviceOrientation: UIDeviceOrientation = .portrait
     
     
     // MARK: - CameraManager
@@ -840,7 +846,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     }
     
     fileprivate func _currentVideoOrientation() -> AVCaptureVideoOrientation {
-        switch UIDevice.current.orientation {
+        switch deviceOrientation {
         case .landscapeLeft:
             return .landscapeRight
         case .landscapeRight:
@@ -881,14 +887,37 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     
     fileprivate func _startFollowingDeviceOrientation() {
         if shouldRespondToOrientationChanges && !cameraIsObservingDeviceOrientation {
-            NotificationCenter.default.addObserver(self, selector: #selector(CameraManager._orientationChanged), name: NSNotification.Name.UIDeviceOrientationDidChange, object: nil)
+            coreMotionManager = CMMotionManager()
+            coreMotionManager.accelerometerUpdateInterval = 0.1
+            
+            coreMotionManager.startAccelerometerUpdates(to: OperationQueue()) { (data, error) in
+                guard let data = data else {
+                    return
+                }
+                DispatchQueue.main.async { [weak self] in
+                    if(abs(data.acceleration.y) < abs(data.acceleration.x)){
+                        if(data.acceleration.x > 0){
+                            self?.deviceOrientation = UIDeviceOrientation.landscapeRight
+                        } else {
+                            self?.deviceOrientation = UIDeviceOrientation.landscapeLeft
+                        }
+                    } else {
+                        if(data.acceleration.y > 0){
+                            self?.deviceOrientation = UIDeviceOrientation.portraitUpsideDown
+                        } else {
+                            self?.deviceOrientation = UIDeviceOrientation.portrait
+                        }
+                    }
+                    self?._orientationChanged()
+                }
+            }
             cameraIsObservingDeviceOrientation = true
         }
     }
     
     fileprivate func _stopFollowingDeviceOrientation() {
         if cameraIsObservingDeviceOrientation {
-            NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIDeviceOrientationDidChange, object: nil)
+            coreMotionManager.stopAccelerometerUpdates()
             cameraIsObservingDeviceOrientation = false
         }
     }
