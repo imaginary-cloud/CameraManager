@@ -829,7 +829,14 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             return .landscapeRight
         case .landscapeRight:
             return .landscapeLeft
+        case .portrait:
+            return .portrait
         default:
+            //prior code forced everything else to portrait.  This causes the preview to flip incorrectly when recording landscape, and then pointing down or up
+            //The following returns the current orientation if the device is flipped to a orientation that isn't supported if there is a valid preview layer & connection
+            if let validPreviewLayer = previewLayer, let connection = validPreviewLayer.connection  {
+                return connection.videoOrientation //Keep the existing orientation
+            }
             return .portrait
         }
     }
