@@ -243,14 +243,15 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
      
      :returns: Current state of the camera: Ready / AccessDenied / NoDeviceFound / NotDetermined.
      */
-    open func addPreviewLayerToView(_ view: UIView) -> CameraState {
+    @discardableResult open func addPreviewLayerToView(_ view: UIView) -> CameraState {
         return addPreviewLayerToView(view, newCameraOutputMode: cameraOutputMode)
     }
-    open func addPreviewLayerToView(_ view: UIView, newCameraOutputMode: CameraOutputMode) -> CameraState {
+  
+    @discardableResult open func addPreviewLayerToView(_ view: UIView, newCameraOutputMode: CameraOutputMode) -> CameraState {
         return addLayerPreviewToView(view, newCameraOutputMode: newCameraOutputMode, completion: nil)
     }
     
-    open func addLayerPreviewToView(_ view: UIView, newCameraOutputMode: CameraOutputMode, completion: (() -> Void)?) -> CameraState {
+    @discardableResult open func addLayerPreviewToView(_ view: UIView, newCameraOutputMode: CameraOutputMode, completion: (() -> Void)?) -> CameraState {
         if _canLoadCamera() {
             if let _ = embeddingView {
                 if let validPreviewLayer = previewLayer {
@@ -506,6 +507,21 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         return cameraOutputQuality
     }
     
+    /**
+     Check the camera device has flash
+     */
+    open func hasFlash(for cameraDevice: CameraDevice) -> Bool {
+        let devices = AVCaptureDevice.videoDevices
+        for device in devices {
+            if device.position == .back && cameraDevice == .back {
+                return device.hasFlash
+            } else if device.position == .front && cameraDevice == .front {
+                return device.hasFlash
+            }
+        }
+        return false
+    }
+    
     // MARK: - AVCaptureFileOutputRecordingDelegate
     public func fileOutput(captureOutput: AVCaptureFileOutput, didStartRecordingTo fileURL: URL, from connections: [AVCaptureConnection]) {
         captureSession?.beginConfiguration()
@@ -631,9 +647,9 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     
     fileprivate func attachFocus(_ view: UIView) {
         DispatchQueue.main.async {
-            self.zoomGesture.addTarget(self, action: #selector(CameraManager._zoomStart(_:)))
+            self.focusGesture.addTarget(self, action: #selector(CameraManager._focusStart(_:)))
             view.addGestureRecognizer(self.focusGesture)
-            self.zoomGesture.delegate = self
+            self.focusGesture.delegate = self
         }
     }
     
