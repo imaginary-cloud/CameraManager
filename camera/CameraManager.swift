@@ -1206,7 +1206,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             let inputs: [AVCaptureInput] = validCaptureSession.inputs
             
             for input in inputs {
-                if let deviceInput = input as? AVCaptureDeviceInput {
+                if let deviceInput = input as? AVCaptureDeviceInput, deviceInput.device != mic {
                     validCaptureSession.removeInput(deviceInput)
                 }
             }
