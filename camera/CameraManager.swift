@@ -215,15 +215,14 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     }()
     
     // MARK: - Core ML
-    public var shouldForwardPixelBuffersToDelegate: Bool = false
     public var pixelsBuffersToForwardPerSecond = 15
     public var videoOutputSettings: [String : Any] =
-        [kCVPixelBufferPixelFormatTypeKey as String: NSNumber(value: kCVPixelFormatType_32ARGB),
+        [kCVPixelBufferPixelFormatTypeKey as String: NSNumber(value: kCVPixelFormatType_32BGRA),
          kCVPixelBufferWidthKey as String: NSNumber(value: 224),
          kCVPixelBufferHeightKey as String: NSNumber(value: 224)]
     fileprivate var videoOutput: AVCaptureVideoDataOutput?
     fileprivate let videoOutputQueue = DispatchQueue(label: "camera.manager.video.output.queue")
-    public weak var videoOutputDelegate: CameraManagerVideoCaptureDelegate?
+    public weak var videoOutputDelegate: VideoCaptureDelegate?
     fileprivate var videoOutputLastTimestamp = CMTime()
     // MARK: -
     
@@ -813,20 +812,6 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         return newMoviewOutput
     }
     
-    fileprivate func _getVideoOutput() -> AVCaptureVideoDataOutput {
-        if let videoOutput = videoOutput,
-            let connection = videoOutput.connection(with: AVMediaType.video),
-            connection.isActive {
-            return videoOutput
-        }
-        let newVideoOutput = AVCaptureVideoDataOutput()
-        newVideoOutput.videoSettings = videoOutputSettings
-        newVideoOutput.alwaysDiscardsLateVideoFrames = true
-        newVideoOutput.setSampleBufferDelegate(self, queue: videoOutputQueue)
-        self.videoOutput = newVideoOutput
-        return newVideoOutput
-    }
-    
     fileprivate func _getStillImageOutput() -> AVCaptureStillImageOutput {
         if let stillImageOutput = stillImageOutput, let connection = stillImageOutput.connection(with: AVMediaType.video),
             connection.isActive {
@@ -834,25 +819,13 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         }
         let newStillImageOutput = AVCaptureStillImageOutput()
         stillImageOutput = newStillImageOutput
-        
-        var videoOutput: AVCaptureVideoDataOutput? = nil
-        if isCameraManagerVideoCaptureDelegateActive {
-            videoOutput = _getVideoOutput()
-        }
-        
         if let captureSession = captureSession {
-            captureSession.beginConfiguration()
             if captureSession.canAddOutput(newStillImageOutput) {
+                captureSession.beginConfiguration()
                 captureSession.addOutput(newStillImageOutput)
+                captureSession.commitConfiguration()
             }
-            if let videoOutputValue = videoOutput, captureSession.canAddOutput(videoOutputValue) {
-                captureSession.addOutput(videoOutputValue)
-            }
-            captureSession.commitConfiguration()
         }
-        // We want the buffers to be in portrait orientation otherwise they are
-        // rotated by 90 degrees. Need to set this _after_ addOutput()!
-        videoOutput?.connection(with: AVMediaType.video)?.videoOrientation = .portrait
         return newStillImageOutput
     }
     
@@ -1371,38 +1344,61 @@ fileprivate extension AVCaptureDevice {
 
 // MARK: - Core ML
 
-public protocol CameraManagerVideoCaptureDelegate: class {
+public protocol VideoCaptureDelegate: class {
     func didCaptureVideoFrame(pixelBuffer: CVPixelBuffer?, timestamp: CMTime)
 }
 
 extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
-    private var isCameraManagerVideoCaptureDelegateActive: Bool {
+    
+    private var isVideoCaptureDelegateActive: Bool {
         if #available(iOS 11, *) {
-            return shouldForwardPixelBuffersToDelegate && videoOutputDelegate != nil
+            return videoOutputDelegate != nil
         }
         return false
     }
     
+    public func addVideoOutput() {
+        if let videoOutput = videoOutput,
+            let connection = videoOutput.connection(with: AVMediaType.video),
+            connection.isActive {
+            return
+        }
+        let newVideoOutput = AVCaptureVideoDataOutput()
+        newVideoOutput.videoSettings = videoOutputSettings
+        newVideoOutput.alwaysDiscardsLateVideoFrames = true
+        newVideoOutput.setSampleBufferDelegate(self, queue: videoOutputQueue)
+        if let captureSession = captureSession {
+            if captureSession.canAddOutput(newVideoOutput) {
+                captureSession.beginConfiguration()
+                captureSession.addOutput(newVideoOutput)
+                // We want the buffers to be in portrait orientation otherwise they are
+                // rotated by 90 degrees. Need to set this _after_ addOutput()!
+                newVideoOutput.connection(with: AVMediaType.video)?.videoOrientation = .portrait
+                captureSession.commitConfiguration()
+            }
+        }
+        self.videoOutput = newVideoOutput
+    }
+    
+    // MARK: AVCaptureVideoDataOutputSampleBufferDelegate
+    
     public func captureOutput(_ output: AVCaptureOutput,
                               didOutput sampleBuffer: CMSampleBuffer,
                               from connection: AVCaptureConnection) {
-        if isCameraManagerVideoCaptureDelegateActive {
-            // capture at full speed but only call the delegate at its desired framerate
-            let timestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
-            let deltaTime = timestamp - videoOutputLastTimestamp
-            if deltaTime >= CMTimeMake(1, Int32(pixelsBuffersToForwardPerSecond)) {
-                videoOutputLastTimestamp = timestamp
-                let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
-                videoOutputDelegate?.didCaptureVideoFrame(pixelBuffer: imageBuffer, timestamp: timestamp)
-            }
+        guard isVideoCaptureDelegateActive else { return }
+        // capture at full speed but only call the delegate at its desired framerate
+        let timestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+        let deltaTime = timestamp - videoOutputLastTimestamp
+        if deltaTime >= CMTimeMake(1, Int32(pixelsBuffersToForwardPerSecond)) {
+            videoOutputLastTimestamp = timestamp
+            let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
+            videoOutputDelegate?.didCaptureVideoFrame(pixelBuffer: imageBuffer, timestamp: timestamp)
         }
     }
     
     public func captureOutput(_ output: AVCaptureOutput,
                               didDrop sampleBuffer: CMSampleBuffer,
                               from connection: AVCaptureConnection) {
-        if isCameraManagerVideoCaptureDelegateActive {
-            print("captureOutput:didDrop")
-        }
+        guard isVideoCaptureDelegateActive else { return }
     }
 }
