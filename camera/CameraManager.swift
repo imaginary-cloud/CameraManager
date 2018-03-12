@@ -1351,10 +1351,7 @@ public protocol VideoCaptureDelegate: class {
 extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
     
     private var isVideoCaptureDelegateActive: Bool {
-        if #available(iOS 11, *) {
-            return videoOutputDelegate != nil
-        }
-        return false
+        return videoOutputDelegate != nil
     }
     
     public func addVideoOutput() {
@@ -1394,11 +1391,5 @@ extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
             let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
             videoOutputDelegate?.didCaptureVideoFrame(pixelBuffer: imageBuffer, timestamp: timestamp)
         }
-    }
-    
-    public func captureOutput(_ output: AVCaptureOutput,
-                              didDrop sampleBuffer: CMSampleBuffer,
-                              from connection: AVCaptureConnection) {
-        guard isVideoCaptureDelegateActive else { return }
     }
 }
