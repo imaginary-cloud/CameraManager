@@ -61,6 +61,9 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     
     /// Property to determine if manager should write the resources to the phone library. Default value is true.
     open var writeFilesToPhoneLibrary = true
+
+    // Allow to save location on images when saving to library. Default value is false.
+    open var saveLocationOnImages = false
     
     /// Property to determine if manager should follow device orientation. Default value is true.
     open var shouldRespondToOrientationChanges = true {
@@ -193,7 +196,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     // MARK: - Private properties
     
     fileprivate var locationManager: CameraLocationManager?
-    
+
     fileprivate weak var embeddingView: UIView?
     fileprivate var videoCompletion: ((_ videoURL: URL?, _ error: NSError?) -> Void)?
     
@@ -210,6 +213,18 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     fileprivate lazy var mic: AVCaptureDevice? = {
         return AVCaptureDevice.default(for: AVMediaType.audio)
     }()
+    
+    // MARK: - Core ML
+    public var pixelsBuffersToForwardPerSecond = 15
+    public var videoOutputSettings: [String : Any] =
+        [kCVPixelBufferPixelFormatTypeKey as String: NSNumber(value: kCVPixelFormatType_32BGRA),
+         kCVPixelBufferWidthKey as String: NSNumber(value: 224),
+         kCVPixelBufferHeightKey as String: NSNumber(value: 224)]
+    fileprivate var videoOutput: AVCaptureVideoDataOutput?
+    fileprivate let videoOutputQueue = DispatchQueue(label: "camera.manager.video.output.queue")
+    public weak var videoOutputDelegate: VideoCaptureDelegate?
+    fileprivate var videoOutputLastTimestamp = CMTime()
+    // MARK: -
     
     fileprivate var stillImageOutput: AVCaptureStillImageOutput?
     fileprivate var movieOutput: AVCaptureMovieFileOutput?
@@ -344,6 +359,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         mic = nil
         stillImageOutput = nil
         movieOutput = nil
+        videoOutput = nil
         animateCameraDeviceChange = oldAnimationValue
     }
     
@@ -353,6 +369,11 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
      :param: imageCompletion Completion block containing the captured UIImage
      */
     open func capturePictureWithCompletion(_ imageCompletion: @escaping (UIImage?, NSError?) -> Void) {
+        
+        if writeFilesToPhoneLibrary && saveLocationOnImages && locationManager == nil {
+            locationManager = CameraLocationManager()
+        }
+        
         self.capturePictureDataWithCompletion { data, error in
             
             guard error == nil, let imageData = data else {
@@ -628,7 +649,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             captureDevice?.videoZoomFactor = zoomScale
             
             captureDevice?.unlockForConfiguration()
-            
+
         } catch {
             print("Error locking configuration")
         }
@@ -1318,5 +1339,57 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
 fileprivate extension AVCaptureDevice {
     fileprivate static var videoDevices: [AVCaptureDevice] {
         return AVCaptureDevice.devices(for: AVMediaType.video)
+    }
+}
+
+// MARK: - Core ML
+
+public protocol VideoCaptureDelegate: class {
+    func didCaptureVideoFrame(pixelBuffer: CVPixelBuffer?, timestamp: CMTime)
+}
+
+extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
+    
+    private var isVideoCaptureDelegateActive: Bool {
+        return videoOutputDelegate != nil
+    }
+    
+    public func addVideoOutput() {
+        if let videoOutput = videoOutput,
+            let connection = videoOutput.connection(with: AVMediaType.video),
+            connection.isActive {
+            return
+        }
+        let newVideoOutput = AVCaptureVideoDataOutput()
+        newVideoOutput.videoSettings = videoOutputSettings
+        newVideoOutput.alwaysDiscardsLateVideoFrames = true
+        newVideoOutput.setSampleBufferDelegate(self, queue: videoOutputQueue)
+        if let captureSession = captureSession {
+            if captureSession.canAddOutput(newVideoOutput) {
+                captureSession.beginConfiguration()
+                captureSession.addOutput(newVideoOutput)
+                // We want the buffers to be in portrait orientation otherwise they are
+                // rotated by 90 degrees. Need to set this _after_ addOutput()!
+                newVideoOutput.connection(with: AVMediaType.video)?.videoOrientation = .portrait
+                captureSession.commitConfiguration()
+            }
+        }
+        self.videoOutput = newVideoOutput
+    }
+    
+    // MARK: AVCaptureVideoDataOutputSampleBufferDelegate
+    
+    public func captureOutput(_ output: AVCaptureOutput,
+                              didOutput sampleBuffer: CMSampleBuffer,
+                              from connection: AVCaptureConnection) {
+        guard isVideoCaptureDelegateActive else { return }
+        // capture at full speed but only call the delegate at its desired framerate
+        let timestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+        let deltaTime = timestamp - videoOutputLastTimestamp
+        if deltaTime >= CMTimeMake(1, Int32(pixelsBuffersToForwardPerSecond)) {
+            videoOutputLastTimestamp = timestamp
+            let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
+            videoOutputDelegate?.didCaptureVideoFrame(pixelBuffer: imageBuffer, timestamp: timestamp)
+        }
     }
 }
