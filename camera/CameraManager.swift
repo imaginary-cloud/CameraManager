@@ -62,7 +62,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     /// Property to determine if manager should write the resources to the phone library. Default value is true.
     open var writeFilesToPhoneLibrary = true
 
-    // Allow to save location on images when saving to library. Default value is true.
+    // Allow to save location on images when saving to library. Default value is false.
     open var saveLocationOnImages = false
     
     /// Property to determine if manager should follow device orientation. Default value is true.
