@@ -383,7 +383,24 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         }
         
         let image: UIImage
-        if self.shouldFlipFrontCameraImage == true, self.cameraDevice == .front {
+        if UIDevice.current.userInterfaceIdiom == .pad, self.cameraDevice == .front {
+            guard let cgImage = tempImage.cgImage else {
+                imageCompletion(nil, NSError())
+                return
+            }
+            
+            switch _currentVideoOrientation() {
+            case .landscapeLeft:
+                image = UIImage(cgImage: cgImage, scale: tempImage.scale, orientation: self.shouldFlipFrontCameraImage ? .upMirrored : .up)
+            case .landscapeRight:
+                image = UIImage(cgImage: cgImage, scale: tempImage.scale, orientation: self.shouldFlipFrontCameraImage ? .downMirrored : .down)
+            case .portraitUpsideDown:
+                image = UIImage(cgImage: cgImage, scale: tempImage.scale, orientation: self.shouldFlipFrontCameraImage ? .rightMirrored : .left)
+            default:
+                image = UIImage(cgImage: cgImage, scale: tempImage.scale, orientation: self.shouldFlipFrontCameraImage ? .leftMirrored : .right)
+            }
+        }
+        else if self.shouldFlipFrontCameraImage == true, self.cameraDevice == .front {
             guard let cgImage = tempImage.cgImage else {
                 imageCompletion(nil, NSError())
                 return
@@ -851,6 +868,8 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             return .landscapeRight
         case .landscapeRight:
             return .landscapeLeft
+        case .portraitUpsideDown:
+            return .portraitUpsideDown
         default:
             return .portrait
         }
