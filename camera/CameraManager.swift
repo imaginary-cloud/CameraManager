@@ -780,21 +780,20 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     }
     
     fileprivate func _getMovieOutput() -> AVCaptureMovieFileOutput {
-        if let movieOutput = movieOutput, let connection = movieOutput.connection(with: AVMediaType.video),
-            connection.isActive {
-            return movieOutput
-        }
-        let newMoviewOutput = AVCaptureMovieFileOutput()
-        newMoviewOutput.movieFragmentInterval = kCMTimeInvalid
-        movieOutput = newMoviewOutput
-        if let captureSession = captureSession {
-            if captureSession.canAddOutput(newMoviewOutput) {
-                captureSession.beginConfiguration()
-                captureSession.addOutput(newMoviewOutput)
-                captureSession.commitConfiguration()
+        if (movieOutput == nil) {
+            let newMoviewOutput = AVCaptureMovieFileOutput()
+            newMoviewOutput.movieFragmentInterval = kCMTimeInvalid
+            movieOutput = newMoviewOutput
+            if let captureSession = captureSession {
+                if captureSession.canAddOutput(newMoviewOutput) {
+                    captureSession.beginConfiguration()
+                    captureSession.addOutput(newMoviewOutput)
+                    captureSession.commitConfiguration()
+                }
             }
         }
-        return newMoviewOutput
+
+        return movieOutput!
     }
     
     fileprivate func _getStillImageOutput() -> AVCaptureStillImageOutput {
@@ -815,7 +814,8 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     }
     
     @objc fileprivate func _orientationChanged() {
-        var currentConnection: AVCaptureConnection?;
+        var currentConnection: AVCaptureConnection?
+
         switch cameraOutputMode {
         case .stillImage:
             currentConnection = stillImageOutput?.connection(with: AVMediaType.video)
