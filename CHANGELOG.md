@@ -2,6 +2,21 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [4.0.2](https://github.com/imaginary-cloud/CameraManager/tree/4.0.2) - 2018-05-07
+
+### Fixed 
+
+- Using CoreMotion to get real device orientation, fixing no sound when switching camera (pull request #134)
+- Fixed take picture on iPad with front camera(landscape, UpsideDown… (pull request #139)
+
+- Bugs (issue #115)
+- Not able to to get sound while recording from front camera (#116)
+- Urgent: toggle camera back to front no sound coming in recorded video (issue #118)
+- Orientation issues (landscape) (issue #135)
+- Resuming capture session improvement (issue #136)
+- Issue with focus area (issue #137)
+- Repeat crash CameraManager.swift line 430 in release (issue #138)
+
 ## [4.0.1](https://github.com/imaginary-cloud/CameraManager/tree/4.0.1) - 2017-11-18
 
 ### Added
