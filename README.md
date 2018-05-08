@@ -218,4 +218,10 @@ Supports iOS 8 and above. Xcode 9.0 is required to build the latest code written
 
 ## License
 
-Copyright © 2018 Imaginary Cloud, www.imaginarycloud.com. This library is licensed under the MIT license.
+Copyright © 2010-2018 [Imaginary Cloud](www.imaginarycloud.com). This library is licensed under the MIT license.
+
+## About Imaginary Cloud
+
+![alt text](https://s31.postimg.cc/qlhlkdh4b/github.png)
+
+We apply our own Product Design Process to bring great digital products to life. Visit [our website](www.imaginarycloud.com) to find out about our other projects or [contact us](www.imaginarycloud.com/contacts) if there's an idea that you want to turn into an outstanding product, we'll take it from there!
