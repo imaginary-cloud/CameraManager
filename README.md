@@ -222,6 +222,6 @@ Copyright © 2010-2018 [Imaginary Cloud](www.imaginarycloud.com). This library i
 
 ## About Imaginary Cloud
 
-![alt text](https://s31.postimg.cc/52wejht57/logo_whitebg_horizontal_2x.png)
+![alt text](https://s31.postimg.cc/nwi7gpouz/Imaginary_Cloud.jpg)
 
 We apply our own Product Design Process to bring great digital products to life. Visit [our website](www.imaginarycloud.com) to find out about our other projects or [contact us](www.imaginarycloud.com/contacts) if there's an idea that you want to turn into an outstanding product, we'll take it from there!
