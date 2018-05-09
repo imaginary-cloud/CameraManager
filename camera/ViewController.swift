@@ -3,7 +3,7 @@
 //  camera
 //
 //  Created by Natalia Terlecka on 10/10/14.
-//  Copyright (c) 2014 imaginaryCloud. All rights reserved.
+//  Copyright (c) 2014 Imaginary Cloud. All rights reserved.
 //
 
 import UIKit
@@ -30,6 +30,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        cameraManager.shouldFlipFrontCameraImage = true
         cameraManager.showAccessPermissionPopupAutomatically = false
         navigationController?.navigationBar.isHidden = true
         
@@ -41,7 +42,7 @@ class ViewController: UIViewController {
         if currentCameraState == .notDetermined {
             askForPermissionsButton.isHidden = false
             askForPermissionsLabel.isHidden = false
-        } else if (currentCameraState == .ready) {
+        } else if currentCameraState == .ready {
             addCameraToView()
         }
 
@@ -65,7 +66,6 @@ class ViewController: UIViewController {
     
     
     // MARK: - ViewController
-    
     fileprivate func addCameraToView()
     {
         cameraManager.addPreviewLayerToView(cameraView, newCameraOutputMode: CameraOutputMode.videoWithMic)
@@ -97,16 +97,15 @@ class ViewController: UIViewController {
         switch (cameraManager.cameraOutputMode) {
         case .stillImage:
             cameraManager.capturePictureWithCompletion({ (image, error) -> Void in
-                if let errorOccured = error {
-                    self.cameraManager.showErrorBlock("Error occurred", errorOccured.localizedDescription)
+                if error != nil {
+                    self.cameraManager.showErrorBlock("Error occurred", "Cannot save picture.")
                 }
                 else {
                     let vc: ImageViewController? = self.storyboard?.instantiateViewController(withIdentifier: "ImageVC") as? ImageViewController
-                    if let validVC: ImageViewController = vc {
-                        if let capturedImage = image {
+                    if let validVC: ImageViewController = vc,
+                        let capturedImage = image {
                             validVC.image = capturedImage
                             self.navigationController?.pushViewController(validVC, animated: true)
-                        }
                     }
                 }
             })
@@ -118,8 +117,8 @@ class ViewController: UIViewController {
                 cameraManager.startRecordingVideo()
             } else {
                 cameraManager.stopVideoRecording({ (videoURL, error) -> Void in
-                    if let errorOccured = error {                        
-                        self.cameraManager.showErrorBlock("Error occurred", errorOccured.localizedDescription)
+                    if error != nil {
+                        self.cameraManager.showErrorBlock("Error occurred", "Cannot save video.")
                     }
                 })
             }

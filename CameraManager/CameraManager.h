@@ -3,7 +3,7 @@
 //  CameraManager
 //
 //  Created by Lex Tang on 4/9/15.
-//  Copyright (c) 2015 imaginaryCloud. All rights reserved.
+//  Copyright (c) 2015 Imaginary Cloud. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>

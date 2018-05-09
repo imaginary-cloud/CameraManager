@@ -6,7 +6,6 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
-        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -152,13 +151,13 @@
                             <constraint firstItem="2bK-wq-6Rf" firstAttribute="top" secondItem="rd3-ei-B9P" secondAttribute="top" id="0KQ-L2-vRf"/>
                             <constraint firstAttribute="trailing" secondItem="jaF-q9-Eli" secondAttribute="trailing" id="2fZ-BE-g5j"/>
                             <constraint firstItem="2bK-wq-6Rf" firstAttribute="top" secondItem="jaF-q9-Eli" secondAttribute="bottom" constant="4" id="8fE-gJ-Hi7"/>
-                            <constraint firstItem="doC-d9-lME" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="9aZ-Bp-CKI"/>
                             <constraint firstItem="EI2-CK-oqA" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="E1I-Yh-igT"/>
                             <constraint firstItem="rd3-ei-B9P" firstAttribute="bottom" secondItem="EI2-CK-oqA" secondAttribute="bottom" constant="-4" id="GKS-w4-B8J"/>
                             <constraint firstItem="2bK-wq-6Rf" firstAttribute="bottom" secondItem="rd3-ei-B9P" secondAttribute="bottom" id="J9p-Wn-xC4"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="EI2-CK-oqA" secondAttribute="bottom" id="JW8-WC-69E"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="FSo-n8-ZwV" secondAttribute="bottom" constant="20" id="KgN-t9-iTh"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="doC-d9-lME" secondAttribute="bottom" constant="20" id="Ky0-wh-bIF"/>
+                            <constraint firstAttribute="trailing" secondItem="doC-d9-lME" secondAttribute="trailing" constant="16" id="SPW-pC-9Xf"/>
                             <constraint firstItem="jaF-q9-Eli" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="Tv6-Ak-cSA"/>
                             <constraint firstItem="EI2-CK-oqA" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="Y9T-eB-SQS"/>
                             <constraint firstItem="2bK-wq-6Rf" firstAttribute="trailing" secondItem="rd3-ei-B9P" secondAttribute="trailing" id="add-TX-ds6"/>
@@ -167,6 +166,7 @@
                             <constraint firstItem="jaF-q9-Eli" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="eAr-PL-deK"/>
                             <constraint firstAttribute="trailing" secondItem="EI2-CK-oqA" secondAttribute="trailing" id="m1R-4g-dGU"/>
                             <constraint firstItem="rd3-ei-B9P" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="4" id="n5z-dZ-b1l"/>
+                            <constraint firstItem="doC-d9-lME" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="20" symbolic="YES" id="rFh-xa-FCK"/>
                             <constraint firstItem="2bK-wq-6Rf" firstAttribute="leading" secondItem="rd3-ei-B9P" secondAttribute="leading" id="vNM-yq-5jd"/>
                         </constraints>
                     </view>
