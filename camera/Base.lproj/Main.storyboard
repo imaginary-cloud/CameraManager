@@ -67,7 +67,7 @@
                                         <color key="backgroundColor" red="0.98039215690000003" green="0.98039215690000003" blue="0.97254901959999995" alpha="0.79679247359154926" colorSpace="custom" customColorSpace="sRGB"/>
                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
                                         <state key="normal" title="Flash off">
-                                            <color key="titleColor" red="0.27843137254901962" green="0.45882352941176469" blue="0.80392156862745101" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <color key="titleColor" red="0.28627450980392155" green="0.46666666666666667" blue="0.792156862745098" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         </state>
                                         <connections>
                                             <action selector="changeFlashMode:" destination="BYZ-38-t0r" eventType="touchUpInside" id="e2b-Lg-iqO"/>
@@ -193,20 +193,37 @@
                         <viewControllerLayoutGuide type="top" id="LQz-Um-h4k"/>
                         <viewControllerLayoutGuide type="bottom" id="qVT-yr-0bo"/>
                     </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="Qhk-xW-6b1">
+                    <view key="view" contentMode="scaleAspectFill" id="Qhk-xW-6b1">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" adjustsImageSizeForAccessibilityContentSizeCategory="YES" translatesAutoresizingMaskIntoConstraints="NO" id="v1g-94-paQ">
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" adjustsImageSizeForAccessibilityContentSizeCategory="YES" translatesAutoresizingMaskIntoConstraints="NO" id="v1g-94-paQ">
                                 <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                             </imageView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hZh-Id-5lE">
+                                <rect key="frame" x="30" y="30" width="60" height="40"/>
+                                <color key="backgroundColor" red="0.97272133436113994" green="0.97272133436113994" blue="0.97272133436113994" alpha="0.79679247359154926" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="40" id="fQO-YO-L9U"/>
+                                    <constraint firstAttribute="width" constant="60" id="kgB-hF-oBt"/>
+                                </constraints>
+                                <state key="normal" title="Close">
+                                    <color key="titleColor" red="0.28627450980000002" green="0.46666666670000001" blue="0.79215686269999996" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                    <color key="titleShadowColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                                <connections>
+                                    <action selector="closeButtonTapped:" destination="xF2-bQ-3ri" eventType="touchUpInside" id="JMX-R6-50P"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="v1g-94-paQ" firstAttribute="leading" secondItem="Qhk-xW-6b1" secondAttribute="leading" id="AJ6-Mx-ha2"/>
+                            <constraint firstItem="hZh-Id-5lE" firstAttribute="leading" secondItem="v1g-94-paQ" secondAttribute="leading" constant="30" id="Jq1-eb-SFZ"/>
                             <constraint firstItem="qVT-yr-0bo" firstAttribute="top" secondItem="v1g-94-paQ" secondAttribute="bottom" id="QTs-sj-GPP"/>
                             <constraint firstAttribute="trailing" secondItem="v1g-94-paQ" secondAttribute="trailing" id="SFa-Zd-kVH"/>
                             <constraint firstItem="v1g-94-paQ" firstAttribute="top" secondItem="Qhk-xW-6b1" secondAttribute="top" id="jLa-Hd-QGr"/>
+                            <constraint firstItem="hZh-Id-5lE" firstAttribute="top" secondItem="v1g-94-paQ" secondAttribute="top" constant="30" id="sKV-s6-riz"/>
                         </constraints>
                     </view>
                     <nil key="simulatedStatusBarMetrics"/>

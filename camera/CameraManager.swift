@@ -121,25 +121,23 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     /// Property to enable or disable location services. Location services in camera is used for EXIF data. Default is false
     open var shouldUseLocationServices: Bool = false {
         didSet {
-            if shouldUseLocationServices == true {
+            if shouldUseLocationServices {
                 self.locationManager = CameraLocationManager()
             }
         }
     }
     
     /// Property to change camera device between front and back.
-    open var cameraDevice = CameraDevice.back {
+    open var cameraDevice = CameraDevice.front {
         didSet {
-            if cameraIsSetup {
-                if cameraDevice != oldValue {
-                    if animateCameraDeviceChange {
-                        _doFlipAnimation()
-                    }
-                    _updateCameraDevice(cameraDevice)
-                    _updateFlashMode(flashMode)
-                    _setupMaxZoomScale()
-                    _zoom(0)
+            if cameraIsSetup && cameraDevice != oldValue {
+                if animateCameraDeviceChange {
+                    _doFlipAnimation()
                 }
+                _updateCameraDevice(cameraDevice)
+                _updateFlashMode(flashMode)
+                _setupMaxZoomScale()
+                _zoom(0)
             }
         }
     }
@@ -147,11 +145,8 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     /// Property to change camera flash mode.
     open var flashMode = CameraFlashMode.off {
         didSet {
-            if cameraIsSetup {
-                if flashMode != oldValue {
-                    _updateFlashMode(flashMode)
-                    print("Flash Mode: \(flashMode.rawValue)")
-                }
+            if cameraIsSetup && flashMode != oldValue {
+                _updateFlashMode(flashMode)
             }
         }
     }
@@ -159,10 +154,8 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     /// Property to change camera output quality.
     open var cameraOutputQuality = CameraOutputQuality.high {
         didSet {
-            if cameraIsSetup {
-                if cameraOutputQuality != oldValue {
-                    _updateCameraQualityMode(cameraOutputQuality)
-                }
+            if cameraIsSetup && cameraOutputQuality != oldValue {
+                _updateCameraQualityMode(cameraOutputQuality)
             }
         }
     }
@@ -297,7 +290,6 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                 DispatchQueue.main.async(execute: { () -> Void in
                     completion(allowedAccess)
                 })
-                
             }
         })
     }
@@ -382,34 +374,52 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     
     fileprivate func _capturePicture(_ imageData: Data, _ imageCompletion: (UIImage?, NSError?) -> Void) {
         guard let ciImage = CIImage(data: imageData) else { imageCompletion(nil, NSError()); return }
-        
+        let orientation = ciImage.properties["Orientation"] as! Int32
         let image: UIImage
-        if UIDevice.current.userInterfaceIdiom == .pad, self.cameraDevice == .front {
-            
-            switch _currentVideoOrientation() {
-            case .landscapeLeft:
-                image = UIImage(ciImage: ciImage, scale: 1.0, orientation: self.shouldFlipFrontCameraImage ? .upMirrored : .up)
-            case .landscapeRight:
-                image = UIImage(ciImage: ciImage, scale: 1.0, orientation: self.shouldFlipFrontCameraImage ? .downMirrored : .down)
-            case .portraitUpsideDown:
-                image = UIImage(ciImage: ciImage, scale: 1.0, orientation: self.shouldFlipFrontCameraImage ? .rightMirrored : .left)
-            default:
-                image = UIImage(ciImage: ciImage, scale: 1.0, orientation: self.shouldFlipFrontCameraImage ? .leftMirrored : .right)
+        
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            if(isDeviceOrientationLocked()) {
+                if cameraDevice == .front {
+                    image = UIImage(ciImage: ciImage, scale: 1.0, orientation: _iPadFrontImageLockedOrientation())
+                } else {
+                    image = UIImage(ciImage: ciImage, scale: 1.0, orientation: UIImageOrientation.right)
+                }
+            } else {
+                let mirror = shouldFlipFrontCameraImage && cameraDevice == .front
+                switch _imageOrientation() {
+                case .leftMirrored:
+                    image = UIImage(ciImage: ciImage, scale: 1.0, orientation: mirror ? .leftMirrored : .right)
+                case .rightMirrored:
+                    image = UIImage(ciImage: ciImage, scale: 1.0, orientation: mirror ? .rightMirrored : .left)
+                case .downMirrored where cameraDevice == .front:
+                    image = UIImage(ciImage: ciImage, scale: 1.0, orientation: mirror ? .downMirrored : .down)
+                case .downMirrored:
+                    image = UIImage(ciImage: ciImage, scale: 1.0, orientation: .up)
+                case .upMirrored where cameraDevice == .front:
+                    image = UIImage(ciImage: ciImage, scale: 1.0, orientation: mirror ? .upMirrored: .up)
+                case .upMirrored:
+                    image = UIImage(ciImage: ciImage, scale: 1.0, orientation: .down)
+                default:
+                    image = UIImage(ciImage: ciImage)
+                }
             }
-        }
-        else if self.shouldFlipFrontCameraImage == true, self.cameraDevice == .front {
-            let flippedImage = UIImage(ciImage: ciImage, scale: 1.0, orientation: .leftMirrored)
-            image = flippedImage
         } else {
-            let orientation = ciImage.properties["Orientation"] as! Int32
-            image = UIImage(ciImage: ciImage.oriented(forExifOrientation: orientation))
+            if (isDeviceOrientationLocked()) {
+                if cameraDevice == .front {
+                    image = UIImage(ciImage: ciImage.oriented(forExifOrientation: Int32(_iPhoneFrontImageLockedOrientation().rawValue)))
+                } else {
+                    image = UIImage(ciImage: ciImage.oriented(forExifOrientation: Int32(CGImagePropertyOrientation.right.rawValue)))
+                }
+            } else {
+                image = UIImage(ciImage: ciImage.oriented(forExifOrientation: orientation), scale: 1.0, orientation: _imageOrientation())
+            }
         }
         
         if self.writeFilesToPhoneLibrary == true, let library = self.library  {
             library.performChanges({
                 let request = PHAssetChangeRequest.creationRequestForAsset(from: image)
                 request.creationDate = Date()
-                
+
                 if let location = self.locationManager?.latestLocation {
                     request.location = location
                 }
@@ -446,6 +456,11 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             let stillImageOutput = self._getStillImageOutput()
             if let connection = stillImageOutput.connection(with: AVMediaType.video),
                 connection.isEnabled {
+                if (self.cameraDevice == CameraDevice.front && UIDevice.current.userInterfaceIdiom != .pad &&
+                    connection.isVideoMirroringSupported &&
+                    self.shouldFlipFrontCameraImage) {
+                    connection.isVideoMirrored = true
+                }
                 stillImageOutput.captureStillImageAsynchronously(from: connection, completionHandler: { [weak self] sample, error in
                     
                     if let error = error {
@@ -472,7 +487,20 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
      */
     open func startRecordingVideo() {
         if cameraOutputMode != .stillImage {
-            _getMovieOutput().startRecording(to: _tempFilePath(), recordingDelegate: self)
+            let videoOutput = _getMovieOutput()
+            // setup video mirroring
+            for connection in videoOutput.connections {
+                for port in connection.inputPorts {
+                    
+                    if port.mediaType == AVMediaType.video {
+                        let videoConnection = connection as AVCaptureConnection
+                        if videoConnection.isVideoMirroringSupported {
+                            videoConnection.isVideoMirrored = (cameraDevice == CameraDevice.front && videoConnection.isVideoMirroringSupported && shouldFlipFrontCameraImage)
+                        }
+                    }
+                }
+            }
+            videoOutput.startRecording(to: _tempFilePath(), recordingDelegate: self)
         } else {
             _show(NSLocalizedString("Capture session output still image", comment:""), message: NSLocalizedString("I can only take pictures", comment:""))
         }
@@ -487,6 +515,13 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                 videoCompletion = completion
                 runningMovieOutput.stopRecording()
         }
+    }
+    
+    /**
+     Check if the device rotation is locked
+     */
+    open func isDeviceOrientationLocked() -> Bool {
+        return UIDevice.current.orientation == UIDeviceOrientation.portrait && deviceOrientation.rawValue != 1
     }
     
     /**
@@ -841,7 +876,8 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             }
             if let validOutputLayerConnection = currentConnection,
                 validOutputLayerConnection.isVideoOrientationSupported {
-                    validOutputLayerConnection.videoOrientation = _currentVideoOrientation()
+                
+                validOutputLayerConnection.videoOrientation = _currentVideoOrientation()
             }
             if !shouldKeepViewAtOrientationChanges {
                 DispatchQueue.main.async(execute: { () -> Void in
@@ -854,7 +890,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     }
     
     fileprivate func _currentVideoOrientation() -> AVCaptureVideoOrientation {
-        switch deviceOrientation {
+        switch UIDevice.current.orientation {
         case .landscapeLeft:
             return .landscapeRight
         case .landscapeRight:
@@ -863,6 +899,43 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             return .portraitUpsideDown
         default:
             return .portrait
+        }
+    }
+    
+    fileprivate func _imageOrientation() -> UIImageOrientation {
+        switch deviceOrientation {
+        case .landscapeLeft:
+            return .downMirrored
+        case .landscapeRight:
+            return .upMirrored
+        case .portraitUpsideDown:
+            return .rightMirrored
+        default:
+            return .leftMirrored
+        }
+    }
+    
+    fileprivate func _iPadFrontImageLockedOrientation() -> UIImageOrientation {
+        let mirror = shouldFlipFrontCameraImage && cameraDevice == .front
+        switch deviceOrientation {
+        case .landscapeLeft, .landscapeRight:
+            return mirror ? .leftMirrored : .left
+        case .portraitUpsideDown:
+            return mirror ? .leftMirrored : .right
+        default:
+            return .down
+        }
+    }
+    
+    fileprivate func _iPhoneFrontImageLockedOrientation() -> CGImagePropertyOrientation {
+        let mirror = shouldFlipFrontCameraImage && cameraDevice == .front
+        switch deviceOrientation {
+        case .landscapeLeft, .landscapeRight:
+            return mirror ? .leftMirrored : .left
+        case .portraitUpsideDown:
+            return mirror ? .leftMirrored : .right
+        default:
+            return .down
         }
     }
     
@@ -1058,12 +1131,10 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                 var tempView = UIView()
                 
                 if CameraManager._blurSupported() {
-                    
                     let blurEffect = UIBlurEffect(style: .light)
                     tempView = UIVisualEffectView(effect: blurEffect)
                     tempView.frame = validEmbeddingView.bounds
                 } else {
-                    
                     tempView = UIView(frame: validEmbeddingView.bounds)
                     tempView.backgroundColor = UIColor(white: 0.0, alpha: 0.5)
                 }
@@ -1179,7 +1250,6 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         
         if let cameraTransitionView = cameraTransitionView {
             if let validPreviewLayer = previewLayer {
-                
                 validPreviewLayer.opacity = 1.0
             }
             
@@ -1256,7 +1326,6 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                 CATransaction.begin()
                 
                 if let completion = completion {
-                    
                     CATransaction.setCompletionBlock(completion)
                 }
                 
@@ -1338,7 +1407,6 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         _stopFollowingDeviceOrientation()
     }
 }
-
 
 fileprivate extension AVCaptureDevice {
     fileprivate static var videoDevices: [AVCaptureDevice] {
