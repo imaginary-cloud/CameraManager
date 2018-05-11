@@ -340,21 +340,19 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
      Stops running capture session and removes all setup devices, inputs and outputs.
      */
     open func stopAndRemoveCaptureSession() {
-        sessionQueue.async(execute: {
-            self.stopCaptureSession()
-            let oldAnimationValue = self.animateCameraDeviceChange
-            self.animateCameraDeviceChange = false
-            self.cameraDevice = .back
-            self.cameraIsSetup = false
-            self.previewLayer = nil
-            self.captureSession = nil
-            self.frontCameraDevice = nil
-            self.backCameraDevice = nil
-            self.mic = nil
-            self.stillImageOutput = nil
-            self.movieOutput = nil
-            self.animateCameraDeviceChange = oldAnimationValue
-        })
+        self.stopCaptureSession()
+        let oldAnimationValue = self.animateCameraDeviceChange
+        self.animateCameraDeviceChange = false
+        self.cameraDevice = .back
+        self.cameraIsSetup = false
+        self.previewLayer = nil
+        self.captureSession = nil
+        self.frontCameraDevice = nil
+        self.backCameraDevice = nil
+        self.mic = nil
+        self.stillImageOutput = nil
+        self.movieOutput = nil
+        self.animateCameraDeviceChange = oldAnimationValue
     }
     
     /**
