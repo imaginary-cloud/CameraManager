@@ -8,6 +8,7 @@
 
 import UIKit
 import CameraManager
+import CoreLocation
 
 class ViewController: UIViewController {
     
@@ -22,7 +23,8 @@ class ViewController: UIViewController {
     @IBOutlet weak var cameraButton: UIButton!
     @IBOutlet weak var flashModeButton: UIButton!
     
-    @IBOutlet weak var askForPermissionsButton: UIButton!
+    @IBOutlet weak var locationButton: UIButton!
+    
     @IBOutlet weak var askForPermissionsLabel: UILabel!
     
     // MARK: - UIViewController
@@ -30,17 +32,29 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        cameraManager.shouldFlipFrontCameraImage = true
+        cameraManager.shouldFlipFrontCameraImage = false
         cameraManager.showAccessPermissionPopupAutomatically = false
         navigationController?.navigationBar.isHidden = true
         
-        askForPermissionsButton.isHidden = true
         askForPermissionsLabel.isHidden = true
+        
+        askForPermissionsLabel.isUserInteractionEnabled = true
+        let tapGesture = UITapGestureRecognizer.init(target: self, action: #selector(askForCameraPermissions))
+        askForPermissionsLabel.addGestureRecognizer(tapGesture)
+        
+        if CLLocationManager.locationServicesEnabled() {
+            switch CLLocationManager.authorizationStatus() {
+            case .authorizedAlways, .authorizedWhenInUse:
+                self.cameraManager.shouldUseLocationServices = true
+                self.locationButton.isHidden = true
+            default:
+                self.cameraManager.shouldUseLocationServices = false
+            }
+        }
 
         let currentCameraState = cameraManager.currentCameraStatus()
         
         if currentCameraState == .notDetermined {
-            askForPermissionsButton.isHidden = false
             askForPermissionsLabel.isHidden = false
         } else if currentCameraState == .ready {
             addCameraToView()
@@ -64,7 +78,7 @@ class ViewController: UIViewController {
         cameraManager.stopCaptureSession()
     }
     
-    
+
     // MARK: - ViewController
     fileprivate func addCameraToView()
     {
@@ -105,6 +119,7 @@ class ViewController: UIViewController {
                     if let validVC: ImageViewController = vc,
                         let capturedImage = image {
                             validVC.image = capturedImage
+                            validVC.cameraManager = self.cameraManager
                             self.navigationController?.pushViewController(validVC, animated: true)
                     }
                 }
@@ -140,6 +155,7 @@ class ViewController: UIViewController {
     
     @IBAction func locateMeButtonTapped(_ sender: Any) {
         self.cameraManager.shouldUseLocationServices = true
+        self.locationButton.isHidden = true
     }
     
     @IBAction func changeCameraDevice(_ sender: UIButton) {
@@ -156,9 +172,7 @@ class ViewController: UIViewController {
     @IBAction func askForCameraPermissions(_ sender: UIButton) {
         
         cameraManager.askUserForCameraPermission({ permissionGranted in
-            self.askForPermissionsButton.isHidden = true
             self.askForPermissionsLabel.isHidden = true
-            self.askForPermissionsButton.alpha = 0
             self.askForPermissionsLabel.alpha = 0
             if permissionGranted {
                 self.addCameraToView()

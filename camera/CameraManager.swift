@@ -9,11 +9,12 @@
 import UIKit
 import AVFoundation
 import Photos
+import PhotosUI
 import ImageIO
 import MobileCoreServices
-import Photos
 import CoreLocation
 import CoreMotion
+import CoreImage
 
 public enum CameraState {
     case ready, accessDenied, noDeviceFound, notDetermined
@@ -128,7 +129,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     }
     
     /// Property to change camera device between front and back.
-    open var cameraDevice = CameraDevice.front {
+    open var cameraDevice = CameraDevice.back {
         didSet {
             if cameraIsSetup && cameraDevice != oldValue {
                 if animateCameraDeviceChange {
@@ -226,7 +227,6 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     
     /// Real device orientation from accelerometer
     fileprivate var deviceOrientation: UIDeviceOrientation = .portrait
-    
     
     // MARK: - CameraManager
     
@@ -372,67 +372,114 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         }
     }
     
-    fileprivate func _capturePicture(_ imageData: Data, _ imageCompletion: (UIImage?, NSError?) -> Void) {
-        guard let ciImage = CIImage(data: imageData) else { imageCompletion(nil, NSError()); return }
-        let orientation = ciImage.properties["Orientation"] as! Int32
-        let image: UIImage
-        
-        if UIDevice.current.userInterfaceIdiom == .pad {
-            if(isDeviceOrientationLocked()) {
-                if cameraDevice == .front {
-                    image = UIImage(ciImage: ciImage, scale: 1.0, orientation: _iPadFrontImageLockedOrientation())
-                } else {
-                    image = UIImage(ciImage: ciImage, scale: 1.0, orientation: UIImageOrientation.right)
-                }
-            } else {
-                let mirror = shouldFlipFrontCameraImage && cameraDevice == .front
-                switch _imageOrientation() {
-                case .leftMirrored:
-                    image = UIImage(ciImage: ciImage, scale: 1.0, orientation: mirror ? .leftMirrored : .right)
-                case .rightMirrored:
-                    image = UIImage(ciImage: ciImage, scale: 1.0, orientation: mirror ? .rightMirrored : .left)
-                case .downMirrored where cameraDevice == .front:
-                    image = UIImage(ciImage: ciImage, scale: 1.0, orientation: mirror ? .downMirrored : .down)
-                case .downMirrored:
-                    image = UIImage(ciImage: ciImage, scale: 1.0, orientation: .up)
-                case .upMirrored where cameraDevice == .front:
-                    image = UIImage(ciImage: ciImage, scale: 1.0, orientation: mirror ? .upMirrored: .up)
-                case .upMirrored:
-                    image = UIImage(ciImage: ciImage, scale: 1.0, orientation: .down)
-                default:
-                    image = UIImage(ciImage: ciImage)
-                }
-            }
-        } else {
-            if (isDeviceOrientationLocked()) {
-                if cameraDevice == .front {
-                    image = UIImage(ciImage: ciImage.oriented(forExifOrientation: Int32(_iPhoneFrontImageLockedOrientation().rawValue)))
-                } else {
-                    image = UIImage(ciImage: ciImage.oriented(forExifOrientation: Int32(CGImagePropertyOrientation.right.rawValue)))
-                }
-            } else {
-                image = UIImage(ciImage: ciImage.oriented(forExifOrientation: orientation), scale: 1.0, orientation: _imageOrientation())
-            }
+    fileprivate func _capturePicture(_ imageData: Data, _ imageCompletion: @escaping (UIImage?, NSError?) -> Void) {
+        guard let img = UIImage(data: imageData) else {
+            imageCompletion(nil, NSError())
+            return
         }
         
-        if self.writeFilesToPhoneLibrary == true, let library = self.library  {
-            library.performChanges({
-                let request = PHAssetChangeRequest.creationRequestForAsset(from: image)
-                request.creationDate = Date()
+        let image = fixOrientation(withImage: img)
+        
+        if writeFilesToPhoneLibrary {
+            
+            let filePath = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("tempImg\(Int(Date().timeIntervalSince1970)).jpg")
+            let newImageData = _imageDataWithEXIF(forImage: image, imageData) as Data
+                
+            do {
+                
+                try newImageData.write(to: filePath)
+                
+                // make sure that doesn't fail the first time
+                if PHPhotoLibrary.authorizationStatus() != .authorized {
+                    PHPhotoLibrary.requestAuthorization { (status) in
+                        if status == PHAuthorizationStatus.authorized {
+                            self._saveImageToLibrary(atFileURL: filePath, imageCompletion)
+                        }
+                    }
+                } else {
+                    self._saveImageToLibrary(atFileURL: filePath, imageCompletion)
+                }
 
-                if let location = self.locationManager?.latestLocation {
-                    request.location = location
-                }
-            }, completionHandler: { _, error in
-                if let error = error {
-                    DispatchQueue.main.async(execute: {
-                        self._show(NSLocalizedString("Error", comment:""), message: error.localizedDescription)
-                    })
-                }
-            })
+            } catch {
+                imageCompletion(nil, NSError())
+                return
+            }
         }
         
         imageCompletion(image, nil)
+    }
+    
+    fileprivate func _setVideoWithGPS(forLocation location: CLLocation) {
+        let metadata = AVMutableMetadataItem()
+        metadata.keySpace = AVMetadataKeySpace.quickTimeMetadata
+        metadata.key = AVMetadataKey.quickTimeMetadataKeyLocationISO6709 as NSString
+        metadata.identifier = AVMetadataIdentifier.quickTimeMetadataLocationISO6709
+        metadata.value = String(format: "%+09.5f%+010.5f%+.0fCRSWGS_84", location.coordinate.latitude, location.coordinate.longitude, location.altitude) as NSString
+        _getMovieOutput().metadata = [metadata]
+    }
+    
+    fileprivate func _imageDataWithEXIF(forImage image: UIImage, _ imageData: Data) -> CFMutableData {
+        // get EXIF info
+        let cgImage = image.cgImage
+        let newImageData:CFMutableData = CFDataCreateMutable(nil, 0)
+        let type = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, "image/jpg" as CFString, kUTTypeImage)
+        let destination:CGImageDestination = CGImageDestinationCreateWithData(newImageData, (type?.takeRetainedValue())!, 1, nil)!
+    
+        let imageSourceRef = CGImageSourceCreateWithData(imageData as CFData, nil)
+        let currentProperties = CGImageSourceCopyPropertiesAtIndex(imageSourceRef!, 0, nil)
+        let mutableDict = NSMutableDictionary(dictionary: currentProperties!)
+        
+        if let location = self.locationManager?.latestLocation {
+            mutableDict.setValue(_gpsMetadata(withLocation: location), forKey: kCGImagePropertyGPSDictionary as String)
+        }
+    
+        CGImageDestinationAddImage(destination, cgImage!, mutableDict as CFDictionary)
+        CGImageDestinationFinalize(destination)
+    
+        return newImageData
+    }
+    
+    fileprivate func _gpsMetadata(withLocation location: CLLocation) -> NSMutableDictionary {
+        let f = DateFormatter()
+        f.timeZone = TimeZone(abbreviation: "UTC")
+        
+        f.dateFormat = "yyyy:MM:dd"
+        let isoDate = f.string(from: location.timestamp)
+
+        f.dateFormat = "HH:mm:ss.SSSSSS"
+        let isoTime = f.string(from: location.timestamp)
+    
+        let GPSMetadata = NSMutableDictionary()
+        let altitudeRef = Int(location.altitude < 0.0 ? 1 : 0)
+        let latitudeRef = location.coordinate.latitude < 0.0 ? "S" : "N"
+        let longitudeRef = location.coordinate.longitude < 0.0 ? "W" : "E"
+        
+        // GPS metadata
+        GPSMetadata[(kCGImagePropertyGPSLatitude as String)] = abs(location.coordinate.latitude)
+        GPSMetadata[(kCGImagePropertyGPSLongitude as String)] = abs(location.coordinate.longitude)
+        GPSMetadata[(kCGImagePropertyGPSLatitudeRef as String)] = latitudeRef
+        GPSMetadata[(kCGImagePropertyGPSLongitudeRef as String)] = longitudeRef
+        GPSMetadata[(kCGImagePropertyGPSAltitude as String)] = Int(abs(location.altitude))
+        GPSMetadata[(kCGImagePropertyGPSAltitudeRef as String)] = altitudeRef
+        GPSMetadata[(kCGImagePropertyGPSTimeStamp as String)] = isoTime
+        GPSMetadata[(kCGImagePropertyGPSDateStamp as String)] = isoDate
+        
+        return GPSMetadata
+    }
+    
+    fileprivate func _saveImageToLibrary(atFileURL filePath: URL, _ imageCompletion: @escaping (UIImage?, NSError?) -> Void) {
+        guard let library = library else { imageCompletion(nil, NSError()); return }
+
+        library.performChanges({
+            if let request = PHAssetChangeRequest.creationRequestForAssetFromImage(atFileURL: filePath) {
+                request.creationDate = Date()
+            }
+        }, completionHandler: { success, error in
+            if error != nil {
+                imageCompletion(nil, NSError())
+                return
+            }
+        })
     }
     
     /**
@@ -456,11 +503,14 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             let stillImageOutput = self._getStillImageOutput()
             if let connection = stillImageOutput.connection(with: AVMediaType.video),
                 connection.isEnabled {
-                if (self.cameraDevice == CameraDevice.front && UIDevice.current.userInterfaceIdiom != .pad &&
-                    connection.isVideoMirroringSupported &&
+                if (self.cameraDevice == CameraDevice.front && connection.isVideoMirroringSupported &&
                     self.shouldFlipFrontCameraImage) {
                     connection.isVideoMirrored = true
                 }
+                if connection.isVideoOrientationSupported {
+                    connection.videoOrientation = self._currentCaptureVideoOrientation()
+                }
+                
                 stillImageOutput.captureStillImageAsynchronously(from: connection, completionHandler: { [weak self] sample, error in
                     
                     if let error = error {
@@ -481,6 +531,21 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             }
         })
     }
+    //
+
+    fileprivate func _imageOrientation(forDeviceOrientation deviceOrientation: UIDeviceOrientation, isMirrored: Bool) -> UIImageOrientation {
+        
+        switch deviceOrientation {
+        case .landscapeLeft:
+            return isMirrored ? .upMirrored : .up
+        case .landscapeRight:
+            return isMirrored ? .downMirrored : .down
+        default:
+            break
+        }
+
+        return isMirrored ? .leftMirrored : .right
+    }
     
     /**
      Starts recording a video with or without voice as in the session preset.
@@ -495,11 +560,32 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                     if port.mediaType == AVMediaType.video {
                         let videoConnection = connection as AVCaptureConnection
                         if videoConnection.isVideoMirroringSupported {
-                            videoConnection.isVideoMirrored = (cameraDevice == CameraDevice.front && videoConnection.isVideoMirroringSupported && shouldFlipFrontCameraImage)
+                            videoConnection.isVideoMirrored = (cameraDevice == CameraDevice.front && shouldFlipFrontCameraImage)
                         }
                     }
                 }
             }
+            
+            let specs = [kCMMetadataFormatDescriptionMetadataSpecificationKey_Identifier as String: AVMetadataIdentifier.quickTimeMetadataLocationISO6709,
+                         kCMMetadataFormatDescriptionMetadataSpecificationKey_DataType as String: kCMMetadataDataType_QuickTimeMetadataLocation_ISO6709 as String] as [String : Any]
+            
+            var locationMetadataDesc: CMFormatDescription?
+            CMMetadataFormatDescriptionCreateWithMetadataSpecifications(kCFAllocatorDefault, kCMMetadataFormatType_Boxed, [specs] as CFArray, &locationMetadataDesc)
+            
+            // Create the metadata input and add it to the session.
+            guard let captureSession = captureSession, let locationMetadata = locationMetadataDesc else {
+                    return
+            }
+
+            let newLocationMetadataInput = AVCaptureMetadataInput(formatDescription: locationMetadata, clock: CMClockGetHostTimeClock())
+            captureSession.addInputWithNoConnections(newLocationMetadataInput)
+            
+            // Connect the location metadata input to the movie file output.
+            let inputPort = newLocationMetadataInput.ports[0]
+            captureSession.add(AVCaptureConnection(inputPorts: [inputPort], output: videoOutput))
+            
+            
+            
             videoOutput.startRecording(to: _tempFilePath(), recordingDelegate: self)
         } else {
             _show(NSLocalizedString("Capture session output still image", comment:""), message: NSLocalizedString("I can only take pictures", comment:""))
@@ -520,8 +606,8 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     /**
      Check if the device rotation is locked
      */
-    open func isDeviceOrientationLocked() -> Bool {
-        return UIDevice.current.orientation == UIDeviceOrientation.portrait && deviceOrientation.rawValue != 1
+    open func deviceOrientationMatchesInterfaceOrientation() -> Bool {
+        return deviceOrientation == UIDevice.current.orientation
     }
     
     /**
@@ -576,6 +662,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         if flashMode != .off {
             _updateFlashMode(flashMode)
         }
+        
         captureSession?.commitConfiguration()
     }
     
@@ -586,29 +673,29 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         } else {
             if writeFilesToPhoneLibrary {
                 if PHPhotoLibrary.authorizationStatus() == .authorized {
-                    saveVideoToLibrary(outputFileURL)
+                    _saveVideoToLibrary(outputFileURL)
                 } else {
                     PHPhotoLibrary.requestAuthorization({ (autorizationStatus) in
                         if autorizationStatus == .authorized {
-                            self.saveVideoToLibrary(outputFileURL)
+                            self._saveVideoToLibrary(outputFileURL)
                         }
                     })
                 }
-                
             } else {
                 _executeVideoCompletionWithURL(outputFileURL, error: error as NSError?)
             }
         }
     }
     
-    fileprivate func saveVideoToLibrary(_ fileURL: URL) {
+    fileprivate func _saveVideoToLibrary(_ fileURL: URL) {
         if let validLibrary = library {
             validLibrary.performChanges({
-                let request = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: fileURL)
-                request?.creationDate = Date()
-                
-                if let location = self.locationManager?.latestLocation {
-                    request?.location = location
+                if let request = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: fileURL) {
+                    request.creationDate = Date()
+                    
+                    if let location = self.locationManager?.latestLocation {
+                        request.location = location
+                    }
                 }
             }, completionHandler: { _, error in
                 if let error = error {
@@ -866,18 +953,22 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             currentConnection = stillImageOutput?.connection(with: AVMediaType.video)
         case .videoOnly, .videoWithMic:
             currentConnection = _getMovieOutput().connection(with: AVMediaType.video)
+            if let location = self.locationManager?.latestLocation {
+                _setVideoWithGPS(forLocation: location)
+            }
         }
+        
         if let validPreviewLayer = previewLayer {
             if !shouldKeepViewAtOrientationChanges {
                 if let validPreviewLayerConnection = validPreviewLayer.connection,
                     validPreviewLayerConnection.isVideoOrientationSupported {
-                        validPreviewLayerConnection.videoOrientation = _currentVideoOrientation()
+                        validPreviewLayerConnection.videoOrientation = _currentPreviewVideoOrientation()
                 }
             }
             if let validOutputLayerConnection = currentConnection,
                 validOutputLayerConnection.isVideoOrientationSupported {
                 
-                validOutputLayerConnection.videoOrientation = _currentVideoOrientation()
+                validOutputLayerConnection.videoOrientation = _currentCaptureVideoOrientation()
             }
             if !shouldKeepViewAtOrientationChanges {
                 DispatchQueue.main.async(execute: { () -> Void in
@@ -889,12 +980,70 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         }
     }
     
-    fileprivate func _currentVideoOrientation() -> AVCaptureVideoOrientation {
-        switch UIDevice.current.orientation {
+    fileprivate func _currentCaptureVideoOrientation() -> AVCaptureVideoOrientation {
+        
+        if (deviceOrientation == .faceDown
+            || deviceOrientation == .faceUp
+            || deviceOrientation == .unknown) {
+             return _currentPreviewVideoOrientation()
+        }
+        
+        return _videoOrientation(forDeviceOrientation: deviceOrientation)
+    }
+    
+    
+    fileprivate func _currentPreviewDeviceOrientation() -> UIDeviceOrientation {
+        if (shouldKeepViewAtOrientationChanges) {
+            return .portrait
+        }
+        
+        return UIDevice.current.orientation
+    }
+
+    
+    fileprivate func _currentPreviewVideoOrientation() -> AVCaptureVideoOrientation {
+        let orientation = _currentPreviewDeviceOrientation()
+        
+        return _videoOrientation(forDeviceOrientation: orientation)
+    }
+    
+
+    fileprivate func _videoOrientation(forDeviceOrientation deviceOrientation: UIDeviceOrientation) -> AVCaptureVideoOrientation {
+        switch deviceOrientation {
         case .landscapeLeft:
             return .landscapeRight
         case .landscapeRight:
             return .landscapeLeft
+        case .portraitUpsideDown:
+            return .portraitUpsideDown
+        case .faceUp:
+            return _videoOrientationFromStatusBarOrientation()
+        case .faceDown:
+            return _videoOrientationFromStatusBarOrientation()
+        default:
+            return .portrait
+        }
+    }
+    
+    fileprivate func _videoOrientationFromStatusBarOrientation() -> AVCaptureVideoOrientation {
+        
+        var orientation: UIInterfaceOrientation?
+       
+        DispatchQueue.main.async {
+            orientation = UIApplication.shared.statusBarOrientation
+        }
+        
+        guard let statusBarOrientation = orientation else {
+            return .portrait
+        }
+        
+        switch statusBarOrientation {
+        case .landscapeLeft:
+            return .landscapeLeft
+        case .landscapeRight:
+            return .landscapeRight
+        case .portrait:
+            return .portrait
         case .portraitUpsideDown:
             return .portraitUpsideDown
         default:
@@ -902,41 +1051,26 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         }
     }
     
-    fileprivate func _imageOrientation() -> UIImageOrientation {
-        switch deviceOrientation {
-        case .landscapeLeft:
-            return .downMirrored
-        case .landscapeRight:
-            return .upMirrored
-        case .portraitUpsideDown:
-            return .rightMirrored
-        default:
-            return .leftMirrored
+    fileprivate func fixOrientation(withImage image: UIImage) -> UIImage {
+        guard let cgImage = image.cgImage else { return image }
+        
+        var isMirrored = false
+        let orientation = image.imageOrientation
+        if orientation == .rightMirrored
+            || orientation == .leftMirrored
+            || orientation == .upMirrored
+            || orientation == .downMirrored {
+            
+            isMirrored = true
         }
-    }
-    
-    fileprivate func _iPadFrontImageLockedOrientation() -> UIImageOrientation {
-        let mirror = shouldFlipFrontCameraImage && cameraDevice == .front
-        switch deviceOrientation {
-        case .landscapeLeft, .landscapeRight:
-            return mirror ? .leftMirrored : .left
-        case .portraitUpsideDown:
-            return mirror ? .leftMirrored : .right
-        default:
-            return .down
+        
+        let newOrientation = _imageOrientation(forDeviceOrientation: deviceOrientation, isMirrored: isMirrored)
+        
+        if (image.imageOrientation != newOrientation) {
+            return UIImage(cgImage: cgImage, scale: image.scale, orientation: newOrientation)
         }
-    }
-    
-    fileprivate func _iPhoneFrontImageLockedOrientation() -> CGImagePropertyOrientation {
-        let mirror = shouldFlipFrontCameraImage && cameraDevice == .front
-        switch deviceOrientation {
-        case .landscapeLeft, .landscapeRight:
-            return mirror ? .leftMirrored : .left
-        case .portraitUpsideDown:
-            return mirror ? .leftMirrored : .right
-        default:
-            return .down
-        }
+        
+        return image
     }
     
     fileprivate func _canLoadCamera() -> Bool {
@@ -971,18 +1105,33 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     fileprivate func _startFollowingDeviceOrientation() {
         if shouldRespondToOrientationChanges && !cameraIsObservingDeviceOrientation {
             coreMotionManager = CMMotionManager()
-            coreMotionManager.accelerometerUpdateInterval = 0.1
+            coreMotionManager.accelerometerUpdateInterval = 0.005
             
             if coreMotionManager.isAccelerometerAvailable {
                 coreMotionManager.startAccelerometerUpdates(to: OperationQueue(), withHandler:
                     {data, error in
                         
-                        guard let data = data else{
+                        guard let acceleration: CMAcceleration = data?.acceleration  else{
                             return
                         }
-                        abs( data.acceleration.y ) < abs( data.acceleration.x )
-                            ?   data.acceleration.x > 0 ? (self.deviceOrientation = UIDeviceOrientation.landscapeRight)  :  (self.deviceOrientation = UIDeviceOrientation.landscapeLeft)
-                            :   data.acceleration.y > 0 ? (self.deviceOrientation = UIDeviceOrientation.portraitUpsideDown)   :   (self.deviceOrientation = UIDeviceOrientation.portrait)
+                        
+                        let scaling: CGFloat = CGFloat(1) / CGFloat(( abs(acceleration.x) + abs(acceleration.y)))
+                        
+                        let x: CGFloat = CGFloat(acceleration.x) * scaling
+                        let y: CGFloat = CGFloat(acceleration.y) * scaling
+                        
+                        if acceleration.z < Double(-0.75) {
+                            self.deviceOrientation = .faceUp
+                        } else if acceleration.z > Double(0.75) {
+                            self.deviceOrientation = .faceDown
+                        } else if x < CGFloat(-0.5) {
+                            self.deviceOrientation = .landscapeLeft
+                        } else if x > CGFloat(0.5) {
+                            self.deviceOrientation = .landscapeRight
+                        } else if y > CGFloat(0.5) {
+                            self.deviceOrientation = .portraitUpsideDown
+                        }
+                        
                         self._orientationChanged()
                 })
                 
@@ -991,6 +1140,11 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                 cameraIsObservingDeviceOrientation = false
             }
         }
+    }
+    
+    fileprivate func updateDeviceOrientation(_ orientaion: UIDeviceOrientation) {
+        print()
+        self.deviceOrientation = orientaion
     }
     
     fileprivate func _stopFollowingDeviceOrientation() {
@@ -1167,8 +1321,10 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         override init() {
             super.init()
             locationManager.delegate = self
-            locationManager.desiredAccuracy = kCLLocationAccuracyBest
             locationManager.requestWhenInUseAuthorization()
+            locationManager.distanceFilter = kCLDistanceFilterNone
+            locationManager.headingFilter = 5.0
+            locationManager.desiredAccuracy = kCLLocationAccuracyBest
         }
         
         func startUpdatingLocation() {
