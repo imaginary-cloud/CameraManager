@@ -501,8 +501,8 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             let stillImageOutput = self._getStillImageOutput()
             if let connection = stillImageOutput.connection(with: AVMediaType.video),
                 connection.isEnabled {
-                if (self.cameraDevice == CameraDevice.front && connection.isVideoMirroringSupported &&
-                    self.shouldFlipFrontCameraImage) {
+                if self.cameraDevice == CameraDevice.front && connection.isVideoMirroringSupported &&
+                    self.shouldFlipFrontCameraImage {
                     connection.isVideoMirrored = true
                 }
                 if connection.isVideoOrientationSupported {
@@ -980,9 +980,9 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     
     fileprivate func _currentCaptureVideoOrientation() -> AVCaptureVideoOrientation {
         
-        if (deviceOrientation == .faceDown
+        if deviceOrientation == .faceDown
             || deviceOrientation == .faceUp
-            || deviceOrientation == .unknown) {
+            || deviceOrientation == .unknown {
              return _currentPreviewVideoOrientation()
         }
         
@@ -991,7 +991,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     
     
     fileprivate func _currentPreviewDeviceOrientation() -> UIDeviceOrientation {
-        if (shouldKeepViewAtOrientationChanges) {
+        if shouldKeepViewAtOrientationChanges {
             return .portrait
         }
         
@@ -1064,7 +1064,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         
         let newOrientation = _imageOrientation(forDeviceOrientation: deviceOrientation, isMirrored: isMirrored)
         
-        if (image.imageOrientation != newOrientation) {
+        if image.imageOrientation != newOrientation {
             return UIImage(cgImage: cgImage, scale: image.scale, orientation: newOrientation)
         }
         
@@ -1220,7 +1220,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         // configure new devices
         switch newCameraOutputMode {
         case .stillImage:
-            if (stillImageOutput == nil) {
+            if stillImageOutput == nil {
                 _setupOutputs()
             }
             if let validStillImageOutput = stillImageOutput,
@@ -1502,7 +1502,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     fileprivate func _updateCameraQualityMode(_ newCameraOutputQuality: CameraOutputQuality) {
         if let validCaptureSession = captureSession {
             var sessionPreset = AVCaptureSession.Preset.low
-            switch (newCameraOutputQuality) {
+            switch newCameraOutputQuality {
             case CameraOutputQuality.low:
                 sessionPreset = AVCaptureSession.Preset.low
             case CameraOutputQuality.medium:

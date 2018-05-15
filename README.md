@@ -6,45 +6,17 @@ This is a simple Swift class to provide all the configurations you need to creat
 It follows orientation change and updates UI accordingly, supports front and rear camera selection, pinch to zoom, tap to focus, different flash modes, inputs and outputs.
 Just drag, drop and use.
 
-Now it's compatible with latest Swift syntax, so if you're using any Swift version prior to 4.0 make sure to use one of the previously tagged releases.
-
 ## Installation with CocoaPods
 
-The easiest way to install the CameraManager is with: [CocoaPods](http://cocoapods.org)
+The easiest way to install the CameraManager is with [CocoaPods](http://cocoapods.org)
 
 ### Podfile
 
-If you want Swift 4.0 syntax use:
-
 ```ruby
 use_frameworks!
 
-pod 'CameraManager', '~> 4.0'
-```
-
-If you want Swift 3.0 syntax use:
-
-```ruby
-use_frameworks!
-
-pod 'CameraManager', '~> 3.2'
-```
-
-If you want Swift 2.0 syntax use:
-
-```ruby
-use_frameworks!
-
-pod 'CameraManager', '~> 2.2'
-```
-
-If you want Swift 1.2 syntax use:
-
-```ruby
-use_frameworks!
-
-pod 'CameraManager', '~> 1.0.14'
-```
+pod 'CameraManager', '~> 4.1'
+``` 
 
 ## Installation with Swift Package Manager
 
@@ -57,7 +29,7 @@ import PackageDescription
 
 let package = Package(
     dependencies: [
-        .Package(url: "https://github.com/imaginary-cloud/CameraManager", majorVersion: 4, minor: 0)
+        .Package(url: "https://github.com/imaginary-cloud/CameraManager", majorVersion: 4, minor: 1)
     ]
 )
 ```
@@ -68,28 +40,8 @@ let package = Package(
 
 Add the following line to your Cartfile:
 
-If you want Swift 4.0 syntax use:
-
 ```
-github "imaginary-cloud/CameraManager" >= 4.0
-```
-
-If you want Swift 3.0 syntax use:
-
-```
-github "imaginary-cloud/CameraManager" >= 3.2
-```
-
-If you want Swift 2.0 syntax use:
-
-```
-github "imaginary-cloud/CameraManager" >= 2.2
-```
-
-If you want Swift 1.2 syntax use:
-
-```
-github "imaginary-cloud/CameraManager" >= 1.0
+github "imaginary-cloud/CameraManager" >= 4.1
 ```
 
 And run `carthage update` to build the dynamic framework.
@@ -100,56 +52,87 @@ To use it you just add the preview layer to your desired view, you'll get back t
 let cameraManager = CameraManager()
 cameraManager.addPreviewLayerToView(self.cameraView)
 ```
-You can set input device to front or back camera:
+
+To shoot image all you need to do is call:
 ```swift
-cameraManager.cameraDevice = .Front
-cameraManager.cameraDevice = .Back
+cameraManager.capturePictureWithCompletion({ (image, error) -> Void in
+	self.myImage = image             
+})
 ```
 
-You can specify if the front camera image should be horizontally fliped:
+To record video you call:
+```swift
+cameraManager.startRecordingVideo()
+cameraManager.stopVideoRecording({ (videoURL, error) -> Void in
+	NSFileManager.defaultManager().copyItemAtURL(videoURL, toURL: self.myVideoURL, error: &error)
+})
+```
+
+### Properties
+
+You can set input device to front or back camera. `(Default: .Back)`
+```swift
+cameraManager.cameraDevice = .Front || .Back
+```
+
+You can specify if the front camera image should be horizontally fliped. `(Default: false)`
 
 ```swift
-cameraManager.shouldFlipFrontCameraImage = true
+cameraManager.shouldFlipFrontCameraImage = true || false
 ```
 
-You can enable or disable gestures on camera preview:
+You can enable or disable gestures on camera preview. `(Default: true)`
 
 ```swift
-cameraManager.shouldEnableTapToFocus = true
-cameraManager.shouldEnablePinchToZoom = true
+cameraManager.shouldEnableTapToFocus = true || false
+cameraManager.shouldEnablePinchToZoom = true || false
 ```
 
-You can set output format to Image, video or video with audio:
+You can set output format to Image, video or video with audio. `(Default: .StillImage)`
 
 ```swift
-cameraManager.cameraOutputMode = .StillImage
-cameraManager.cameraOutputMode = .VideoWithMic
-cameraManager.cameraOutputMode = .VideoOnly
+cameraManager.cameraOutputMode = .StillImage || .VideoWithMic || .VideoOnly
 ```
 
-You can set the quality:
+You can set the quality. `(Default: .High)`
 ```swift
-cameraManager.cameraOutputQuality = .Low
-cameraManager.cameraOutputQuality = .Medium
-cameraManager.cameraOutputQuality = .High
+cameraManager.cameraOutputQuality = .Low || .Medium || .High
 ```
 
-You can specifiy the focus and exposure mode:
+You can specify the focus mode. `(Default: .continuousAutoFocus)`
 ```swift
-cameraManager.focusMode = .continuousAutoFocus 
-cameraManager.exposureMode = .continuousAutoExposure 
+cameraManager.focusMode = .autoFocus || .continuousAutoFocus || .locked
 ```
 
-You can change the flash mode (it will also set corresponding flash mode):
+You can specifiy the exposure mode. `(Default: .continuousAutoExposure)`
 ```swift
-cameraManager.flashMode = .Off
-cameraManager.flashMode = .On
-cameraManager.flashMode = .Auto
+cameraManager.exposureMode = .autoExpose || .continuousAutoExposure || .locked || .custom
 ```
 
-To enable location services for storing in Camera Roll. Default is false:
+You can change the flash mode (it will also set corresponding flash mode). `(Default: .Off)`
+```swift
+cameraManager.flashMode = .Off || .On || .Auto
 ```
-cameraManager.shouldUseLocationServices = true
+
+You can enable location services for storing in Camera Roll. `(Default: false)`
+```swift
+cameraManager.shouldUseLocationServices = true || false
+```
+
+You can specify if you want to save the files to phone library. `(Default: true)`
+```swift
+cameraManager.writeFilesToPhoneLibrary = true || false
+```
+
+You can specify if you want to disable animations. `(Default: true)`
+```swift
+cameraManager.animateShutter = true || false
+cameraManager.animateCameraDeviceChange = true || false
+```
+
+You can specify if you want the user to be asked about camera permissions automatically when you first try to use the camera or manually. `(Default: true)`
+```swift
+cameraManager.showAccessPermissionPopupAutomatically = true || false
 ```
 
 To check if the device supports flash call:
@@ -160,22 +143,6 @@ cameraManager.hasFlash
 To change flash mode to the next available one you can use this handy function which will also return current value for you to update the UI accordingly:
 ```swift
 cameraManager.changeFlashMode()
-```
-
-You can specify if you want to save the files to phone library:
-```swift
-cameraManager.writeFilesToPhoneLibrary = true
-```
-
-You can specify if you want to disable animations:
-```swift
-cameraManager.animateShutter = false
-cameraManager.animateCameraDeviceChange = false
-```
-
-You can specify if you want the user to be asked about camera permissions automatically when you first try to use the camera or manually:
-```swift
-cameraManager.showAccessPermissionPopupAutomatically = false
 ```
 
 You can even setUp your custom block to handle error messages:
@@ -197,24 +164,13 @@ cameraManager.showErrorBlock = { (erTitle: String, erMessage: String) -> Void in
 }
 ```
 
-To shoot image all you need to do is call:
-```swift
-cameraManager.capturePictureWithCompletion({ (image, error) -> Void in
-	self.myImage = image             
-})
-```
-
-To record video you do:
-```swift
-cameraManager.startRecordingVideo()
-cameraManager.stopVideoRecording({ (videoURL, error) -> Void in
-	NSFileManager.defaultManager().copyItemAtURL(videoURL, toURL: self.myVideoURL, error: &error)
-})
-```
-
 ## Support
 
-Supports iOS 8 and above. Xcode 9.0 is required to build the latest code written in Swift 4.0.
+Supports iOS 9 and above. Xcode 9.0 is required to build the latest code written in Swift 4.0.
+
+
+Now it's compatible with latest Swift syntax, so if you're using any Swift version prior to 4.0 make sure to use one of the previously tagged releases
+(i.e for Swift 3.0 see [v3.2.0](https://github.com/imaginary-cloud/CameraManager/tree/3.2.0)).
 
 ## License
 

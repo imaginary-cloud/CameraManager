@@ -2,6 +2,18 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [4.1.0](https://github.com/imaginary-cloud/CameraManager/tree/4.0.2) - 2018-05-15
+
+### Added
+
+- Add EXIF metadata for images and video - including location (#131)
+- New layout for Example App
+
+### Fixed
+
+- Fix Crash (pull request #141)
+- Fix image orientation when taking pictures with device rotation lock active 
+
 ## [4.0.2](https://github.com/imaginary-cloud/CameraManager/tree/4.0.2) - 2018-05-07
 
 ### Fixed 
