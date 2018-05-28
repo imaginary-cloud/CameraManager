@@ -94,6 +94,13 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         }
     }
     
+    /// Property to determine if manager should enable pan to change exposure/brightness. Default value is true.
+    open var shouldEnableExposure = true {
+        didSet {
+            exposureGesture.isEnabled = shouldEnableExposure
+        }
+    }
+    
     /// The Bool property to determine if the camera is ready to use.
     open var cameraIsReady: Bool {
         get {
@@ -784,6 +791,16 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         }
     }
     
+    fileprivate lazy var exposureGesture = UIPanGestureRecognizer()
+    
+    fileprivate func attachExposure(_ view: UIView) {
+        DispatchQueue.main.async {
+            self.exposureGesture.addTarget(self, action: #selector(CameraManager._exposureStart(_:)))
+            view.addGestureRecognizer(self.exposureGesture)
+            self.exposureGesture.delegate = self
+        }
+    }
+    
     @objc fileprivate func _focusStart(_ recognizer: UITapGestureRecognizer) {
         
         let device: AVCaptureDevice?
@@ -794,6 +811,10 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         case .front:
             device = frontCameraDevice
         }
+        
+        _changeExposureMode(mode: .continuousAutoExposure)
+        translationY = 0
+        exposureValue = 0.5
         
         if let validDevice = device,
             let validPreviewLayer = previewLayer,
@@ -833,7 +854,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     
     fileprivate var lastFocusRectangle:CAShapeLayer? = nil
     
-    fileprivate func _showFocusRectangleAtPoint(_ focusPoint: CGPoint, inLayer layer: CALayer) {
+    fileprivate func _showFocusRectangleAtPoint(_ focusPoint: CGPoint, inLayer layer: CALayer, withBrightness brightness: Float? = nil) {
         
         if let lastFocusRectangle = lastFocusRectangle {
             
@@ -853,6 +874,13 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         endPath.addLine(to: CGPoint(x: rect.minX + size.width / 2.0, y: rect.maxY - 5.0))
         endPath.move(to: CGPoint(x: rect.minX, y: rect.minY + size.height / 2.0))
         endPath.addLine(to: CGPoint(x: rect.minX + 5.0, y: rect.minY + size.height / 2.0))
+        if (brightness != nil) {
+            endPath.move(to: CGPoint(x: rect.minX + size.width + size.width / 4, y: rect.minY))
+            endPath.addLine(to: CGPoint(x: rect.minX + size.width + size.width / 4, y: rect.minY + size.height))
+            
+            endPath.move(to: CGPoint(x: rect.minX + size.width + size.width / 4 - size.width / 16, y: rect.minY + size.height - CGFloat(brightness!) * size.height))
+            endPath.addLine(to: CGPoint(x: rect.minX + size.width + size.width / 4 + size.width / 16, y: rect.minY + size.height - CGFloat(brightness!) * size.height))
+        }
         
         let startPath = UIBezierPath(cgPath: endPath.cgPath)
         let scaleAroundCenterTransform = CGAffineTransform(translationX: -focusPoint.x, y: -focusPoint.y).concatenating(CGAffineTransform(scaleX: 2.0, y: 2.0).concatenating(CGAffineTransform(translationX: focusPoint.x, y: focusPoint.y)))
@@ -878,16 +906,17 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                 self.lastFocusRectangle = nil
             }
         }
-        
-        let appearPathAnimation = CABasicAnimation(keyPath: "path")
-        appearPathAnimation.fromValue = startPath.cgPath
-        appearPathAnimation.toValue = endPath.cgPath
-        shapeLayer.add(appearPathAnimation, forKey: "path")
-        
-        let appearOpacityAnimation = CABasicAnimation(keyPath: "opacity")
-        appearOpacityAnimation.fromValue = 0.0
-        appearOpacityAnimation.toValue = 1.0
-        shapeLayer.add(appearOpacityAnimation, forKey: "opacity")
+        if (brightness == nil) {
+            let appearPathAnimation = CABasicAnimation(keyPath: "path")
+            appearPathAnimation.fromValue = startPath.cgPath
+            appearPathAnimation.toValue = endPath.cgPath
+            shapeLayer.add(appearPathAnimation, forKey: "path")
+            
+            let appearOpacityAnimation = CABasicAnimation(keyPath: "opacity")
+            appearOpacityAnimation.fromValue = 0.0
+            appearOpacityAnimation.toValue = 1.0
+            shapeLayer.add(appearOpacityAnimation, forKey: "opacity")
+        }
         
         let disappearOpacityAnimation = CABasicAnimation(keyPath: "opacity")
         disappearOpacityAnimation.fromValue = 1.0
@@ -1156,6 +1185,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         embeddingView = view
         attachZoom(view)
         attachFocus(view)
+        attachExposure(view)
         
         DispatchQueue.main.async(execute: { () -> Void in
             guard let previewLayer = self.previewLayer else { return }
@@ -1309,6 +1339,132 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                 }
         }
     }
+    
+    var exposureValue: Float = 0.5 // EV
+    var translationY: Float = 0
+    var startPanPointInPreviewLayer: CGPoint?
+    
+    let EXPOSURE_DURATION_POWER:Float = 4.0 //the exposure slider gain
+    let EXPOSURE_MINIMUM_DURATION:Float64 = 1.0/2000.0
+    
+    @objc fileprivate func _exposureStart(_ gestureRecognizer: UIPanGestureRecognizer) {
+        guard gestureRecognizer.view != nil else {return}
+        let view = gestureRecognizer.view!
+        
+        _changeExposureMode(mode: .custom)
+
+        let translation = gestureRecognizer.translation(in: view)
+        let currentTranslation = translationY + Float(translation.y)
+        if (gestureRecognizer.state == .ended) {
+            translationY = currentTranslation
+        }
+        if (currentTranslation < 0) {
+            // up - brighter
+            exposureValue = 0.5 + min(abs(currentTranslation) / 400, 1) / 2
+        } else if (currentTranslation >= 0) {
+            // down - lower
+            exposureValue = 0.5 - min(abs(currentTranslation) / 400, 1) / 2
+        }
+        _changeExposureDuration(value: exposureValue)
+        
+        // UI Visualization
+        if (gestureRecognizer.state == .began) {
+            if let validPreviewLayer = previewLayer {
+                startPanPointInPreviewLayer = view.layer.convert(gestureRecognizer.location(in: view), to: validPreviewLayer)
+            }
+        }
+        
+        if let validPreviewLayer = previewLayer, let startPanPointInPreviewLayer = startPanPointInPreviewLayer {
+            _showFocusRectangleAtPoint(startPanPointInPreviewLayer, inLayer: validPreviewLayer, withBrightness: exposureValue)
+        }
+    }
+    
+    // Available modes:
+    // .Locked .AutoExpose .ContinuousAutoExposure .Custom
+    func _changeExposureMode(mode: AVCaptureDevice.ExposureMode) {
+        let device: AVCaptureDevice?
+        
+        switch cameraDevice {
+        case .back:
+            device = backCameraDevice
+        case .front:
+            device = frontCameraDevice
+        }
+        if (device?.exposureMode == mode) {
+            return
+        }
+        
+        do {
+            try device?.lockForConfiguration()
+        } catch {
+            return
+        }
+        if device?.isExposureModeSupported(mode) == true {
+            device?.exposureMode = mode
+        }
+        device?.unlockForConfiguration()
+    }
+    
+    func _changeExposureDuration(value: Float) {
+        if (self.cameraIsSetup) {
+            let device: AVCaptureDevice?
+            
+            switch cameraDevice {
+            case .back:
+                device = backCameraDevice
+            case .front:
+                device = frontCameraDevice
+            }
+            
+            do {
+                try device?.lockForConfiguration()
+            } catch {
+                return
+            }
+            guard let videoDevice = device else {
+                return
+            }
+            
+            let p = Float64(pow(value, EXPOSURE_DURATION_POWER)) // Apply power function to expand slider's low-end range
+            let minDurationSeconds = Float64(max(CMTimeGetSeconds(videoDevice.activeFormat.minExposureDuration), EXPOSURE_MINIMUM_DURATION))
+            let maxDurationSeconds = Float64(CMTimeGetSeconds(videoDevice.activeFormat.maxExposureDuration))
+            let newDurationSeconds = Float64(p * (maxDurationSeconds - minDurationSeconds)) + minDurationSeconds // Scale from 0-1 slider range to actual duration
+            
+            if (videoDevice.exposureMode == .custom) {
+                let newExposureTime = CMTimeMakeWithSeconds(Float64(newDurationSeconds), 1000*1000*1000)
+                videoDevice.setExposureModeCustom(duration: newExposureTime, iso: AVCaptureDevice.currentISO, completionHandler: nil)
+                // should we calculate the isoValue instead?
+                // self.currentISOValue = self._capISO(videoDevice, value: Float(self.exposureValue) / Float(newDurationSeconds))
+//                if self.isoMode == .Auto {
+//                    // Going to calculate the correct exposure EV
+//                    // Keep EV stay the same
+//                    // Need to calculate the ISO based on current image exposure
+//                    // exposureTime * ISO = EV
+//                    // ISO from 29 to 464
+//                    // exposureTime from 1/8000 to 1/2
+//                    // Let's assume EV = 14.45
+//
+//                    //self.exposureValue = 14.45
+//                    self.currentISOValue = self._capISO(videoDevice, value: Float(self.exposureValue) / Float(newDurationSeconds))
+//                    //println("iso=\(self.currentISOValue) expo=\(newDurationSeconds)")
+//                } else if self.currentISOValue == nil{
+//                    self.currentISOValue = AVCaptureDevice.currentISO
+//                }
+//                self.currentExposureDuration = newDurationSeconds
+//                let newExposureTime = CMTimeMakeWithSeconds(Float64(newDurationSeconds), 1000*1000*1000)
+//                videoDevice.setExposureModeCustom(duration: newExposureTime, iso: self.currentISOValue!, completionHandler: nil)
+            }
+        }
+    }
+    
+//    func _capISO(_ videoDevice: AVCaptureDevice, value: Float) -> Float {
+//        if value > videoDevice.activeFormat.maxISO{
+//            return videoDevice.activeFormat.maxISO
+//        } else if value < videoDevice.activeFormat.minISO{
+//            return videoDevice.activeFormat.minISO
+//        }
+//        return value
+//    }
     
     // MARK: - CameraLocationManager()
     
