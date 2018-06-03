@@ -70,7 +70,7 @@ cameraManager.stopVideoRecording({ (videoURL, error) -> Void in
 
 To zoom in manually:
 ```swift
-let zoomScale = 2.0
+let zoomScale = CGFloat(2.0)
 cameraManager.zoom(zoomScale)
 ```
 
