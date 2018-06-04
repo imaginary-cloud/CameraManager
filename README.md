@@ -68,6 +68,12 @@ cameraManager.stopVideoRecording({ (videoURL, error) -> Void in
 })
 ```
 
+To zoom in manually:
+```swift
+let zoomScale = CGFloat(2.0)
+cameraManager.zoom(zoomScale)
+```
+
 ### Properties
 
 You can set input device to front or back camera. `(Default: .Back)`
