@@ -3,7 +3,7 @@
 //  camera
 //
 //  Created by Natalia Terlecka on 10/10/14.
-//  Copyright (c) 2014 imaginaryCloud. All rights reserved.
+//  Copyright (c) 2014 Imaginary Cloud. All rights reserved.
 //
 
 import UIKit
