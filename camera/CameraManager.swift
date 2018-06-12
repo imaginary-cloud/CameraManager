@@ -1008,7 +1008,6 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     
     fileprivate func _currentPreviewVideoOrientation() -> AVCaptureVideoOrientation {
         let orientation = _currentPreviewDeviceOrientation()
-        
         return _videoOrientation(forDeviceOrientation: orientation)
     }
     
@@ -1028,8 +1027,28 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         case .portraitUpsideDown:
             return .portraitUpsideDown
         case .faceUp:
+            /*
+             Attempt to keep the existing orientation.  If the device was landscape, then face up
+             getting the orientation from the stats bar would fail every other time forcing it
+             to default to portrait which would introduce flicker into the preview layer.  This
+             would not happen if it was in portrait then face up
+            */
+            if let validPreviewLayer = previewLayer, let connection = validPreviewLayer.connection  {
+                return connection.videoOrientation //Keep the existing orientation
+            }
+            //Could not get existing orientation, try to get it from stats bar
             return _videoOrientationFromStatusBarOrientation()
         case .faceDown:
+            /*
+             Attempt to keep the existing orientation.  If the device was landscape, then face down
+             getting the orientation from the stats bar would fail every other time forcing it
+             to default to portrait which would introduce flicker into the preview layer.  This
+             would not happen if it was in portrait then face down
+             */
+            if let validPreviewLayer = previewLayer, let connection = validPreviewLayer.connection  {
+                return connection.videoOrientation //Keep the existing orientation
+            }
+            //Could not get existing orientation, try to get it from stats bar
             return _videoOrientationFromStatusBarOrientation()
         default:
             return .portrait
@@ -1044,6 +1063,10 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             orientation = UIApplication.shared.statusBarOrientation
         }
         
+        /*
+         Note - the following would fall into the guard every other call (it is called repeatedly) if the device was
+         landscape then face up/down.  Did not seem to fail if in portrait first.
+         */
         guard let statusBarOrientation = orientation else {
             return .portrait
         }
