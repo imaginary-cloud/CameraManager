@@ -3,7 +3,7 @@
 [![CocoaPods](https://img.shields.io/cocoapods/v/CameraManager.svg)](https://github.com/imaginary-cloud/CameraManager) [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 
 This is a simple Swift class to provide all the configurations you need to create custom camera view in your app.
-It follows orientation change and updates UI accordingly, supports front and rear camera selection, pinch to zoom, tap to focus, different flash modes, inputs and outputs.
+It follows orientation change and updates UI accordingly, supports front and rear camera selection, pinch to zoom, tap to focus, exposure slider, different flash modes, inputs and outputs.
 Just drag, drop and use.
 
 ## Installation with CocoaPods
@@ -15,7 +15,7 @@ The easiest way to install the CameraManager is with [CocoaPods](http://cocoapod
 ```ruby
 use_frameworks!
 
-pod 'CameraManager', '~> 4.1'
+pod 'CameraManager', '~> 4.2'
 ``` 
 
 ## Installation with Swift Package Manager
@@ -29,7 +29,7 @@ import PackageDescription
 
 let package = Package(
     dependencies: [
-        .Package(url: "https://github.com/imaginary-cloud/CameraManager", majorVersion: 4, minor: 1)
+        .Package(url: "https://github.com/imaginary-cloud/CameraManager", majorVersion: 4, minor: 2)
     ]
 )
 ```
@@ -41,7 +41,7 @@ let package = Package(
 Add the following line to your Cartfile:
 
 ```
-github "imaginary-cloud/CameraManager" >= 4.1
+github "imaginary-cloud/CameraManager" >= 4.2
 ```
 
 And run `carthage update` to build the dynamic framework.
@@ -92,6 +92,7 @@ You can enable or disable gestures on camera preview. `(Default: true)`
 ```swift
 cameraManager.shouldEnableTapToFocus = true || false
 cameraManager.shouldEnablePinchToZoom = true || false
+cameraManager.shouldEnableExposure = true || false
 ```
 
 You can set output format to Image, video or video with audio. `(Default: .StillImage)`
@@ -128,6 +129,12 @@ cameraManager.shouldUseLocationServices = true || false
 You can specify if you want to save the files to phone library. `(Default: true)`
 ```swift
 cameraManager.writeFilesToPhoneLibrary = true || false
+```
+
+You can specify the album names for image and video recordings.
+```swift 
+cameraManager.imageAlbumName =  "Image Album Name" 
+cameraManager.videoAlbumName =  "Video Album Name" 
 ```
 
 You can specify if you want to disable animations. `(Default: true)`
@@ -184,6 +191,6 @@ Copyright © 2010-2018 [Imaginary Cloud](https://www.imaginarycloud.com). This l
 
 ## About Imaginary Cloud
 
-![alt text](https://s31.postimg.cc/nwi7gpouz/Imaginary_Cloud.jpg)
+![ImaginaryCloud](https://s3.eu-central-1.amazonaws.com/imaginary-images/IC_readme_logo.svg)
 
 We apply our own Product Design Process to bring great digital products to life. Visit [our website](https://www.imaginarycloud.com) to find out about our other projects or [contact us](https://www.imaginarycloud.com/contacts) if there's an idea that you want to turn into an outstanding product, we'll take it from there!
