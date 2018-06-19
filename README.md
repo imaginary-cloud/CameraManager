@@ -191,6 +191,6 @@ Copyright © 2010-2018 [Imaginary Cloud](https://www.imaginarycloud.com). This l
 
 ## About Imaginary Cloud
 
-![ImaginaryCloud](https://s3.eu-central-1.amazonaws.com/imaginary-images/IC_readme_logo.svg)
+![Imaginary Cloud](https://s3.eu-central-1.amazonaws.com/imaginary-images/Logo_IC_readme.svg)
 
 We apply our own Product Design Process to bring great digital products to life. Visit [our website](https://www.imaginarycloud.com) to find out about our other projects or [contact us](https://www.imaginarycloud.com/contacts) if there's an idea that you want to turn into an outstanding product, we'll take it from there!
