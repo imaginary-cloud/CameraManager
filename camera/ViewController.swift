@@ -86,7 +86,6 @@ class ViewController: UIViewController {
         let cameraTypeGesture = UITapGestureRecognizer(target: self, action: #selector(changeCameraDevice))
         cameraTypeImageView.addGestureRecognizer(cameraTypeGesture)
     
-        qualityLabel.text = "High"
         qualityLabel.isUserInteractionEnabled = true
         let qualityGesture = UITapGestureRecognizer(target: self, action: #selector(changeCameraQuality))
         qualityLabel.addGestureRecognizer(qualityGesture)
