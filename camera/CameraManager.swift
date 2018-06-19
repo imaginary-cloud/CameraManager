@@ -152,6 +152,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                 _updateFlashMode(flashMode)
                 _setupMaxZoomScale()
                 _zoom(0)
+                _orientationChanged()
             }
         }
     }
