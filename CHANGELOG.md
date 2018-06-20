@@ -2,9 +2,20 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [4.2.1](https://github.com/imaginary-cloud/CameraManager/tree/4.2.1) - 2018-06-20
+
+### Added
+
+- Add `CODE_OF_CONDUCT.md`
+
+### Fixed
+
+- Fix flash for video (#152)
+
 ## [4.2.0](https://github.com/imaginary-cloud/CameraManager/tree/4.2.0) - 2018-06-19
 
 ### Added
+
 - Add properties for setting custom album names for image and video recordings (pull request #147)
 - Add Exposure slider (pull request #148)
 
