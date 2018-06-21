@@ -1,4 +1,4 @@
-# [Imaginary Cloud's](www.imaginarycloud.com) Code of Conduct
+# [Imaginary Cloud's](https://www.imaginarycloud.com) Code of Conduct
 
 To make sure that we provide an open and welcoming environment, we enforce in our projects a harassment-free experience for everyone, regardless of age, body size, disability, ethnicity, gender identity and expression, level of experience, nationality, personal appearance, race, religion, or sexual identity and orientation.
 
