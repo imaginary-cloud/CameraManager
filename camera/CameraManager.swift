@@ -375,7 +375,6 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
      */
     open func capturePictureWithCompletion(_ imageCompletion: @escaping (UIImage?, NSError?) -> Void) {
         self.capturePictureDataWithCompletion { data, error in
-            
             guard error == nil, let imageData = data else {
                 imageCompletion(nil, error)
                 return
@@ -491,11 +490,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         let location = self.locationManager?.latestLocation
         let date = Date()
 
-        
-        library!.save(imageAtURL: filePath, albumName: self.imageAlbumName, date: date, location: location) { _ in
-            imageCompletion(nil, nil)
-        }
-        
+        library!.save(imageAtURL: filePath, albumName: self.imageAlbumName, date: date, location: location)
     }
     
     /**
@@ -504,7 +499,6 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
      :param: imageCompletion Completion block containing the captured imageData
      */
     open func capturePictureDataWithCompletion(_ imageCompletion: @escaping (Data?, NSError?) -> Void) {
-        
         guard cameraIsSetup else {
             _show(NSLocalizedString("No capture session setup", comment:""), message: NSLocalizedString("I can't take any picture", comment:""))
             return
@@ -549,7 +543,6 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             }
         })
     }
-    //
 
     fileprivate func _imageOrientation(forDeviceOrientation deviceOrientation: UIDeviceOrientation, isMirrored: Bool) -> UIImageOrientation {
         
@@ -710,7 +703,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         let date = Date()
         
         library?.save(videoAtURL: fileURL, albumName: self.videoAlbumName, date: date, location: location, completion: { _ in
-            self._executeVideoCompletionWithURL(nil, error: nil)
+            self._executeVideoCompletionWithURL(fileURL, error: nil)
         })
 
     }
@@ -1301,7 +1294,6 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     }
     
     fileprivate func updateDeviceOrientation(_ orientaion: UIDeviceOrientation) {
-        print()
         self.deviceOrientation = orientaion
     }
     
@@ -1860,15 +1852,12 @@ extension PHPhotoLibrary {
             
         }, completionHandler: { success, error in
             guard let placeholder = placeholder else {
-                completion?(nil)
                 return
             }
             if success {
                 let assets:PHFetchResult<PHAsset> =  PHAsset.fetchAssets(withLocalIdentifiers: [placeholder.localIdentifier], options: nil)
                 let asset:PHAsset? = assets.firstObject
                 completion?(asset)
-            } else {
-                completion?(nil)
             }
         })
     }
