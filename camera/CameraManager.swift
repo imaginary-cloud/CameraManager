@@ -41,16 +41,19 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     
     // MARK: - Public properties
     
-    // custom image album name
+    // Property for custom image album name.
     open var imageAlbumName: String?
     
-    // custom image album name
+    // Property for custom image album name.
     open var videoAlbumName: String?
     
-    /// Capture session to customize camera settings.
+    /// Property for capture session to customize camera settings.
     open var captureSession: AVCaptureSession?
     
-    /// Property to determine if the manager should show the error for the user. If you want to show the errors yourself set this to false. If you want to add custom error UI set showErrorBlock property. Default value is false.
+    /**
+     Property to determine if the manager should show the error for the user. If you want to show the errors yourself set this to false. If you want to add custom error UI set showErrorBlock property.
+     - note: Default value is **false**
+     */
     open var showErrorsToUsers = false
     
     /// Property to determine if the manager should show the camera permission popup immediatly when it's needed or you want to show it manually. Default value is true. Be carful cause using the camera requires permission, if you set this value to false and don't ask manually you won't be able to use the camera.
@@ -67,10 +70,16 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         }
     }
     
-    /// Property to determine if manager should write the resources to the phone library. Default value is true.
+    /**
+     Property to determine if manager should write the resources to the phone library.
+     - note: Default value is **true**
+     */
     open var writeFilesToPhoneLibrary = true
     
-    /// Property to determine if manager should follow device orientation. Default value is true.
+    /**
+     Property to determine if manager should follow device orientation.
+     - note: Default value is **true**
+     */
     open var shouldRespondToOrientationChanges = true {
         didSet {
             if shouldRespondToOrientationChanges {
@@ -81,58 +90,83 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         }
     }
     
-    /// Property to determine if manager should horizontally flip image took by front camera. Default value is false.
+    /**
+     Property to determine if manager should horizontally flip image took by front camera.
+     - note: Default value is **false**
+     */
     open var shouldFlipFrontCameraImage = false
     
+    /**
+     Property to determine if manager should keep view with the same bounds when the orientation changes.
+     - note: Default value is **false**
+     */
     open var shouldKeepViewAtOrientationChanges = false
     
-    /// Property to determine if manager should enable tap to focus on camera preview. Default value is true.
+    /**
+     Property to determine if manager should enable tap to focus on camera preview.
+     - note: Default value is **true**
+     */
     open var shouldEnableTapToFocus = true {
         didSet {
             focusGesture.isEnabled = shouldEnableTapToFocus
         }
     }
     
-    /// Property to determine if manager should enable pinch to zoom on camera preview. Default value is true.
+    /**
+     Property to determine if manager should enable pinch to zoom on camera preview.
+     - note: Default value is **true**
+     */
     open var shouldEnablePinchToZoom = true {
         didSet {
             zoomGesture.isEnabled = shouldEnablePinchToZoom
         }
     }
     
-    /// Property to determine if manager should enable pan to change exposure/brightness. Default value is true.
+    /**
+     Property to determine if manager should enable pan to change exposure/brightness.
+     - note: Default value is **true**
+     */
     open var shouldEnableExposure = true {
         didSet {
             exposureGesture.isEnabled = shouldEnableExposure
         }
     }
     
-    /// The Bool property to determine if the camera is ready to use.
+    /// Property to determine if the camera is ready to use.
     open var cameraIsReady: Bool {
         get {
             return cameraIsSetup
         }
     }
     
-    /// The Bool property to determine if current device has front camera.
+    /// Property to determine if current device has front camera.
     open var hasFrontCamera: Bool = {
         let frontDevices = AVCaptureDevice.videoDevices.filter { $0.position == .front }
         return !frontDevices.isEmpty
     }()
     
-    /// The Bool property to determine if current device has flash.
+    /// Property to determine if current device has flash.
     open var hasFlash: Bool = {
         let hasFlashDevices = AVCaptureDevice.videoDevices.filter { $0.hasFlash }
         return !hasFlashDevices.isEmpty
     }()
     
-    /// Property to enable or disable flip animation when switch between back and front camera. Default value is true.
+    /**
+     Property to enable or disable flip animation when switch between back and front camera.
+     - note: Default value is **true**
+     */
     open var animateCameraDeviceChange: Bool = true
     
-    /// Property to enable or disable shutter animation when taking a picture. Default value is true.
+    /**
+     Property to enable or disable shutter animation when taking a picture.
+     - note: Default value is **true**
+     */
     open var animateShutter: Bool = true
     
-    /// Property to enable or disable location services. Location services in camera is used for EXIF data. Default is false
+    /**
+     Property to enable or disable location services. Location services in camera is used for EXIF data.
+     - note: Default value is **false**
+     */
     open var shouldUseLocationServices: Bool = false {
         didSet {
             if shouldUseLocationServices {
@@ -188,14 +222,16 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         }
     }
     
-    /// Property to check video recording duration when in progress
+    /// Property to check video recording duration when in progress.
     open var recordedDuration : CMTime { return movieOutput?.recordedDuration ?? kCMTimeZero }
     
-    /// Property to check video recording file size when in progress
+    /// Property to check video recording file size when in progress.
     open var recordedFileSize : Int64 { return movieOutput?.recordedFileSize ?? 0 }
     
-    //Properties to set focus and capture mode when tap to focus is used (_focusStart)
+    /// Property to set focus mode when tap to focus is used (_focusStart).
     open var focusMode : AVCaptureDevice.FocusMode = .continuousAutoFocus
+    
+    /// Property to set exposure mode when tap to focus is used (_focusStart).
     open var exposureMode: AVCaptureDevice.ExposureMode = .continuousAutoExposure
     
     
@@ -288,7 +324,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     }
 
     /**
-     zoom in to the requested scale
+     Zoom in to the requested scale.
     */
     open func zoom(_ scale: CGFloat) {
         _zoom(scale)
@@ -728,8 +764,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         return true
     }
     
-    @objc
-    fileprivate func _zoomStart(_ recognizer: UIPinchGestureRecognizer) {
+    @objc fileprivate func _zoomStart(_ recognizer: UIPinchGestureRecognizer) {
         guard let view = embeddingView,
             let previewLayer = previewLayer
             else { return }
@@ -795,8 +830,6 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             self.exposureGesture.delegate = self
         }
     }
-    
-    
     
     @objc fileprivate func _focusStart(_ recognizer: UITapGestureRecognizer) {
         
@@ -1419,7 +1452,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     }
     
     /**
-     Switches between the current and specified camera using a flip animation similar to the one used in the iOS stock camera app
+     Switches between the current and specified camera using a flip animation similar to the one used in the iOS stock camera app.
      */
     
     fileprivate var cameraTransitionView: UIView?
@@ -1462,7 +1495,6 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                 }
         }
     }
-    
     
     
     // MARK: - CameraLocationManager()
@@ -1553,7 +1585,6 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             })
         }
     }
-    
     
     fileprivate func _removeCameraTransistionView() {
         
@@ -1810,7 +1841,6 @@ extension PHPhotoLibrary {
     }
     
 
-    
     // MARK: - Private
     
     fileprivate func findAlbum(name: String) -> PHAssetCollection? {
@@ -1891,9 +1921,6 @@ extension PHPhotoLibrary {
             }
         })
     }
-
-
-    
     
     fileprivate func saveImage(image: UIImage, album: PHAssetCollection, completion:((PHAsset?)->())? = nil) {
         var placeholder: PHObjectPlaceholder?
