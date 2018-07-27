@@ -1092,7 +1092,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                 
                 validOutputLayerConnection.videoOrientation = _currentCaptureVideoOrientation()
             }
-            if !shouldKeepViewAtOrientationChanges {
+            if !shouldKeepViewAtOrientationChanges && cameraIsObservingDeviceOrientation {
                 DispatchQueue.main.async(execute: { () -> Void in
                     if let validEmbeddingView = self.embeddingView {
                         validPreviewLayer.frame = validEmbeddingView.bounds
@@ -1736,10 +1736,10 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             return nil
         }
     }
-    
+
     deinit {
-        stopAndRemoveCaptureSession()
         _stopFollowingDeviceOrientation()
+        stopAndRemoveCaptureSession()
     }
 }
 
