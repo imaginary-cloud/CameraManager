@@ -36,6 +36,7 @@ public enum CameraOutputQuality: Int {
     case low, medium, high
 }
 
+
 /// Class for handling iDevices custom camera usage
 open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGestureRecognizerDelegate {
     
@@ -233,6 +234,9 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     
     /// Property to set exposure mode when tap to focus is used (_focusStart).
     open var exposureMode: AVCaptureDevice.ExposureMode = .continuousAutoExposure
+    
+    /// Property to set video stabilisation mode during a video record session
+    open var videoStabilisationMode : AVCaptureVideoStabilizationMode = .auto
     
     
     // MARK: - Private properties
@@ -608,6 +612,10 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                         let videoConnection = connection as AVCaptureConnection
                         if videoConnection.isVideoMirroringSupported {
                             videoConnection.isVideoMirrored = (cameraDevice == CameraDevice.front && shouldFlipFrontCameraImage)
+                        }
+                        
+                        if videoConnection.isVideoStabilizationSupported {
+                            videoConnection.preferredVideoStabilizationMode = self.videoStabilisationMode
                         }
                     }
                 }
