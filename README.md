@@ -1,25 +1,38 @@
 
 # Camera Manager
-[![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
-
+[![CocoaPods](https://img.shields.io/cocoapods/v/CameraManager.svg)](https://github.com/imaginary-cloud/CameraManager) [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 
 This is a simple Swift class to provide all the configurations you need to create custom camera view in your app.
 It follows orientation change and updates UI accordingly, supports front and rear camera selection, pinch to zoom, tap to focus, exposure slider, different flash modes, inputs and outputs.
 Just drag, drop and use.
 
-
-**
-Exozet forked this at version 4.2.3. We want to implement a new feature to change the "AVCaptureVideoStabilizationMode" at start of recording a video.
-**
-
-
 ## Installation with CocoaPods
 
-In the Eoxzet Fork no more is possible, we only support Carthage.
+The easiest way to install the CameraManager is with [CocoaPods](http://cocoapods.org)
+
+### Podfile
+
+```ruby
+use_frameworks!
+
+pod 'CameraManager', '~> 4.2'
+``` 
 
 ## Installation with Swift Package Manager
 
-In the Eoxzet Fork no more is possible, we only support Carthage.
+The [Swift Package Manager](https://swift.org/package-manager/) is a tool for managing the distribution of Swift code.
+
+Add `CameraManager` as a dependency in your `Package.swift` file:
+
+```
+import PackageDescription
+
+let package = Package(
+    dependencies: [
+        .Package(url: "https://github.com/imaginary-cloud/CameraManager", majorVersion: 4, minor: 2)
+    ]
+)
+```
 
 ## Installation with Carthage
 
@@ -28,12 +41,10 @@ In the Eoxzet Fork no more is possible, we only support Carthage.
 Add the following line to your Cartfile:
 
 ```
-github "exozet/CameraManager" >= 4.2
+github "imaginary-cloud/CameraManager" >= 4.2
 ```
 
 And run `carthage update` to build the dynamic framework.
-
-Than you have to add the framework into your project and setup the runscript like described [here](https://github.com/Carthage/Carthage#if-youre-building-for-ios-tvos-or-watchos) 
 
 ## How to use
 To use it you just add the preview layer to your desired view, you'll get back the state of the camera if it's unavailable, ready or the user denied access to it. Have in mind that in order to retain the AVCaptureSession you will need to retain cameraManager instance somewhere, ex. as an instance constant.
@@ -45,7 +56,7 @@ cameraManager.addPreviewLayerToView(self.cameraView)
 To shoot image all you need to do is call:
 ```swift
 cameraManager.capturePictureWithCompletion({ (image, error) -> Void in
-	self.myImage = image             
+    self.myImage = image             
 })
 ```
 
@@ -53,7 +64,7 @@ To record video you call:
 ```swift
 cameraManager.startRecordingVideo()
 cameraManager.stopVideoRecording({ (videoURL, error) -> Void in
-	NSFileManager.defaultManager().copyItemAtURL(videoURL, toURL: self.myVideoURL, error: &error)
+    NSFileManager.defaultManager().copyItemAtURL(videoURL, toURL: self.myVideoURL, error: &error)
 })
 ```
 
