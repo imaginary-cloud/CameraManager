@@ -56,7 +56,7 @@ cameraManager.addPreviewLayerToView(self.cameraView)
 To shoot image all you need to do is call:
 ```swift
 cameraManager.capturePictureWithCompletion({ (image, error) -> Void in
-	self.myImage = image             
+    self.myImage = image             
 })
 ```
 
@@ -64,7 +64,7 @@ To record video you call:
 ```swift
 cameraManager.startRecordingVideo()
 cameraManager.stopVideoRecording({ (videoURL, error) -> Void in
-	NSFileManager.defaultManager().copyItemAtURL(videoURL, toURL: self.myVideoURL, error: &error)
+    NSFileManager.defaultManager().copyItemAtURL(videoURL, toURL: self.myVideoURL, error: &error)
 })
 ```
 
