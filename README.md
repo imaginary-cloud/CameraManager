@@ -15,7 +15,7 @@ The easiest way to install the CameraManager is with [CocoaPods](http://cocoapod
 ```ruby
 use_frameworks!
 
-pod 'CameraManager', '~> 4.2'
+pod 'CameraManager', '~> 4.3'
 ``` 
 
 ## Installation with Swift Package Manager
@@ -29,7 +29,7 @@ import PackageDescription
 
 let package = Package(
     dependencies: [
-        .Package(url: "https://github.com/imaginary-cloud/CameraManager", majorVersion: 4, minor: 2)
+        .Package(url: "https://github.com/imaginary-cloud/CameraManager", majorVersion: 4, minor: 3)
     ]
 )
 ```
@@ -41,7 +41,7 @@ let package = Package(
 Add the following line to your Cartfile:
 
 ```
-github "imaginary-cloud/CameraManager" >= 4.2
+github "imaginary-cloud/CameraManager" >= 4.3
 ```
 
 And run `carthage update` to build the dynamic framework.
@@ -119,6 +119,11 @@ cameraManager.exposureMode = .autoExpose || .continuousAutoExposure || .locked |
 You can change the flash mode (it will also set corresponding flash mode). `(Default: .Off)`
 ```swift
 cameraManager.flashMode = .Off || .On || .Auto
+```
+
+You can specify the stabilisation mode to be used during a video record session. `(Default: .auto)`
+```swift
+cameraManger.videoStabilisationMode = .auto || .cinematic
 ```
 
 You can enable location services for storing in Camera Roll. `(Default: false)`
