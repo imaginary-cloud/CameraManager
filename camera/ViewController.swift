@@ -195,9 +195,10 @@ class ViewController: UIViewController {
     @IBAction func askForCameraPermissions() {
         
         self.cameraManager.askUserForCameraPermission({ permissionGranted in
-            self.askForPermissionsLabel.isHidden = true
-            self.askForPermissionsLabel.alpha = 0
+           
             if permissionGranted {
+                self.askForPermissionsLabel.isHidden = true
+                self.askForPermissionsLabel.alpha = 0
                 self.addCameraToView()
             } else {
                 if #available(iOS 10.0, *) { 
