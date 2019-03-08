@@ -51,6 +51,7 @@ To use it you just add the preview layer to your desired view, you'll get back t
 ```swift
 let cameraManager = CameraManager()
 cameraManager.addPreviewLayerToView(self.cameraView)
+
 ```
 
 To shoot image all you need to do is call:
@@ -63,8 +64,16 @@ cameraManager.capturePictureWithCompletion({ (image, error) -> Void in
 To record video you call:
 ```swift
 cameraManager.startRecordingVideo()
-cameraManager.stopVideoRecording({ (videoURL, error) -> Void in
-    NSFileManager.defaultManager().copyItemAtURL(videoURL, toURL: self.myVideoURL, error: &error)
+cameraManager.stopVideoRecording({ (videoURL, recordError) -> Void in
+    guard let videoURL = videoURL else {
+        //Handle error of no recorded video URL
+    }
+    do {
+        try FileManager.default.copyItem(at: videoURL, to: self.myVideoURL)
+    }
+    catch {
+        //Handle error occured during copy
+    }
 })
 ```
 
@@ -78,7 +87,7 @@ cameraManager.zoom(zoomScale)
 
 You can set input device to front or back camera. `(Default: .Back)`
 ```swift
-cameraManager.cameraDevice = .Front || .Back
+cameraManager.cameraDevice = .front || .back
 ```
 
 You can specify if the front camera image should be horizontally fliped. `(Default: false)`
@@ -95,15 +104,15 @@ cameraManager.shouldEnablePinchToZoom = true || false
 cameraManager.shouldEnableExposure = true || false
 ```
 
-You can set output format to Image, video or video with audio. `(Default: .StillImage)`
+You can set output format to Image, video or video with audio. `(Default: .stillImage)`
 
 ```swift
-cameraManager.cameraOutputMode = .StillImage || .VideoWithMic || .VideoOnly
+cameraManager.cameraOutputMode = .stillImage || .videoWithMic || .videoOnly
 ```
 
-You can set the quality. `(Default: .High)`
+You can set the quality. `(Default: .high)`
 ```swift
-cameraManager.cameraOutputQuality = .Low || .Medium || .High
+cameraManager.cameraOutputQuality = .low || .medium || .high
 ```
 
 You can specify the focus mode. `(Default: .continuousAutoFocus)`
@@ -116,14 +125,14 @@ You can specifiy the exposure mode. `(Default: .continuousAutoExposure)`
 cameraManager.exposureMode = .autoExpose || .continuousAutoExposure || .locked || .custom
 ```
 
-You can change the flash mode (it will also set corresponding flash mode). `(Default: .Off)`
+You can change the flash mode (it will also set corresponding flash mode). `(Default: .off)`
 ```swift
-cameraManager.flashMode = .Off || .On || .Auto
+cameraManager.flashMode = .off || .on || .auto
 ```
 
 You can specify the stabilisation mode to be used during a video record session. `(Default: .auto)`
 ```swift
-cameraManger.videoStabilisationMode = .auto || .cinematic
+cameraManager.videoStabilisationMode = .auto || .cinematic
 ```
 
 You can enable location services for storing in Camera Roll. `(Default: false)`
@@ -167,14 +176,14 @@ You can even setUp your custom block to handle error messages:
 It can be customized to be presented on the Window root view controller, for example.
 ```swift
 cameraManager.showErrorBlock = { (erTitle: String, erMessage: String) -> Void in
-    var alertController = UIAlertController(title: erTitle, message: erMessage, preferredStyle: .Alert)
-    alertController.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Default, handler: { (alertAction) -> Void in
+    var alertController = UIAlertController(title: erTitle, message: erMessage, preferredStyle: .alert)
+    alertController.addAction(UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: { (alertAction) -> Void in
     }))
 
-    let topController = UIApplication.sharedApplication().keyWindow?.rootViewController
+    let topController = UIApplication.shared.keyWindow?.rootViewController
 
     if (topController != nil) {
-        topController?.presentViewController(alertController, animated: true, completion: { () -> Void in
+        topController?.present(alertController, animated: true, completion: { () -> Void in
             //
         })
     }
@@ -184,11 +193,14 @@ cameraManager.showErrorBlock = { (erTitle: String, erMessage: String) -> Void in
 
 ## Support
 
-Supports iOS 9 and above. Xcode 9.0 is required to build the latest code written in Swift 4.0.
+Supports iOS 9 and above. Xcode 10.0 is required to build the latest code written in Swift 4.2.
 
 
-Now it's compatible with latest Swift syntax, so if you're using any Swift version prior to 4.0 make sure to use one of the previously tagged releases
-(i.e for Swift 3.0 see [v3.2.0](https://github.com/imaginary-cloud/CameraManager/tree/3.2.0)).
+Now it's compatible with latest Swift syntax, so if you're using any Swift version prior to 4.2 make sure to use one of the previously tagged releases:
+
+- for Swift 4.0 see: [v4.3.0](https://github.com/imaginary-cloud/CameraManager/tree/4.3.0))
+
+- for Swift 3.0 see: [v3.2.0](https://github.com/imaginary-cloud/CameraManager/tree/3.2.0)).
 
 ## License
 
