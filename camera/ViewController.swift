@@ -38,6 +38,7 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+//      cameraManager.shouldRespondToOrientationChanges = false
         cameraManager.shouldEnableExposure = true
         
         cameraManager.shouldFlipFrontCameraImage = false
