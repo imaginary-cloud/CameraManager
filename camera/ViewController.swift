@@ -203,7 +203,7 @@ class ViewController: UIViewController {
                 self.addCameraToView()
             } else {
                 if #available(iOS 10.0, *) { 
-                    UIApplication.shared.open(URL(string:UIApplicationOpenSettingsURLString)!)
+                    UIApplication.shared.open(URL(string:UIApplication.openSettingsURLString)!)
                 } else {
                     // Fallback on earlier versions
                 }
