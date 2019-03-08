@@ -71,6 +71,8 @@ class ViewController: UIViewController {
             askForPermissionsLabel.isHidden = false
         } else if currentCameraState == .ready {
             addCameraToView()
+        } else {
+            askForPermissionsLabel.isHidden = false
         }
 
         flashModeImageView.image = UIImage(named: "flash_off")
@@ -194,10 +196,17 @@ class ViewController: UIViewController {
     @IBAction func askForCameraPermissions() {
         
         self.cameraManager.askUserForCameraPermission({ permissionGranted in
-            self.askForPermissionsLabel.isHidden = true
-            self.askForPermissionsLabel.alpha = 0
+           
             if permissionGranted {
+                self.askForPermissionsLabel.isHidden = true
+                self.askForPermissionsLabel.alpha = 0
                 self.addCameraToView()
+            } else {
+                if #available(iOS 10.0, *) { 
+                    UIApplication.shared.open(URL(string:UIApplicationOpenSettingsURLString)!)
+                } else {
+                    // Fallback on earlier versions
+                }
             }
         })
     }
