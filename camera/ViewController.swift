@@ -138,14 +138,15 @@ class ViewController: UIViewController {
         
         switch cameraManager.cameraOutputMode {
         case .stillImage:
-            cameraManager.capturePictureWithCompletion({ (image, error) -> Void in
-                if error != nil {
+            cameraManager.capturePictureWithCompletion({ result in
+                switch result {
+                case .failure:
                     self.cameraManager.showErrorBlock("Error occurred", "Cannot save picture.")
-                }
-                else {
+                case .success(let content):
+
                     let vc: ImageViewController? = self.storyboard?.instantiateViewController(withIdentifier: "ImageVC") as? ImageViewController
                     if let validVC: ImageViewController = vc,
-                        let capturedImage = image {
+                        case let capturedImage = content.asImage {
                             validVC.image = capturedImage
                             validVC.cameraManager = self.cameraManager
                             self.navigationController?.pushViewController(validVC, animated: true)

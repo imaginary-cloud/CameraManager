@@ -36,6 +36,87 @@ public enum CameraOutputQuality: Int {
     case low, medium, high
 }
 
+public enum CaptureResult {
+    case success(content: CaptureContent)
+    case failure(Error)
+
+    init(_ image: UIImage) {
+        self = .success(content: .image(image))
+    }
+
+    init(_ data: Data) {
+        self = .success(content: .imageData(data))
+    }
+
+    init(_ asset: PHAsset) {
+        self = .success(content: .asset(asset))
+    }
+
+    var imageData: Data? {
+        if case let .success(content) = self {
+            return content.asData
+        } else {
+
+            return nil
+        }
+    }
+}
+
+public enum CaptureContent {
+    case imageData(Data)
+    case image(UIImage)
+    case asset(PHAsset)
+}
+
+extension CaptureContent {
+
+    public var asImage: UIImage? {
+
+        switch self {
+        case let .image(image): return image
+        case let .imageData(data): return UIImage(data: data)
+        case let .asset(asset):
+            if let data = getImageData(fromAsset: asset) {
+                return UIImage(data: data)
+            } else {
+                return nil
+            }
+        }
+    }
+
+    public var asData: Data? {
+
+        switch self {
+        case let .image(image): return image.jpegData(compressionQuality: 0.8)
+        case let .imageData(data): return data
+        case let .asset(asset): return getImageData(fromAsset: asset)
+        }
+
+    }
+
+    private func getImageData(fromAsset asset: PHAsset) -> Data? {
+
+        var imageData: Data? = nil
+        let manager = PHImageManager.default()
+        let options = PHImageRequestOptions()
+        options.version = .original
+        options.isSynchronous = true
+        manager.requestImageData(for: asset, options: options) { data, _, _, _ in
+
+            imageData = data
+        }
+        return imageData
+    }
+}
+
+public enum CaptureError: Error {
+
+    case noImageData
+    case invalidImageData
+    case noVideoConnection
+    case noSampleBuffer
+    case assetNotSaved
+}
 
 /// Class for handling iDevices custom camera usage
 open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGestureRecognizerDelegate {
@@ -413,10 +494,17 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
      
      :param: imageCompletion Completion block containing the captured UIImage
      */
-    open func capturePictureWithCompletion(_ imageCompletion: @escaping (UIImage?, NSError?) -> Void) {
-        self.capturePictureDataWithCompletion { data, error in
-            guard error == nil, let imageData = data else {
-                imageCompletion(nil, error)
+    open func capturePictureWithCompletion(_ imageCompletion: @escaping (CaptureResult) -> Void) {
+        self.capturePictureDataWithCompletion { result in
+
+            guard let imageData = result.imageData else {
+
+                if case let .failure(error) = result {
+                    imageCompletion(.failure(error))
+                } else {
+                    imageCompletion(.failure(CaptureError.noImageData))
+                }
+
                 return
             }
             
@@ -430,9 +518,9 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         }
     }
     
-    fileprivate func _capturePicture(_ imageData: Data, _ imageCompletion: @escaping (UIImage?, NSError?) -> Void) {
+    fileprivate func _capturePicture(_ imageData: Data, _ imageCompletion: @escaping (CaptureResult) -> Void) {
         guard let img = UIImage(data: imageData) else {
-            imageCompletion(nil, NSError())
+            imageCompletion(.failure(NSError()))
             return
         }
         
@@ -459,12 +547,12 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                 }
 
             } catch {
-                imageCompletion(nil, NSError())
+                imageCompletion(.failure(error))
                 return
             }
         }
         
-        imageCompletion(image, nil)
+        imageCompletion(CaptureResult(image))
     }
     
     fileprivate func _setVideoWithGPS(forLocation location: CLLocation) {
@@ -525,12 +613,19 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         return GPSMetadata
     }
     
-    fileprivate func _saveImageToLibrary(atFileURL filePath: URL, _ imageCompletion: @escaping (UIImage?, NSError?) -> Void) {
+    fileprivate func _saveImageToLibrary(atFileURL filePath: URL, _ imageCompletion: @escaping (CaptureResult) -> Void) {
         
         let location = self.locationManager?.latestLocation
         let date = Date()
 
-        library!.save(imageAtURL: filePath, albumName: self.imageAlbumName, date: date, location: location)
+        library?.save(imageAtURL: filePath, albumName: self.imageAlbumName, date: date, location: location) { asset in
+
+            if let asset = asset {
+                imageCompletion(CaptureResult(asset))
+            } else {
+                imageCompletion(.failure(CaptureError.assetNotSaved))
+            }
+        }
     }
     
     /**
@@ -538,7 +633,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
      
      :param: imageCompletion Completion block containing the captured imageData
      */
-    open func capturePictureDataWithCompletion(_ imageCompletion: @escaping (Data?, NSError?) -> Void) {
+    open func capturePictureDataWithCompletion(_ imageCompletion: @escaping (CaptureResult) -> Void) {
         guard cameraIsSetup else {
             _show(NSLocalizedString("No capture session setup", comment:""), message: NSLocalizedString("I can't take any picture", comment:""))
             return
@@ -569,17 +664,20 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                         DispatchQueue.main.async(execute: {
                             self?._show(NSLocalizedString("Error", comment:""), message: error.localizedDescription)
                         })
-                        imageCompletion(nil, error as NSError?)
+                        imageCompletion(.failure(error))
                         return
                     }
                     
-                    guard let sample = sample else { imageCompletion(nil, NSError()); return }
-                    let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(sample)
-                    imageCompletion(imageData, nil)
+                    guard let sample = sample else { imageCompletion(.failure(CaptureError.noSampleBuffer)); return }
+                    if let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(sample) {
+                        imageCompletion(CaptureResult(imageData))
+                    } else {
+                        imageCompletion(.failure(CaptureError.noImageData))
+                    }
                     
                 })
             } else {
-                imageCompletion(nil, NSError())
+                imageCompletion(.failure(CaptureError.noVideoConnection))
             }
         })
     }
