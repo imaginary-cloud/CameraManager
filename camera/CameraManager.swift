@@ -488,7 +488,29 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         self.movieOutput = nil
         self.animateCameraDeviceChange = oldAnimationValue
     }
-    
+
+    /**
+     Captures still image from currently running capture session.
+
+     :param: imageCompletion Completion block containing the captured UIImage
+     */
+    @available(*, deprecated)
+    open func capturePictureWithCompletion(_ imageCompletion: @escaping (UIImage?, NSError?) -> Void) {
+
+        func completion(_ result: CaptureResult) {
+
+            switch result {
+
+            case let .success(content):
+                imageCompletion(content.asImage, nil)
+            case .failure:
+                imageCompletion(nil, NSError())
+            }
+        }
+
+        capturePictureWithCompletion(completion)
+    }
+
     /**
      Captures still image from currently running capture session.
      
@@ -631,6 +653,27 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     /**
      Captures still image from currently running capture session.
      
+     :param: imageCompletion Completion block containing the captured imageData
+     */
+    @available(*, deprecated)
+    open func capturePictureDataWithCompletion(_ imageCompletion: @escaping (Data?, NSError?) -> Void) {
+
+        func completion(_ result: CaptureResult) {
+
+            switch result {
+
+            case let .success(content):
+                imageCompletion(content.asData, nil)
+            case .failure:
+                imageCompletion(nil, NSError())
+            }
+        }
+        capturePictureDataWithCompletion(completion)
+    }
+
+    /**
+     Captures still image from currently running capture session.
+
      :param: imageCompletion Completion block containing the captured imageData
      */
     open func capturePictureDataWithCompletion(_ imageCompletion: @escaping (CaptureResult) -> Void) {
