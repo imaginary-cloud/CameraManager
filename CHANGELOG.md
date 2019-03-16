@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+### Added
+- Add `asAsset` computed property to CaptureContent
+- Extract enums to separate file
+
+## [4.4.0](https://github.com/imaginary-cloud/CameraManager/tree/4.4.0) - 2019-03-12
+### Changed
+- Change callbacks to the swifty way of reporting success and errors (pull request #185)
+
 ## [4.3.1](https://github.com/imaginary-cloud/CameraManager/tree/4.3.1) - 2019-03-08
 ### Fixed
 
