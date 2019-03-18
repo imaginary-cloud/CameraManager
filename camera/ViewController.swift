@@ -38,6 +38,7 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+//      cameraManager.shouldRespondToOrientationChanges = false
         cameraManager.shouldEnableExposure = true
         
         cameraManager.shouldFlipFrontCameraImage = false
@@ -70,6 +71,8 @@ class ViewController: UIViewController {
             askForPermissionsLabel.isHidden = false
         } else if currentCameraState == .ready {
             addCameraToView()
+        } else {
+            askForPermissionsLabel.isHidden = false
         }
 
         flashModeImageView.image = UIImage(named: "flash_off")
@@ -111,7 +114,7 @@ class ViewController: UIViewController {
         cameraManager.showErrorBlock = { [weak self] (erTitle: String, erMessage: String) -> Void in
         
             let alertController = UIAlertController(title: erTitle, message: erMessage, preferredStyle: .alert)
-            alertController.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: { (alertAction) -> Void in  }))
+            alertController.addAction(UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: { (alertAction) -> Void in  }))
             
             self?.present(alertController, animated: true, completion: nil)
         }
@@ -135,14 +138,15 @@ class ViewController: UIViewController {
         
         switch cameraManager.cameraOutputMode {
         case .stillImage:
-            cameraManager.capturePictureWithCompletion({ (image, error) -> Void in
-                if error != nil {
+            cameraManager.capturePictureWithCompletion({ result in
+                switch result {
+                case .failure:
                     self.cameraManager.showErrorBlock("Error occurred", "Cannot save picture.")
-                }
-                else {
+                case .success(let content):
+
                     let vc: ImageViewController? = self.storyboard?.instantiateViewController(withIdentifier: "ImageVC") as? ImageViewController
                     if let validVC: ImageViewController = vc,
-                        let capturedImage = image {
+                        case let capturedImage = content.asImage {
                             validVC.image = capturedImage
                             validVC.cameraManager = self.cameraManager
                             self.navigationController?.pushViewController(validVC, animated: true)
@@ -151,7 +155,7 @@ class ViewController: UIViewController {
             })
         case .videoWithMic, .videoOnly:
             cameraButton.isSelected = !cameraButton.isSelected
-            cameraButton.setTitle("", for: UIControlState.selected)
+            cameraButton.setTitle("", for: UIControl.State.selected)
     
             cameraButton.backgroundColor = cameraButton.isSelected ? redColor : lightBlue
             if sender.isSelected {
@@ -193,10 +197,17 @@ class ViewController: UIViewController {
     @IBAction func askForCameraPermissions() {
         
         self.cameraManager.askUserForCameraPermission({ permissionGranted in
-            self.askForPermissionsLabel.isHidden = true
-            self.askForPermissionsLabel.alpha = 0
+           
             if permissionGranted {
+                self.askForPermissionsLabel.isHidden = true
+                self.askForPermissionsLabel.alpha = 0
                 self.addCameraToView()
+            } else {
+                if #available(iOS 10.0, *) { 
+                    UIApplication.shared.open(URL(string:UIApplication.openSettingsURLString)!)
+                } else {
+                    // Fallback on earlier versions
+                }
             }
         })
     }

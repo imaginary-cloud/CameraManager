@@ -2,8 +2,31 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [4.2.2](https://github.com/imaginary-cloud/CameraManager/tree/4.2.2) - 2018-07-26
+## [4.4.0](https://github.com/imaginary-cloud/CameraManager/tree/4.4.0) - 2019-03-12
+### Changed
+- Change callbacks to the swifty way of reporting success and errors (pull request #185)
 
+## [4.3.1](https://github.com/imaginary-cloud/CameraManager/tree/4.3.1) - 2019-03-08
+### Fixed
+
+- Swift Support (pull request #173 and #168)
+- Example App layout supports iPhone X (pull request #173)
+
+## [4.3.0](https://github.com/imaginary-cloud/CameraManager/tree/4.3.0) - 2018-08-17
+### Added
+
+- Add video stabilization mode (pull request #160)
+
+## [4.2.3](https://github.com/imaginary-cloud/CameraManager/tree/4.2.3) - 2018-07-27
+### Fixed
+
+- Deinit cause crash when `cameraDevice = .front` (#157)
+
+### Changed
+
+- Add note to documentation when a property has a default value
+
+## [4.2.2](https://github.com/imaginary-cloud/CameraManager/tree/4.2.2) - 2018-07-26
 ### Added
 
 - Add `CONTRIBUTING.md`
@@ -14,7 +37,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 ## [4.2.1](https://github.com/imaginary-cloud/CameraManager/tree/4.2.1) - 2018-06-20
-
 ### Added
 
 - Add `CODE_OF_CONDUCT.md`
@@ -24,7 +46,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Fix flash for video (#152)
 
 ## [4.2.0](https://github.com/imaginary-cloud/CameraManager/tree/4.2.0) - 2018-06-19
-
 ### Added
 
 - Add properties for setting custom album names for image and video recordings (pull request #147)
@@ -37,13 +58,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Memory leak in Example App
 
 ## [4.1.1](https://github.com/imaginary-cloud/CameraManager/tree/4.1.1) - 2018-05-16
-
 ### Fixed
 
 - License
 
 ## [4.1.0](https://github.com/imaginary-cloud/CameraManager/tree/4.1.0) - 2018-05-15
-
 ### Added
 
 - Add EXIF metadata for images and video - including location (#131)
@@ -55,7 +74,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Fix image orientation when taking pictures with device rotation lock active 
 
 ## [4.0.2](https://github.com/imaginary-cloud/CameraManager/tree/4.0.2) - 2018-05-07
-
 ### Fixed 
 
 - Using CoreMotion to get real device orientation, fixing no sound when switching camera (pull request #134)
@@ -70,7 +88,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Repeat crash CameraManager.swift line 430 in release (issue #138)
 
 ## [4.0.1](https://github.com/imaginary-cloud/CameraManager/tree/4.0.1) - 2017-11-18
-
 ### Added
 
 - Add @discardableResult modifiers to addPreviewLayerToView (pull request #132)
