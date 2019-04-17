@@ -573,8 +573,9 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                 return
             }
         }
-        
-        imageCompletion(CaptureResult(image))
+        else {
+            imageCompletion(CaptureResult(image))
+        }        
     }
     
     fileprivate func _setVideoWithGPS(forLocation location: CLLocation) {
