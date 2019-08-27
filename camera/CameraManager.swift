@@ -1434,54 +1434,35 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             }
         })
     }
-    
+
+    @IBAction fileprivate func _orientationDidChangeNotification() {
+        self.updateDeviceOrientation(UIDevice.current.orientation)
+        self._orientationChanged()
+    }
+
     fileprivate func _startFollowingDeviceOrientation() {
         if shouldRespondToOrientationChanges && !cameraIsObservingDeviceOrientation {
-            coreMotionManager = CMMotionManager()
-            coreMotionManager.accelerometerUpdateInterval = 0.005
-            
-            if coreMotionManager.isAccelerometerAvailable {
-                coreMotionManager.startAccelerometerUpdates(to: OperationQueue(), withHandler:
-                    {data, error in
-                        
-                        guard let acceleration: CMAcceleration = data?.acceleration  else{
-                            return
-                        }
-                        
-                        let scaling: CGFloat = CGFloat(1) / CGFloat(( abs(acceleration.x) + abs(acceleration.y)))
-                        
-                        let x: CGFloat = CGFloat(acceleration.x) * scaling
-                        let y: CGFloat = CGFloat(acceleration.y) * scaling
-                        
-                        if acceleration.z < Double(-0.75) {
-                            self.deviceOrientation = .faceUp
-                        } else if acceleration.z > Double(0.75) {
-                            self.deviceOrientation = .faceDown
-                        } else if x < CGFloat(-0.5) {
-                            self.deviceOrientation = .landscapeLeft
-                        } else if x > CGFloat(0.5) {
-                            self.deviceOrientation = .landscapeRight
-                        } else if y > CGFloat(0.5) {
-                            self.deviceOrientation = .portraitUpsideDown
-                        }
-                        
-                        self._orientationChanged()
-                })
-                
-                cameraIsObservingDeviceOrientation = true
-            } else {
-                cameraIsObservingDeviceOrientation = false
-            }
+            NotificationCenter.default.addObserver(
+                    self,
+                    selector: #selector(CameraManager._orientationDidChangeNotification),
+                    name: UIDevice.orientationDidChangeNotification,
+                    object: nil
+            )
+            self.cameraIsObservingDeviceOrientation = true
         }
     }
-    
+
     fileprivate func updateDeviceOrientation(_ orientaion: UIDeviceOrientation) {
         self.deviceOrientation = orientaion
     }
-    
+
     fileprivate func _stopFollowingDeviceOrientation() {
         if cameraIsObservingDeviceOrientation {
-            coreMotionManager.stopAccelerometerUpdates()
+            NotificationCenter.default.removeObserver(
+                    self,
+                    name: UIDevice.orientationDidChangeNotification,
+                    object: nil
+            )
             cameraIsObservingDeviceOrientation = false
         }
     }
@@ -1918,8 +1899,8 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     }
 
     deinit {
-        _stopFollowingDeviceOrientation()
         stopAndRemoveCaptureSession()
+        _stopFollowingDeviceOrientation()
     }
 }
 
