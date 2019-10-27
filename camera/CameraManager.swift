@@ -1924,7 +1924,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
 }
 
 fileprivate extension AVCaptureDevice {
-    fileprivate static var videoDevices: [AVCaptureDevice] {
+    static var videoDevices: [AVCaptureDevice] {
         return AVCaptureDevice.devices(for: AVMediaType.video)
     }
 }
