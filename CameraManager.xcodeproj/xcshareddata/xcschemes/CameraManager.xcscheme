@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0930"
+   LastUpgradeVersion = "1130"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -17,7 +17,7 @@
                BlueprintIdentifier = "D71DE8801AD677A7001E62F1"
                BuildableName = "CameraManager.framework"
                BlueprintName = "CameraManager"
-               ReferencedContainer = "container:camera.xcodeproj">
+               ReferencedContainer = "container:CameraManager.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -29,8 +29,6 @@
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
       </Testables>
-      <AdditionalOptions>
-      </AdditionalOptions>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
@@ -48,11 +46,9 @@
             BlueprintIdentifier = "D71DE8801AD677A7001E62F1"
             BuildableName = "CameraManager.framework"
             BlueprintName = "CameraManager"
-            ReferencedContainer = "container:camera.xcodeproj">
+            ReferencedContainer = "container:CameraManager.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
-      <AdditionalOptions>
-      </AdditionalOptions>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -66,7 +62,7 @@
             BlueprintIdentifier = "D71DE8801AD677A7001E62F1"
             BuildableName = "CameraManager.framework"
             BlueprintName = "CameraManager"
-            ReferencedContainer = "container:camera.xcodeproj">
+            ReferencedContainer = "container:CameraManager.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </ProfileAction>

@@ -15,7 +15,7 @@ The easiest way to install the CameraManager is with [CocoaPods](http://cocoapod
 ```ruby
 use_frameworks!
 
-pod 'CameraManager', '~> 4.4'
+pod 'CameraManager', '~> 5.0'
 ```
 
 ## Installation with Swift Package Manager
@@ -29,7 +29,7 @@ import PackageDescription
 
 let package = Package(
     dependencies: [
-        .Package(url: "https://github.com/imaginary-cloud/CameraManager", majorVersion: 4, minor: 3)
+        .Package(url: "https://github.com/imaginary-cloud/CameraManager", from: "5.0.0")
     ]
 )
 ```
@@ -41,7 +41,7 @@ let package = Package(
 Add the following line to your Cartfile:
 
 ```
-github "imaginary-cloud/CameraManager" >= 4.4
+github "imaginary-cloud/CameraManager" >= 5.0
 ```
 
 And run `carthage update` to build the dynamic framework.
@@ -217,13 +217,13 @@ cameraManager.showErrorBlock = { (erTitle: String, erMessage: String) -> Void in
 
 ## Support
 
-Supports iOS 9 and above. Xcode 10.0 is required to build the latest code written in Swift 4.2.
+Supports iOS 9 and above. Xcode 11.4 is required to build the latest code written in Swift 5.2.
 
 Now it's compatible with latest Swift syntax, so if you're using any Swift version prior to 4.2 make sure to use one of the previously tagged releases:
 
-- for Swift 4.0 see: [v4.4.0](https://github.com/imaginary-cloud/CameraManager/tree/4.4.0))
+- for Swift 4.0 see: [v4.4.0](https://github.com/imaginary-cloud/CameraManager/tree/4.4.0)
 
-- for Swift 3.0 see: [v3.2.0](https://github.com/imaginary-cloud/CameraManager/tree/3.2.0)).
+- for Swift 3.0 see: [v3.2.0](https://github.com/imaginary-cloud/CameraManager/tree/3.2.0).
 
 ## License
 

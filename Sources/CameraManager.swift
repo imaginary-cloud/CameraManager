@@ -119,7 +119,7 @@ public enum CaptureError: Error {
 }
 
 /// Class for handling iDevices custom camera usage
-open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGestureRecognizerDelegate {
+public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGestureRecognizerDelegate {
     
     // MARK: - Public properties
     
@@ -572,9 +572,9 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                 imageCompletion(.failure(error))
                 return
             }
+        } else {
+            imageCompletion(CaptureResult(image))
         }
-        
-        imageCompletion(CaptureResult(image))
     }
     
     fileprivate func _setVideoWithGPS(forLocation location: CLLocation) {
@@ -853,7 +853,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     }
     
     // MARK: - AVCaptureFileOutputRecordingDelegate
-    public func fileOutput(captureOutput: AVCaptureFileOutput, didStartRecordingTo fileURL: URL, from connections: [AVCaptureConnection]) {
+    public func fileOutput(_ captureOutput: AVCaptureFileOutput, didStartRecordingTo fileURL: URL, from connections: [AVCaptureConnection]) {
         captureSession?.beginConfiguration()
         if flashMode != .off {
             _updateIlluminationMode(flashMode)
@@ -1475,8 +1475,8 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         }
     }
     
-    fileprivate func updateDeviceOrientation(_ orientaion: UIDeviceOrientation) {
-        self.deviceOrientation = orientaion
+    fileprivate func updateDeviceOrientation(_ orientation: UIDeviceOrientation) {
+        self.deviceOrientation = orientation
     }
     
     fileprivate func _stopFollowingDeviceOrientation() {
@@ -1648,7 +1648,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     
     // MARK: - CameraLocationManager()
     
-    fileprivate class CameraLocationManager: NSObject, CLLocationManagerDelegate {
+    public class CameraLocationManager: NSObject, CLLocationManagerDelegate {
         var locationManager = CLLocationManager()
         var latestLocation: CLLocation?
         
@@ -1670,12 +1670,12 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         }
         
         // MARK: - CLLocationManagerDelegate
-        func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
             // Pick the location with best (= smallest value) horizontal accuracy
             latestLocation = locations.sorted { $0.horizontalAccuracy < $1.horizontalAccuracy }.first
         }
         
-        func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        public func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
             if status == .authorizedAlways || status == .authorizedWhenInUse {
                 locationManager.startUpdatingLocation()
             } else {
@@ -1924,7 +1924,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
 }
 
 fileprivate extension AVCaptureDevice {
-    fileprivate static var videoDevices: [AVCaptureDevice] {
+    static var videoDevices: [AVCaptureDevice] {
         return AVCaptureDevice.devices(for: AVMediaType.video)
     }
 }
