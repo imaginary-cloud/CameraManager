@@ -800,6 +800,54 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
     }
     
     /**
+     The signature for a handler.
+     The success value is the string representation of a scanned QR code, if any.
+     */
+    public typealias QRCodeDetectionHandler = (Result<String, Error>) -> Void
+    
+    /**
+     Start detecting QR codes.
+     */
+    open func startQRCodeDetection(_ handler: @escaping QRCodeDetectionHandler) {
+        guard let captureSession = self.captureSession
+            else { return }
+        
+        let output = AVCaptureMetadataOutput()
+        
+        guard captureSession.canAddOutput(output)
+            else { return }
+
+        self.qrCodeDetectionHandler = handler
+        captureSession.addOutput(output)
+
+        // Note: The object types must be set after the output was added to the capture session.
+        output.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
+        output.metadataObjectTypes = [.qr, .ean8, .ean13, .pdf417].filter { output.availableMetadataObjectTypes.contains($0) }
+    }
+    
+    /**
+     Stop detecting QR codes.
+     */
+    open func stopQRCodeDetection() {
+        self.qrCodeDetectionHandler = nil
+        
+        if let output = self.qrOutput {
+            self.captureSession?.removeOutput(output)
+        }
+        self.qrOutput = nil
+    }
+    
+    /**
+     The stored handler for QR codes.
+     */
+    private var qrCodeDetectionHandler: QRCodeDetectionHandler?
+    
+    /**
+     The stored meta data output; used to detect QR codes.
+     */
+    private var qrOutput: AVCaptureOutput? = nil
+    
+    /**
      Check if the device rotation is locked
      */
     open func deviceOrientationMatchesInterfaceOrientation() -> Bool {
@@ -2097,3 +2145,23 @@ extension PHPhotoLibrary {
     }
 }
 
+extension CameraManager: AVCaptureMetadataOutputObjectsDelegate {
+    /**
+     Called when a QR code is detected.
+     */
+    public func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
+        // Check if there is a registered handler.
+        guard let handler = self.qrCodeDetectionHandler
+            else { return }
+        
+        // Get the detection result.
+        let stringValues = metadataObjects
+            .compactMap { $0 as? AVMetadataMachineReadableCodeObject }
+            .compactMap { $0.stringValue }
+        
+        guard let stringValue = stringValues.first
+            else { return }
+        
+        handler(.success(stringValue))
+    }
+}
