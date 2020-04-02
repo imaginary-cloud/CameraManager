@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [5.0.1](https://github.com/imaginary-cloud/CameraManager/tree/5.0.0) - 2020-04-02
+
+### Fixed
+
+- Support flash mode selection on front camera (pull request #215)
+
 ## [5.0.0](https://github.com/imaginary-cloud/CameraManager/tree/5.0.0) - 2020-04-01
 
 ### Changed
