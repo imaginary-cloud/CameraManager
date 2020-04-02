@@ -360,7 +360,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
     
     fileprivate var coreMotionManager: CMMotionManager!
     
-    /// Real device orientation from accelerometer
+    /// Real device orientation from DeviceMotion
     fileprivate var deviceOrientation: UIDeviceOrientation = .portrait
     
     // MARK: - CameraManager
@@ -1486,35 +1486,27 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
     fileprivate func _startFollowingDeviceOrientation() {
         if shouldRespondToOrientationChanges && !cameraIsObservingDeviceOrientation {
             coreMotionManager = CMMotionManager()
-            coreMotionManager.accelerometerUpdateInterval = 0.005
-            
-            if coreMotionManager.isAccelerometerAvailable {
-                coreMotionManager.startAccelerometerUpdates(to: OperationQueue(), withHandler:
-                    {data, error in
-                        
-                        guard let acceleration: CMAcceleration = data?.acceleration  else{
-                            return
-                        }
-                        
-                        let scaling: CGFloat = CGFloat(1) / CGFloat(( abs(acceleration.x) + abs(acceleration.y)))
-                        
-                        let x: CGFloat = CGFloat(acceleration.x) * scaling
-                        let y: CGFloat = CGFloat(acceleration.y) * scaling
-                        
-                        if acceleration.z < Double(-0.75) {
-                            self.deviceOrientation = .faceUp
-                        } else if acceleration.z > Double(0.75) {
-                            self.deviceOrientation = .faceDown
-                        } else if x < CGFloat(-0.5) {
-                            self.deviceOrientation = .landscapeLeft
-                        } else if x > CGFloat(0.5) {
-                            self.deviceOrientation = .landscapeRight
-                        } else if y > CGFloat(0.5) {
+            coreMotionManager.deviceMotionUpdateInterval = 1 / 30.0
+            if coreMotionManager.isDeviceMotionAvailable {
+                coreMotionManager.startDeviceMotionUpdates(to: OperationQueue()) { (motion, error) in
+                    guard let motion = motion else { return }
+                    let x = motion.gravity.x
+                    let y = motion.gravity.y
+                    if fabs(y) >= fabs(x) {
+                        if y >= 0 {
                             self.deviceOrientation = .portraitUpsideDown
+                        } else {
+                            self.deviceOrientation = .portrait
                         }
-                        
-                        self._orientationChanged()
-                })
+                    } else {
+                        if x >= 0 {
+                            self.deviceOrientation = .landscapeRight
+                        } else {
+                            self.deviceOrientation = .landscapeLeft
+                        }
+                    }
+                    self._orientationChanged()
+                }
                 
                 cameraIsObservingDeviceOrientation = true
             } else {
@@ -1529,7 +1521,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
     
     fileprivate func _stopFollowingDeviceOrientation() {
         if cameraIsObservingDeviceOrientation {
-            coreMotionManager.stopAccelerometerUpdates()
+            coreMotionManager.stopDeviceMotionUpdates()
             cameraIsObservingDeviceOrientation = false
         }
     }

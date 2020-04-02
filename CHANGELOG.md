@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Camera freeze caused by orientation changes (pull request #204)
 - Support flash mode selection on front camera (pull request #215)
 
 ### Added
