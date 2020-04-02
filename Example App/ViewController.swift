@@ -41,6 +41,8 @@ class ViewController: UIViewController {
         //      cameraManager.shouldRespondToOrientationChanges = false
         cameraManager.shouldEnableExposure = true
         
+        cameraManager.writeFilesToPhoneLibrary = false
+        
         cameraManager.shouldFlipFrontCameraImage = false
         cameraManager.showAccessPermissionPopupAutomatically = false
         navigationController?.navigationBar.isHidden = true
@@ -222,15 +224,21 @@ class ViewController: UIViewController {
     }
     
     @IBAction func changeCameraQuality() {
-        
-        switch cameraManager.changeQualityMode() {
+        switch cameraManager.cameraOutputQuality {
         case .high:
-            qualityLabel.text = "High"
-        case .low:
-            qualityLabel.text = "Low"
-        case .medium:
             qualityLabel.text = "Medium"
+            cameraManager.cameraOutputQuality = .medium
+        case .medium:
+            qualityLabel.text = "Low"
+            cameraManager.cameraOutputQuality = .low
+        case .low:
+            qualityLabel.text = "High"
+            cameraManager.cameraOutputQuality = .high
+        default:
+            qualityLabel.text = "High"
+            cameraManager.cameraOutputQuality = .high
         }
+        
     }
 }
 

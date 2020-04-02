@@ -12,6 +12,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+- Set camera output quality using AVCaptureSession.Preset (pull request #195)
 - Add support for scanning QR codes (pull request #199)
 
 ## [5.0.0](https://github.com/imaginary-cloud/CameraManager/tree/5.0.0) - 2020-04-01
