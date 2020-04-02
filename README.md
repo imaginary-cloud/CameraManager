@@ -6,6 +6,8 @@ This is a simple Swift class to provide all the configurations you need to creat
 It follows orientation change and updates UI accordingly, supports front and rear camera selection, pinch to zoom, tap to focus, exposure slider, different flash modes, inputs and outputs.
 Just drag, drop and use.
 
+We've also written a blog post about it. You can read it [here](https://www.imaginarycloud.com/blog/camera-manager/).
+
 ## Installation with CocoaPods
 
 The easiest way to install the CameraManager is with [CocoaPods](http://cocoapods.org)
@@ -227,10 +229,10 @@ Now it's compatible with latest Swift syntax, so if you're using any Swift versi
 
 ## License
 
-Copyright © 2010-2018 [Imaginary Cloud](https://www.imaginarycloud.com). This library is licensed under the MIT license.
+Copyright © 2010-2020 [Imaginary Cloud](https://www.imaginarycloud.com). This library is licensed under the MIT license.
 
 ## About Imaginary Cloud
 
 ![Imaginary Cloud](https://s3.eu-central-1.amazonaws.com/imaginary-images/Logo_IC_readme.svg)
 
-We apply our own Product Design Process to bring great digital products to life. Visit [our website](https://www.imaginarycloud.com) to find out about our other projects or [contact us](https://www.imaginarycloud.com/contacts) if there's an idea that you want to turn into an outstanding product, we'll take it from there!
+At Imaginary Cloud, we build world-class web & mobile apps. Our Front-end developers and UI/UX designers are ready to create or scale your digital product. Take a look at our [website](https://www.imaginarycloud.com/) and [get in touch!](https://www.imaginarycloud.com/contacts) We'll take it from there.
