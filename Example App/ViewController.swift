@@ -13,7 +13,7 @@ import CoreLocation
 class ViewController: UIViewController {
     
     // MARK: - Constants
-
+    
     let cameraManager = CameraManager()
     
     // MARK: - @IBOutlets
@@ -38,7 +38,7 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-//      cameraManager.shouldRespondToOrientationChanges = false
+        //      cameraManager.shouldRespondToOrientationChanges = false
         cameraManager.shouldEnableExposure = true
         
         cameraManager.shouldFlipFrontCameraImage = false
@@ -64,7 +64,7 @@ class ViewController: UIViewController {
                 self.cameraManager.shouldUseLocationServices = false
             }
         }
-
+        
         let currentCameraState = cameraManager.currentCameraStatus()
         
         if currentCameraState == .notDetermined {
@@ -74,7 +74,7 @@ class ViewController: UIViewController {
         } else {
             askForPermissionsLabel.isHidden = false
         }
-
+        
         flashModeImageView.image = UIImage(named: "flash_off")
         if cameraManager.hasFlash {
             let tapGesture = UITapGestureRecognizer(target: self, action: #selector(changeFlashMode))
@@ -88,7 +88,7 @@ class ViewController: UIViewController {
         cameraTypeImageView.image = UIImage(named: "switch_camera")
         let cameraTypeGesture = UITapGestureRecognizer(target: self, action: #selector(changeCameraDevice))
         cameraTypeImageView.addGestureRecognizer(cameraTypeGesture)
-    
+        
         qualityLabel.isUserInteractionEnabled = true
         let qualityGesture = UITapGestureRecognizer(target: self, action: #selector(changeCameraQuality))
         qualityLabel.addGestureRecognizer(qualityGesture)
@@ -99,29 +99,38 @@ class ViewController: UIViewController {
         
         navigationController?.navigationBar.isHidden = true
         cameraManager.resumeCaptureSession()
+        cameraManager.startQRCodeDetection { (result) in
+            switch result {
+            case .success(let value):
+                print(value)
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+        }
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        cameraManager.stopQRCodeDetection()
         cameraManager.stopCaptureSession()
     }
     
-
+    
     // MARK: - ViewController
     fileprivate func addCameraToView()
     {
         cameraManager.addPreviewLayerToView(cameraView, newCameraOutputMode: CameraOutputMode.videoWithMic)
         cameraManager.showErrorBlock = { [weak self] (erTitle: String, erMessage: String) -> Void in
-        
+            
             let alertController = UIAlertController(title: erTitle, message: erMessage, preferredStyle: .alert)
             alertController.addAction(UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: { (alertAction) -> Void in  }))
             
             self?.present(alertController, animated: true, completion: nil)
         }
     }
-
+    
     // MARK: - @IBActions
-
+    
     @IBAction func changeFlashMode(_ sender: UIButton) {
         
         switch cameraManager.changeFlashMode() {
@@ -143,20 +152,20 @@ class ViewController: UIViewController {
                 case .failure:
                     self.cameraManager.showErrorBlock("Error occurred", "Cannot save picture.")
                 case .success(let content):
-
+                    
                     let vc: ImageViewController? = self.storyboard?.instantiateViewController(withIdentifier: "ImageVC") as? ImageViewController
                     if let validVC: ImageViewController = vc,
                         case let capturedImage = content.asImage {
-                            validVC.image = capturedImage
-                            validVC.cameraManager = self.cameraManager
-                            self.navigationController?.pushViewController(validVC, animated: true)
+                        validVC.image = capturedImage
+                        validVC.cameraManager = self.cameraManager
+                        self.navigationController?.pushViewController(validVC, animated: true)
                     }
                 }
             })
         case .videoWithMic, .videoOnly:
             cameraButton.isSelected = !cameraButton.isSelected
             cameraButton.setTitle("", for: UIControl.State.selected)
-    
+            
             cameraButton.backgroundColor = cameraButton.isSelected ? redColor : lightBlue
             if sender.isSelected {
                 cameraManager.startRecordingVideo()
@@ -170,13 +179,13 @@ class ViewController: UIViewController {
         }
     }
     
-
+    
     
     @IBAction func locateMeButtonTapped(_ sender: Any) {
         cameraManager.shouldUseLocationServices = true
         locationButton.isHidden = true
     }
-
+    
     @IBAction func outputModeButtonTapped(_ sender: UIButton) {
         
         cameraManager.cameraOutputMode = cameraManager.cameraOutputMode == CameraOutputMode.videoWithMic ? CameraOutputMode.stillImage : CameraOutputMode.videoWithMic
@@ -197,7 +206,7 @@ class ViewController: UIViewController {
     @IBAction func askForCameraPermissions() {
         
         self.cameraManager.askUserForCameraPermission({ permissionGranted in
-           
+            
             if permissionGranted {
                 self.askForPermissionsLabel.isHidden = true
                 self.askForPermissionsLabel.alpha = 0

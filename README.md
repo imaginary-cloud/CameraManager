@@ -3,7 +3,7 @@
 [![CocoaPods](https://img.shields.io/cocoapods/v/CameraManager.svg)](https://github.com/imaginary-cloud/CameraManager) [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 
 This is a simple Swift class to provide all the configurations you need to create custom camera view in your app.
-It follows orientation change and updates UI accordingly, supports front and rear camera selection, pinch to zoom, tap to focus, exposure slider, different flash modes, inputs and outputs.
+It follows orientation change and updates UI accordingly, supports front and rear camera selection, pinch to zoom, tap to focus, exposure slider, different flash modes, inputs and outputs and QRCode detection.
 Just drag, drop and use.
 
 We've also written a blog post about it. You can read it [here](https://www.imaginarycloud.com/blog/camera-manager/).
@@ -216,6 +216,21 @@ cameraManager.showErrorBlock = { (erTitle: String, erMessage: String) -> Void in
 
 }
 ```
+
+You can set if you want to detect QR codes:
+
+```swift
+cameraManager.startQRCodeDetection { (result) in
+    switch result {
+    case .success(let value):
+        print(value)
+    case .failure(let error):
+        print(error.localizedDescription)
+    }
+}
+```
+
+and don't forget to call `cameraManager.stopQRCodeDetection()` whenever you done detecting.
 
 ## Support
 
