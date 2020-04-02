@@ -32,10 +32,6 @@ public enum CameraOutputMode {
     case stillImage, videoWithMic, videoOnly
 }
 
-public enum CameraOutputQuality: Int {
-    case low, medium, high
-}
-
 public enum CaptureResult {
     case success(content: CaptureContent)
     case failure(Error)
@@ -150,6 +146,13 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
         if let topController = UIApplication.shared.keyWindow?.rootViewController {
             topController.present(alertController, animated: true, completion:nil)
         }
+    }
+    
+    open func canSetPreset(preset: AVCaptureSession.Preset) -> Bool? {
+        if let validCaptureSession = captureSession {
+            return validCaptureSession.canSetSessionPreset(preset)
+        }
+        return nil
     }
     
     /**
@@ -283,7 +286,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
     }
     
     /// Property to change camera output quality.
-    open var cameraOutputQuality = CameraOutputQuality.high {
+    open var cameraOutputQuality: AVCaptureSession.Preset = .high {
         didSet {
             if cameraIsSetup && cameraOutputQuality != oldValue {
                 _updateCameraQualityMode(cameraOutputQuality)
@@ -872,17 +875,6 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
         guard let newFlashMode = CameraFlashMode(rawValue: (flashMode.rawValue+1)%3) else { return flashMode }
         flashMode = newFlashMode
         return flashMode
-    }
-    
-    /**
-     Change current output quality mode to next value from available ones.
-     
-     :returns: Current quality mode: Low / Medium / High
-     */
-    open func changeQualityMode() -> CameraOutputQuality {
-        guard let newQuality = CameraOutputQuality(rawValue: (cameraOutputQuality.rawValue+1)%3) else { return cameraOutputQuality }
-        cameraOutputQuality = newQuality
-        return cameraOutputQuality
     }
     
     /**
@@ -1900,21 +1892,20 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
         }
     }
     
-    fileprivate func _updateCameraQualityMode(_ newCameraOutputQuality: CameraOutputQuality) {
+    fileprivate func _updateCameraQualityMode(_ newCameraOutputQuality: AVCaptureSession.Preset) {
+        
+        
         if let validCaptureSession = captureSession {
-            var sessionPreset = AVCaptureSession.Preset.low
-            switch newCameraOutputQuality {
-            case CameraOutputQuality.low:
-                sessionPreset = AVCaptureSession.Preset.low
-            case CameraOutputQuality.medium:
-                sessionPreset = AVCaptureSession.Preset.medium
-            case CameraOutputQuality.high:
+            
+            var sessionPreset = newCameraOutputQuality
+            if newCameraOutputQuality == .high {
                 if cameraOutputMode == .stillImage {
                     sessionPreset = AVCaptureSession.Preset.photo
                 } else {
                     sessionPreset = AVCaptureSession.Preset.high
                 }
             }
+            
             if validCaptureSession.canSetSessionPreset(sessionPreset) {
                 validCaptureSession.beginConfiguration()
                 validCaptureSession.sessionPreset = sessionPreset

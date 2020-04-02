@@ -123,10 +123,22 @@ You can set output format to Image, video or video with audio. `(Default: .still
 cameraManager.cameraOutputMode = .stillImage || .videoWithMic || .videoOnly
 ```
 
-You can set the quality. `(Default: .high)`
+You can set the quality based on the [AVCaptureSession.Preset values](https://developer.apple.com/documentation/avfoundation/avcapturesession/preset) `(Default: .high)`
 
 ```swift
-cameraManager.cameraOutputQuality = .low || .medium || .high
+cameraManager.cameraOutputQuality = .low || .medium || .high || *
+```
+
+`*` check all the possible values [here](https://developer.apple.com/documentation/avfoundation/avcapturesession/preset)
+
+You can also check if you can set a specific preset value:
+
+```swift
+if .cameraManager.canSetPreset(preset: .hd1280x720) {
+     cameraManager.cameraOutputQuality = .hd1280x720
+} else {
+    cameraManager.cameraOutputQuality = .high
+}
 ```
 
 You can specify the focus mode. `(Default: .continuousAutoFocus)`
