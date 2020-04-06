@@ -645,10 +645,8 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
         
         library?.save(imageAtURL: filePath, albumName: self.imageAlbumName, date: date, location: location) { asset in
             
-            if let asset = asset {
-                imageCompletion(CaptureResult(asset))
-            } else {
-                imageCompletion(.failure(CaptureError.assetNotSaved))
+            guard let _ = asset else {
+                return imageCompletion(.failure(CaptureError.assetNotSaved))
             }
         }
     }

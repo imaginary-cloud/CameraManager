@@ -7,24 +7,25 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- Camera freeze caused by orientation changes (pull request #204)
-- Location data not stored in EXIF data (issue #213)
-- Support flash mode selection on front camera (pull request #215)
+- [`capturePictureWithCompletion` called twice when `writeFilesToPhoneLibrary = true`](https://github.com/imaginary-cloud/CameraManager/issues/187)
+- [Camera freeze caused by orientation changes](https://github.com/imaginary-cloud/CameraManager/pull/204)
+- [Location data not stored in EXIF data](https://github.com/imaginary-cloud/CameraManager/issues/213)
+- [Support flash mode selection on front camera](https://github.com/imaginary-cloud/CameraManager/pull/214)
 
 ### Added
 
-- Set camera output quality using AVCaptureSession.Preset (pull request #195)
-- Add support for scanning QR codes (pull request #199)
+- [Set camera output quality using AVCaptureSession.Preset](https://github.com/imaginary-cloud/CameraManager/pull/195)
+- [Add support for scanning QR codes](https://github.com/imaginary-cloud/CameraManager/pull/199)
 
 ## [5.0.0](https://github.com/imaginary-cloud/CameraManager/tree/5.0.0) - 2020-04-01
 
 ### Changed
 
-- Syntax update for Swift 5.2 (issue #189)
+- [Syntax update for Swift 5.2](https://github.com/imaginary-cloud/CameraManager/issues/189)
 
 ### Fixed
 
-- Fix Swift Package Manager support (issue #215)
+- [Fix Swift Package Manager support](https://github.com/imaginary-cloud/CameraManager/issues/215)
 
 ## [4.4.0](https://github.com/imaginary-cloud/CameraManager/tree/4.4.0) - 2019-03-12
 
