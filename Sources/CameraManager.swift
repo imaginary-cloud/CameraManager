@@ -69,13 +69,13 @@ extension CaptureContent {
     public var asImage: UIImage? {
         
         switch self {
-        case let .image(image): return image
-        case let .imageData(data): return UIImage(data: data)
-        case let .asset(asset):
-            if let data = getImageData(fromAsset: asset) {
-                return UIImage(data: data)
-            } else {
-                return nil
+            case let .image(image): return image
+            case let .imageData(data): return UIImage(data: data)
+            case let .asset(asset):
+                if let data = getImageData(fromAsset: asset) {
+                    return UIImage(data: data)
+                } else {
+                    return nil
             }
         }
     }
@@ -83,9 +83,9 @@ extension CaptureContent {
     public var asData: Data? {
         
         switch self {
-        case let .image(image): return image.jpegData(compressionQuality: 0.8)
-        case let .imageData(data): return data
-        case let .asset(asset): return getImageData(fromAsset: asset)
+            case let .image(image): return image.jpegData(compressionQuality: 1.0)
+            case let .imageData(data): return data
+            case let .asset(asset): return getImageData(fromAsset: asset)
         }
         
     }
@@ -504,10 +504,10 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
             
             switch result {
                 
-            case let .success(content):
-                imageCompletion(content.asImage, nil)
-            case .failure:
-                imageCompletion(nil, NSError())
+                case let .success(content):
+                    imageCompletion(content.asImage, nil)
+                case .failure:
+                    imageCompletion(nil, NSError())
             }
         }
         
@@ -550,14 +550,13 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
         }
         
         let image = fixOrientation(withImage: img)
+        let newImageData = _imageDataWithEXIF(forImage: image, imageData)! as Data
         
         if writeFilesToPhoneLibrary {
             
             let filePath = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("tempImg\(Int(Date().timeIntervalSince1970)).jpg")
-            let newImageData = _imageDataWithEXIF(forImage: image, imageData) as Data
             
             do {
-                
                 try newImageData.write(to: filePath)
                 
                 // make sure that doesn't fail the first time
@@ -577,7 +576,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
             }
         }
         
-        imageCompletion(CaptureResult(image))
+        imageCompletion(CaptureResult(newImageData))
     }
     
     fileprivate func _setVideoWithGPS(forLocation location: CLLocation) {
@@ -589,28 +588,35 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
         _getMovieOutput().metadata = [metadata]
     }
     
-    fileprivate func _imageDataWithEXIF(forImage image: UIImage, _ imageData: Data) -> CFMutableData {
-        // get EXIF info
-        let cgImage = image.cgImage
-        let newImageData:CFMutableData = CFDataCreateMutable(nil, 0)
-        let type = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, "image/jpg" as CFString, kUTTypeImage)
-        let destination:CGImageDestination = CGImageDestinationCreateWithData(newImageData, (type?.takeRetainedValue())!, 1, nil)!
+    
+    fileprivate func _imageDataWithEXIF(forImage image: UIImage, _ data: Data) -> NSData? {
+        let cfdata: CFData =  data as CFData
+        let source = CGImageSourceCreateWithData(cfdata, nil)!
+        let UTI: CFString = CGImageSourceGetType(source)!
+        let mutableData: CFMutableData = NSMutableData(data: data) as CFMutableData
+        let destination = CGImageDestinationCreateWithData(mutableData, UTI, 1, nil)!
         
-        let imageSourceRef = CGImageSourceCreateWithData(imageData as CFData, nil)
-        let currentProperties = CGImageSourceCopyPropertiesAtIndex(imageSourceRef!, 0, nil)
-        let mutableDict = NSMutableDictionary(dictionary: currentProperties!)
+        let imageSourceRef = CGImageSourceCreateWithData(cfdata, nil)
+        let imageProperties = CGImageSourceCopyMetadataAtIndex(imageSourceRef!, 0, nil)!
+        
+        var mutableMetadata = CGImageMetadataCreateMutableCopy(imageProperties)!
         
         if let location = self.locationManager?.latestLocation {
-            mutableDict.setValue(_gpsMetadata(withLocation: location), forKey: kCGImagePropertyGPSDictionary as String)
+            mutableMetadata = _gpsMetadata(mutableMetadata, withLocation: location)
         }
         
-        CGImageDestinationAddImage(destination, cgImage!, mutableDict as CFDictionary)
+        let finalMetadata:CGImageMetadata = mutableMetadata
+        CGImageDestinationAddImageAndMetadata(destination, UIImage(data: data)!.cgImage!, finalMetadata, nil)
         CGImageDestinationFinalize(destination)
+        return mutableData;
         
-        return newImageData
     }
     
-    fileprivate func _gpsMetadata(withLocation location: CLLocation) -> NSMutableDictionary {
+    fileprivate func _gpsMetadata(_ imageMetadata:CGMutableImageMetadata, withLocation location: CLLocation) -> CGMutableImageMetadata {
+        let altitudeRef = Int(location.altitude < 0.0 ? 1 : 0)
+        let latitudeRef = location.coordinate.latitude < 0.0 ? "S" : "N"
+        let longitudeRef = location.coordinate.longitude < 0.0 ? "W" : "E"
+        
         let f = DateFormatter()
         f.timeZone = TimeZone(abbreviation: "UTC")
         
@@ -620,22 +626,16 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
         f.dateFormat = "HH:mm:ss.SSSSSS"
         let isoTime = f.string(from: location.timestamp)
         
-        let GPSMetadata = NSMutableDictionary()
-        let altitudeRef = Int(location.altitude < 0.0 ? 1 : 0)
-        let latitudeRef = location.coordinate.latitude < 0.0 ? "S" : "N"
-        let longitudeRef = location.coordinate.longitude < 0.0 ? "W" : "E"
+        CGImageMetadataSetValueMatchingImageProperty(imageMetadata, kCGImagePropertyGPSDictionary, kCGImagePropertyGPSLatitudeRef, latitudeRef as CFTypeRef)
+        CGImageMetadataSetValueMatchingImageProperty(imageMetadata, kCGImagePropertyGPSDictionary, kCGImagePropertyGPSLatitude, abs(location.coordinate.latitude) as CFTypeRef)
+        CGImageMetadataSetValueMatchingImageProperty(imageMetadata, kCGImagePropertyGPSDictionary, kCGImagePropertyGPSLongitudeRef, longitudeRef as CFTypeRef)
+        CGImageMetadataSetValueMatchingImageProperty(imageMetadata, kCGImagePropertyGPSDictionary, kCGImagePropertyGPSLongitude, abs(location.coordinate.longitude) as CFTypeRef)
+        CGImageMetadataSetValueMatchingImageProperty(imageMetadata, kCGImagePropertyGPSDictionary, kCGImagePropertyGPSAltitude, Int(abs(location.altitude)) as CFTypeRef)
+        CGImageMetadataSetValueMatchingImageProperty(imageMetadata, kCGImagePropertyGPSDictionary, kCGImagePropertyGPSAltitudeRef, altitudeRef as CFTypeRef)
+        CGImageMetadataSetValueMatchingImageProperty(imageMetadata, kCGImagePropertyGPSDictionary, kCGImagePropertyGPSTimeStamp, isoTime as CFTypeRef)
+        CGImageMetadataSetValueMatchingImageProperty(imageMetadata, kCGImagePropertyGPSDictionary, kCGImagePropertyGPSDateStamp, isoDate as CFTypeRef)
         
-        // GPS metadata
-        GPSMetadata[(kCGImagePropertyGPSLatitude as String)] = abs(location.coordinate.latitude)
-        GPSMetadata[(kCGImagePropertyGPSLongitude as String)] = abs(location.coordinate.longitude)
-        GPSMetadata[(kCGImagePropertyGPSLatitudeRef as String)] = latitudeRef
-        GPSMetadata[(kCGImagePropertyGPSLongitudeRef as String)] = longitudeRef
-        GPSMetadata[(kCGImagePropertyGPSAltitude as String)] = Int(abs(location.altitude))
-        GPSMetadata[(kCGImagePropertyGPSAltitudeRef as String)] = altitudeRef
-        GPSMetadata[(kCGImagePropertyGPSTimeStamp as String)] = isoTime
-        GPSMetadata[(kCGImagePropertyGPSDateStamp as String)] = isoDate
-        
-        return GPSMetadata
+        return imageMetadata
     }
     
     fileprivate func _saveImageToLibrary(atFileURL filePath: URL, _ imageCompletion: @escaping (CaptureResult) -> Void) {
@@ -665,10 +665,10 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
             
             switch result {
                 
-            case let .success(content):
-                imageCompletion(content.asData, nil)
-            case .failure:
-                imageCompletion(nil, NSError())
+                case let .success(content):
+                    imageCompletion(content.asData, nil)
+                case .failure:
+                    imageCompletion(nil, NSError())
             }
         }
         capturePictureDataWithCompletion(completion)
@@ -731,12 +731,12 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
     fileprivate func _imageOrientation(forDeviceOrientation deviceOrientation: UIDeviceOrientation, isMirrored: Bool) -> UIImage.Orientation {
         
         switch deviceOrientation {
-        case .landscapeLeft:
-            return isMirrored ? .upMirrored : .up
-        case .landscapeRight:
-            return isMirrored ? .downMirrored : .down
-        default:
-            break
+            case .landscapeLeft:
+                return isMirrored ? .upMirrored : .up
+            case .landscapeRight:
+                return isMirrored ? .downMirrored : .down
+            default:
+                break
         }
         
         return isMirrored ? .leftMirrored : .right
@@ -978,10 +978,10 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
         let device: AVCaptureDevice?
         
         switch cameraDevice {
-        case .back:
-            device = backCameraDevice
-        case .front:
-            device = frontCameraDevice
+            case .back:
+                device = backCameraDevice
+            case .front:
+                device = frontCameraDevice
         }
         
         do {
@@ -1025,10 +1025,10 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
         let device: AVCaptureDevice?
         
         switch cameraDevice {
-        case .back:
-            device = backCameraDevice
-        case .front:
-            device = frontCameraDevice
+            case .back:
+                device = backCameraDevice
+            case .front:
+                device = frontCameraDevice
         }
         
         _changeExposureMode(mode: .continuousAutoExposure)
@@ -1194,10 +1194,10 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
         let device: AVCaptureDevice?
         
         switch cameraDevice {
-        case .back:
-            device = backCameraDevice
-        case .front:
-            device = frontCameraDevice
+            case .back:
+                device = backCameraDevice
+            case .front:
+                device = frontCameraDevice
         }
         if (device?.exposureMode == mode) {
             return
@@ -1219,10 +1219,10 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
             let device: AVCaptureDevice?
             
             switch cameraDevice {
-            case .back:
-                device = backCameraDevice
-            case .front:
-                device = frontCameraDevice
+                case .back:
+                    device = backCameraDevice
+                case .front:
+                    device = frontCameraDevice
             }
             
             do {
@@ -1293,12 +1293,12 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
         var currentConnection: AVCaptureConnection?
         
         switch cameraOutputMode {
-        case .stillImage:
-            currentConnection = stillImageOutput?.connection(with: AVMediaType.video)
-        case .videoOnly, .videoWithMic:
-            currentConnection = _getMovieOutput().connection(with: AVMediaType.video)
-            if let location = self.locationManager?.latestLocation {
-                _setVideoWithGPS(forLocation: location)
+            case .stillImage:
+                currentConnection = stillImageOutput?.connection(with: AVMediaType.video)
+            case .videoOnly, .videoWithMic:
+                currentConnection = _getMovieOutput().connection(with: AVMediaType.video)
+                if let location = self.locationManager?.latestLocation {
+                    _setVideoWithGPS(forLocation: location)
             }
         }
         
@@ -1359,38 +1359,38 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
     
     fileprivate func _videoOrientation(forDeviceOrientation deviceOrientation: UIDeviceOrientation) -> AVCaptureVideoOrientation {
         switch deviceOrientation {
-        case .landscapeLeft:
-            return .landscapeRight
-        case .landscapeRight:
-            return .landscapeLeft
-        case .portraitUpsideDown:
-            return .portraitUpsideDown
-        case .faceUp:
-            /*
-             Attempt to keep the existing orientation.  If the device was landscape, then face up
-             getting the orientation from the stats bar would fail every other time forcing it
-             to default to portrait which would introduce flicker into the preview layer.  This
-             would not happen if it was in portrait then face up
-             */
-            if let validPreviewLayer = previewLayer, let connection = validPreviewLayer.connection  {
-                return connection.videoOrientation //Keep the existing orientation
-            }
-            //Could not get existing orientation, try to get it from stats bar
-            return _videoOrientationFromStatusBarOrientation()
-        case .faceDown:
-            /*
-             Attempt to keep the existing orientation.  If the device was landscape, then face down
-             getting the orientation from the stats bar would fail every other time forcing it
-             to default to portrait which would introduce flicker into the preview layer.  This
-             would not happen if it was in portrait then face down
-             */
-            if let validPreviewLayer = previewLayer, let connection = validPreviewLayer.connection  {
-                return connection.videoOrientation //Keep the existing orientation
-            }
-            //Could not get existing orientation, try to get it from stats bar
-            return _videoOrientationFromStatusBarOrientation()
-        default:
-            return .portrait
+            case .landscapeLeft:
+                return .landscapeRight
+            case .landscapeRight:
+                return .landscapeLeft
+            case .portraitUpsideDown:
+                return .portraitUpsideDown
+            case .faceUp:
+                /*
+                 Attempt to keep the existing orientation.  If the device was landscape, then face up
+                 getting the orientation from the stats bar would fail every other time forcing it
+                 to default to portrait which would introduce flicker into the preview layer.  This
+                 would not happen if it was in portrait then face up
+                 */
+                if let validPreviewLayer = previewLayer, let connection = validPreviewLayer.connection  {
+                    return connection.videoOrientation //Keep the existing orientation
+                }
+                //Could not get existing orientation, try to get it from stats bar
+                return _videoOrientationFromStatusBarOrientation()
+            case .faceDown:
+                /*
+                 Attempt to keep the existing orientation.  If the device was landscape, then face down
+                 getting the orientation from the stats bar would fail every other time forcing it
+                 to default to portrait which would introduce flicker into the preview layer.  This
+                 would not happen if it was in portrait then face down
+                 */
+                if let validPreviewLayer = previewLayer, let connection = validPreviewLayer.connection  {
+                    return connection.videoOrientation //Keep the existing orientation
+                }
+                //Could not get existing orientation, try to get it from stats bar
+                return _videoOrientationFromStatusBarOrientation()
+            default:
+                return .portrait
         }
     }
     
@@ -1411,16 +1411,16 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
         }
         
         switch statusBarOrientation {
-        case .landscapeLeft:
-            return .landscapeLeft
-        case .landscapeRight:
-            return .landscapeRight
-        case .portrait:
-            return .portrait
-        case .portraitUpsideDown:
-            return .portraitUpsideDown
-        default:
-            return .portrait
+            case .landscapeLeft:
+                return .landscapeLeft
+            case .landscapeRight:
+                return .landscapeRight
+            case .portrait:
+                return .portrait
+            case .portraitUpsideDown:
+                return .portraitUpsideDown
+            default:
+                return .portrait
         }
     }
     
@@ -1570,41 +1570,41 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
         if let cameraOutputToRemove = oldCameraOutputMode {
             // remove current setting
             switch cameraOutputToRemove {
-            case .stillImage:
-                if let validStillImageOutput = stillImageOutput {
-                    captureSession?.removeOutput(validStillImageOutput)
+                case .stillImage:
+                    if let validStillImageOutput = stillImageOutput {
+                        captureSession?.removeOutput(validStillImageOutput)
                 }
-            case .videoOnly, .videoWithMic:
-                if let validMovieOutput = movieOutput {
-                    captureSession?.removeOutput(validMovieOutput)
-                }
-                if cameraOutputToRemove == .videoWithMic {
-                    _removeMicInput()
+                case .videoOnly, .videoWithMic:
+                    if let validMovieOutput = movieOutput {
+                        captureSession?.removeOutput(validMovieOutput)
+                    }
+                    if cameraOutputToRemove == .videoWithMic {
+                        _removeMicInput()
                 }
             }
         }
         
         // configure new devices
         switch newCameraOutputMode {
-        case .stillImage:
-            if stillImageOutput == nil {
-                _setupOutputs()
+            case .stillImage:
+                if stillImageOutput == nil {
+                    _setupOutputs()
+                }
+                if let validStillImageOutput = stillImageOutput,
+                    let captureSession = captureSession,
+                    captureSession.canAddOutput(validStillImageOutput) {
+                    captureSession.addOutput(validStillImageOutput)
             }
-            if let validStillImageOutput = stillImageOutput,
-                let captureSession = captureSession,
-                captureSession.canAddOutput(validStillImageOutput) {
-                captureSession.addOutput(validStillImageOutput)
-            }
-        case .videoOnly, .videoWithMic:
-            let videoMovieOutput = _getMovieOutput()
-            if let captureSession = captureSession,
-                captureSession.canAddOutput(videoMovieOutput) {
-                captureSession.addOutput(videoMovieOutput)
-            }
-            
-            if newCameraOutputMode == .videoWithMic,
-                let validMic = _deviceInputFromDevice(mic) {
-                captureSession?.addInput(validMic)
+            case .videoOnly, .videoWithMic:
+                let videoMovieOutput = _getMovieOutput()
+                if let captureSession = captureSession,
+                    captureSession.canAddOutput(videoMovieOutput) {
+                    captureSession.addOutput(videoMovieOutput)
+                }
+                
+                if newCameraOutputMode == .videoWithMic,
+                    let validMic = _deviceInputFromDevice(mic) {
+                    captureSession?.addInput(validMic)
             }
         }
         captureSession?.commitConfiguration()
@@ -1802,17 +1802,17 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
             }
             
             switch cameraDevice {
-            case .front:
-                if hasFrontCamera {
-                    if let validFrontDevice = _deviceInputFromDevice(frontCameraDevice),
-                        !inputs.contains(validFrontDevice) {
-                        validCaptureSession.addInput(validFrontDevice)
-                    }
+                case .front:
+                    if hasFrontCamera {
+                        if let validFrontDevice = _deviceInputFromDevice(frontCameraDevice),
+                            !inputs.contains(validFrontDevice) {
+                            validCaptureSession.addInput(validFrontDevice)
+                        }
                 }
-            case .back:
-                if let validBackDevice = _deviceInputFromDevice(backCameraDevice),
-                    !inputs.contains(validBackDevice) {
-                    validCaptureSession.addInput(validBackDevice)
+                case .back:
+                    if let validBackDevice = _deviceInputFromDevice(backCameraDevice),
+                        !inputs.contains(validBackDevice) {
+                        validCaptureSession.addInput(validBackDevice)
                 }
             }
         }

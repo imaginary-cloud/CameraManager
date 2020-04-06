@@ -17,7 +17,7 @@ The easiest way to install the CameraManager is with [CocoaPods](http://cocoapod
 ```ruby
 use_frameworks!
 
-pod 'CameraManager', '~> 5.0'
+pod 'CameraManager', '~> 5.1'
 ```
 
 ## Installation with Swift Package Manager
@@ -31,7 +31,7 @@ import PackageDescription
 
 let package = Package(
     dependencies: [
-        .Package(url: "https://github.com/imaginary-cloud/CameraManager", from: "5.0.0")
+        .Package(url: "https://github.com/imaginary-cloud/CameraManager", from: "5.1.0")
     ]
 )
 ```
@@ -43,7 +43,7 @@ let package = Package(
 Add the following line to your Cartfile:
 
 ```
-github "imaginary-cloud/CameraManager" >= 5.0
+github "imaginary-cloud/CameraManager" >= 5.1
 ```
 
 And run `carthage update` to build the dynamic framework.
@@ -165,11 +165,15 @@ You can specify the stabilisation mode to be used during a video record session.
 cameraManager.videoStabilisationMode = .auto || .cinematic
 ```
 
-You can enable location services for storing in Camera Roll. `(Default: false)`
+You can enable location services for storing GPS location when saving to Camera Roll. `(Default: false)`
 
 ```swift
 cameraManager.shouldUseLocationServices = true || false
 ```
+
+In case you use location it's mandatory to add `NSLocationWhenInUseUsageDescription` key to the `Info.plist` in your app. [More Info](https://developer.apple.com/documentation/uikit/protecting_the_user_s_privacy)
+
+For getting the gps location when calling `capturePictureWithCompletion` you should use the `CaptureResult` as `data` (see [Example App](https://github.com/imaginary-cloud/CameraManager/blob/master/Example%20App/ViewController.swift)).
 
 You can specify if you want to save the files to phone library. `(Default: true)`
 

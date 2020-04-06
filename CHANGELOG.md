@@ -3,11 +3,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [5.1.0](https://github.com/imaginary-cloud/CameraManager/tree/5.0.0) - 2020-04-02
+## [5.1.0](https://github.com/imaginary-cloud/CameraManager/tree/5.1.0) - 2020-04-06
 
 ### Fixed
 
 - Camera freeze caused by orientation changes (pull request #204)
+- Location data not stored in EXIF data (issue #213)
 - Support flash mode selection on front camera (pull request #215)
 
 ### Added
