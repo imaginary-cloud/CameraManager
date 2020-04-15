@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [5.1.1](https://github.com/imaginary-cloud/CameraManager/tree/5.1.1) - 2020-04-15
+
+### Fixed
+
+- Minor fixes when changing between outputs
+- Fix bug when changing exposure duration not calling `unlockForConfiguration`
+
 ## [5.1.0](https://github.com/imaginary-cloud/CameraManager/tree/5.1.0) - 2020-04-06
 
 ### Fixed
