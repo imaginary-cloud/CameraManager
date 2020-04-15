@@ -6,33 +6,33 @@
 //  Copyright (c) 2014 Imaginary Cloud. All rights reserved.
 //
 
-import UIKit
 import CameraManager
 import CoreLocation
+import UIKit
 
 class ViewController: UIViewController {
-    
     // MARK: - Constants
     
     let cameraManager = CameraManager()
     
     // MARK: - @IBOutlets
-    @IBOutlet weak var headerView: UIView!
-    @IBOutlet weak var flashModeImageView: UIImageView!
-    @IBOutlet weak var outputImageView: UIImageView!
-    @IBOutlet weak var cameraTypeImageView: UIImageView!
-    @IBOutlet weak var qualityLabel: UILabel!
     
-    @IBOutlet weak var cameraView: UIView!
-    @IBOutlet weak var askForPermissionsLabel: UILabel!
+    @IBOutlet var headerView: UIView!
+    @IBOutlet var flashModeImageView: UIImageView!
+    @IBOutlet var outputImageView: UIImageView!
+    @IBOutlet var cameraTypeImageView: UIImageView!
+    @IBOutlet var qualityLabel: UILabel!
     
-    @IBOutlet weak var footerView: UIView!
-    @IBOutlet weak var cameraButton: UIButton!
-    @IBOutlet weak var locationButton: UIButton!
+    @IBOutlet var cameraView: UIView!
+    @IBOutlet var askForPermissionsLabel: UILabel!
     
-    let darkBlue = UIColor(red: 4/255, green: 14/255, blue: 26/255, alpha: 1)
-    let lightBlue = UIColor(red: 24/255, green: 125/255, blue: 251/255, alpha: 1)
-    let redColor = UIColor(red: 229/255, green: 77/255, blue: 67/255, alpha: 1)
+    @IBOutlet var footerView: UIView!
+    @IBOutlet var cameraButton: UIButton!
+    @IBOutlet var locationButton: UIButton!
+    
+    let darkBlue = UIColor(red: 4 / 255, green: 14 / 255, blue: 26 / 255, alpha: 1)
+    let lightBlue = UIColor(red: 24 / 255, green: 125 / 255, blue: 251 / 255, alpha: 1)
+    let redColor = UIColor(red: 229 / 255, green: 77 / 255, blue: 67 / 255, alpha: 1)
     
     // MARK: - UIViewController
     
@@ -51,7 +51,7 @@ class ViewController: UIViewController {
         askForPermissionsLabel.backgroundColor = lightBlue
         askForPermissionsLabel.textColor = .white
         askForPermissionsLabel.isUserInteractionEnabled = true
-        let tapGesture = UITapGestureRecognizer.init(target: self, action: #selector(askForCameraPermissions))
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(askForCameraPermissions))
         askForPermissionsLabel.addGestureRecognizer(tapGesture)
         
         footerView.backgroundColor = darkBlue
@@ -60,10 +60,10 @@ class ViewController: UIViewController {
         if CLLocationManager.locationServicesEnabled() {
             switch CLLocationManager.authorizationStatus() {
                 case .authorizedAlways, .authorizedWhenInUse:
-                    self.cameraManager.shouldUseLocationServices = true
-                    self.locationButton.isHidden = true
+                    cameraManager.shouldUseLocationServices = true
+                    locationButton.isHidden = true
                 default:
-                    self.cameraManager.shouldUseLocationServices = false
+                    cameraManager.shouldUseLocationServices = false
             }
         }
         
@@ -101,7 +101,7 @@ class ViewController: UIViewController {
         
         navigationController?.navigationBar.isHidden = true
         cameraManager.resumeCaptureSession()
-        cameraManager.startQRCodeDetection { (result) in
+        cameraManager.startQRCodeDetection { result in
             switch result {
                 case .success(let value):
                     print(value)
@@ -117,15 +117,14 @@ class ViewController: UIViewController {
         cameraManager.stopCaptureSession()
     }
     
-    
     // MARK: - ViewController
-    fileprivate func addCameraToView()
-    {
+    
+    fileprivate func addCameraToView() {
         cameraManager.addPreviewLayerToView(cameraView, newCameraOutputMode: CameraOutputMode.videoWithMic)
         cameraManager.showErrorBlock = { [weak self] (erTitle: String, erMessage: String) -> Void in
             
             let alertController = UIAlertController(title: erTitle, message: erMessage, preferredStyle: .alert)
-            alertController.addAction(UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: { (alertAction) -> Void in  }))
+            alertController.addAction(UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: { (_) -> Void in }))
             
             self?.present(alertController, animated: true, completion: nil)
         }
@@ -134,7 +133,6 @@ class ViewController: UIViewController {
     // MARK: - @IBActions
     
     @IBAction func changeFlashMode(_ sender: UIButton) {
-        
         switch cameraManager.changeFlashMode() {
             case .off:
                 flashModeImageView.image = UIImage(named: "flash_off")
@@ -146,10 +144,9 @@ class ViewController: UIViewController {
     }
     
     @IBAction func recordButtonTapped(_ sender: UIButton) {
-        
         switch cameraManager.cameraOutputMode {
             case .stillImage:
-                cameraManager.capturePictureWithCompletion({ result in
+                cameraManager.capturePictureWithCompletion { result in
                     switch result {
                         case .failure:
                             self.cameraManager.showErrorBlock("Error occurred", "Cannot save picture.")
@@ -163,9 +160,9 @@ class ViewController: UIViewController {
                                 validVC.image = capturedImage
                                 validVC.cameraManager = self.cameraManager
                                 self.navigationController?.pushViewController(validVC, animated: true)
-                        }
+                            }
                     }
-                })
+                }
             case .videoWithMic, .videoOnly:
                 cameraButton.isSelected = !cameraButton.isSelected
                 cameraButton.setTitle("", for: UIControl.State.selected)
@@ -174,16 +171,14 @@ class ViewController: UIViewController {
                 if sender.isSelected {
                     cameraManager.startRecordingVideo()
                 } else {
-                    cameraManager.stopVideoRecording({ (videoURL, error) -> Void in
+                    cameraManager.stopVideoRecording { (_, error) -> Void in
                         if error != nil {
                             self.cameraManager.showErrorBlock("Error occurred", "Cannot save video.")
                         }
-                    })
-            }
+                    }
+                }
         }
     }
-    
-    
     
     @IBAction func locateMeButtonTapped(_ sender: Any) {
         cameraManager.shouldUseLocationServices = true
@@ -191,7 +186,6 @@ class ViewController: UIViewController {
     }
     
     @IBAction func outputModeButtonTapped(_ sender: UIButton) {
-        
         cameraManager.cameraOutputMode = cameraManager.cameraOutputMode == CameraOutputMode.videoWithMic ? CameraOutputMode.stillImage : CameraOutputMode.videoWithMic
         switch cameraManager.cameraOutputMode {
             case .stillImage:
@@ -208,21 +202,20 @@ class ViewController: UIViewController {
     }
     
     @IBAction func askForCameraPermissions() {
-        
-        self.cameraManager.askUserForCameraPermission({ permissionGranted in
+        cameraManager.askUserForCameraPermission { permissionGranted in
             
             if permissionGranted {
                 self.askForPermissionsLabel.isHidden = true
                 self.askForPermissionsLabel.alpha = 0
                 self.addCameraToView()
             } else {
-                if #available(iOS 10.0, *) { 
-                    UIApplication.shared.open(URL(string:UIApplication.openSettingsURLString)!)
+                if #available(iOS 10.0, *) {
+                    UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
                 } else {
                     // Fallback on earlier versions
                 }
             }
-        })
+        }
     }
     
     @IBAction func changeCameraQuality() {
@@ -240,23 +233,20 @@ class ViewController: UIViewController {
                 qualityLabel.text = "High"
                 cameraManager.cameraOutputQuality = .high
         }
-        
     }
 }
 
 public extension Data {
-    func printExifData() -> Void {
-        let cfdata: CFData =  self as CFData
+    func printExifData() {
+        let cfdata: CFData = self as CFData
         let imageSourceRef = CGImageSourceCreateWithData(cfdata, nil)
         let imageProperties = CGImageSourceCopyMetadataAtIndex(imageSourceRef!, 0, nil)!
         
         let mutableMetadata = CGImageMetadataCreateMutableCopy(imageProperties)!
         
-        CGImageMetadataEnumerateTagsUsingBlock(mutableMetadata, nil, nil, { (value, tag) in
-            print(CGImageMetadataTagCopyName(tag)!,":", CGImageMetadataTagCopyValue(tag)!)
+        CGImageMetadataEnumerateTagsUsingBlock(mutableMetadata, nil, nil) { _, tag in
+            print(CGImageMetadataTagCopyName(tag)!, ":", CGImageMetadataTagCopyValue(tag)!)
             return true
-        })
+        }
     }
 }
-
-
