@@ -683,9 +683,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                 stillImageOutput.captureStillImageAsynchronously(from: connection, completionHandler: { [weak self] sample, error in
                     
                     if let error = error {
-                        DispatchQueue.main.async {
-                            self?._show(NSLocalizedString("Error", comment: ""), message: error.localizedDescription)
-                        }
+                        self?._show(NSLocalizedString("Error", comment: ""), message: error.localizedDescription)
                         imageCompletion(.failure(error))
                         return
                     }
