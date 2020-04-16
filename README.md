@@ -31,7 +31,7 @@ import PackageDescription
 
 let package = Package(
     dependencies: [
-        .Package(url: "https://github.com/imaginary-cloud/CameraManager", from: "5.1.1")
+        .Package(url: "https://github.com/imaginary-cloud/CameraManager", from: "5.1.2")
     ]
 )
 ```
