@@ -725,23 +725,18 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
             _show(NSLocalizedString("Capture session output still image", comment: ""), message: NSLocalizedString("I can only take pictures", comment: ""))
             return
         }
-        
-        let videoOutput = _getMovieOutput()
-        
-        videoOutput.startRecording(to: _tempFilePath(), recordingDelegate: self)
-    }
     
-    open func changeToVideo() {
         let videoOutput = _getMovieOutput()
-        // setup video mirroring
+        
         for connection in videoOutput.connections {
             for port in connection.inputPorts {
                 if port.mediaType == AVMediaType.video {
                     let videoConnection = connection as AVCaptureConnection
+                    // setup video mirroring
                     if videoConnection.isVideoMirroringSupported {
                         videoConnection.isVideoMirrored = (cameraDevice == CameraDevice.front && shouldFlipFrontCameraImage)
                     }
-                    
+
                     if videoConnection.isVideoStabilizationSupported {
                         videoConnection.preferredVideoStabilizationMode = videoStabilisationMode
                     }
@@ -749,25 +744,31 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
             }
         }
         
-        let specs = [kCMMetadataFormatDescriptionMetadataSpecificationKey_Identifier as String: AVMetadataIdentifier.quickTimeMetadataLocationISO6709,
-                     kCMMetadataFormatDescriptionMetadataSpecificationKey_DataType as String: kCMMetadataDataType_QuickTimeMetadataLocation_ISO6709 as String] as [String: Any]
-        
-        var locationMetadataDesc: CMFormatDescription?
-        CMMetadataFormatDescriptionCreateWithMetadataSpecifications(allocator: kCFAllocatorDefault, metadataType: kCMMetadataFormatType_Boxed, metadataSpecifications: [specs] as CFArray, formatDescriptionOut: &locationMetadataDesc)
-        
-        // Create the metadata input and add it to the session.
-        guard let captureSession = captureSession, let locationMetadata = locationMetadataDesc else {
-            return
+        if shouldUseLocationServices {
+            
+            let specs = [kCMMetadataFormatDescriptionMetadataSpecificationKey_Identifier as String: AVMetadataIdentifier.quickTimeMetadataLocationISO6709,
+                         kCMMetadataFormatDescriptionMetadataSpecificationKey_DataType as String: kCMMetadataDataType_QuickTimeMetadataLocation_ISO6709 as String] as [String: Any]
+            
+            var locationMetadataDesc: CMFormatDescription?
+            CMMetadataFormatDescriptionCreateWithMetadataSpecifications(allocator: kCFAllocatorDefault, metadataType: kCMMetadataFormatType_Boxed, metadataSpecifications: [specs] as CFArray, formatDescriptionOut: &locationMetadataDesc)
+            
+            // Create the metadata input and add it to the session.
+            guard let captureSession = captureSession, let locationMetadata = locationMetadataDesc else {
+                return
+            }
+            
+            let newLocationMetadataInput = AVCaptureMetadataInput(formatDescription: locationMetadata, clock: CMClockGetHostTimeClock())
+            captureSession.addInputWithNoConnections(newLocationMetadataInput)
+            
+            // Connect the location metadata input to the movie file output.
+            let inputPort = newLocationMetadataInput.ports[0]
+            captureSession.addConnection(AVCaptureConnection(inputPorts: [inputPort], output: videoOutput))
+            
         }
-        
-        let newLocationMetadataInput = AVCaptureMetadataInput(formatDescription: locationMetadata, clock: CMClockGetHostTimeClock())
-        captureSession.addInputWithNoConnections(newLocationMetadataInput)
-        
-        // Connect the location metadata input to the movie file output.
-        let inputPort = newLocationMetadataInput.ports[0]
-        captureSession.addConnection(AVCaptureConnection(inputPorts: [inputPort], output: videoOutput))
-        
+
         _updateIlluminationMode(flashMode)
+        
+        videoOutput.startRecording(to: _tempFilePath(), recordingDelegate: self)
     }
     
     /**
@@ -1250,6 +1251,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
         
         return movieOutput!
     }
+
     
     fileprivate func _getStillImageOutput() -> AVCaptureStillImageOutput {
         if let stillImageOutput = stillImageOutput, let connection = stillImageOutput.connection(with: AVMediaType.video),
