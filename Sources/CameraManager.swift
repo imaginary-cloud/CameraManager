@@ -108,7 +108,7 @@ public enum CaptureError: Error {
 }
 
 /// Class for handling iDevices custom camera usage
-public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGestureRecognizerDelegate {
+open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGestureRecognizerDelegate {
     // MARK: - Public properties
     
     // Property for custom image album name.
