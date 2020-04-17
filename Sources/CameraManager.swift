@@ -251,7 +251,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     }
     
     /// Property to change camera device between front and back.
-    open var cameraDevice = CameraDevice.back {
+    open var cameraDevice: CameraDevice = .back {
         didSet {
             if cameraIsSetup, cameraDevice != oldValue {
                 if animateCameraDeviceChange {
@@ -267,7 +267,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     }
     
     /// Property to change camera flash mode.
-    open var flashMode = CameraFlashMode.off {
+    open var flashMode: CameraFlashMode = .off {
         didSet {
             if cameraIsSetup && flashMode != oldValue {
                 _updateIlluminationMode(flashMode)
@@ -285,7 +285,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     }
     
     /// Property to change camera output.
-    open var cameraOutputMode = CameraOutputMode.stillImage {
+    open var cameraOutputMode: CameraOutputMode = .stillImage {
         didSet {
             if cameraIsSetup {
                 if cameraOutputMode != oldValue {
@@ -310,7 +310,13 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     open var exposureMode: AVCaptureDevice.ExposureMode = .continuousAutoExposure
     
     /// Property to set video stabilisation mode during a video record session
-    open var videoStabilisationMode: AVCaptureVideoStabilizationMode = .auto
+    open var videoStabilisationMode: AVCaptureVideoStabilizationMode = .auto {
+        didSet {
+            if oldValue != videoStabilisationMode {
+                _setupVideoConnection()
+            }
+        }
+    }
     
     // MARK: - Private properties
     
@@ -725,22 +731,6 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         }
     
         let videoOutput = _getMovieOutput()
-        
-        for connection in videoOutput.connections {
-            for port in connection.inputPorts {
-                if port.mediaType == AVMediaType.video {
-                    let videoConnection = connection as AVCaptureConnection
-                    // setup video mirroring
-                    if videoConnection.isVideoMirroringSupported {
-                        videoConnection.isVideoMirrored = (cameraDevice == CameraDevice.front && shouldFlipFrontCameraImage)
-                    }
-
-                    if videoConnection.isVideoStabilizationSupported {
-                        videoConnection.preferredVideoStabilizationMode = videoStabilisationMode
-                    }
-                }
-            }
-        }
         
         if shouldUseLocationServices {
             
@@ -1235,19 +1225,46 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     
     fileprivate func _getMovieOutput() -> AVCaptureMovieFileOutput {
         if movieOutput == nil {
-            let newMoviewOutput = AVCaptureMovieFileOutput()
-            newMoviewOutput.movieFragmentInterval = CMTime.invalid
-            movieOutput = newMoviewOutput
-            if let captureSession = captureSession {
-                if captureSession.canAddOutput(newMoviewOutput) {
-                    captureSession.beginConfiguration()
-                    captureSession.addOutput(newMoviewOutput)
-                    captureSession.commitConfiguration()
-                }
-            }
+            _createMovieOutput()
         }
         
         return movieOutput!
+    }
+    
+    fileprivate func _createMovieOutput() {
+        
+        let newMovieOutput = AVCaptureMovieFileOutput()
+        newMovieOutput.movieFragmentInterval = CMTime.invalid
+        movieOutput = newMovieOutput
+        
+        _setupVideoConnection()
+        
+        if let captureSession = captureSession, captureSession.canAddOutput(newMovieOutput) {
+            captureSession.beginConfiguration()
+            captureSession.addOutput(newMovieOutput)
+            captureSession.commitConfiguration()
+        }
+    }
+    
+    
+    fileprivate func _setupVideoConnection() {
+        if let movieOutput = movieOutput {
+            for connection in movieOutput.connections {
+                for port in connection.inputPorts {
+                    if port.mediaType == AVMediaType.video {
+                        let videoConnection = connection as AVCaptureConnection
+                        // setup video mirroring
+                        if videoConnection.isVideoMirroringSupported {
+                            videoConnection.isVideoMirrored = (cameraDevice == CameraDevice.front && shouldFlipFrontCameraImage)
+                        }
+
+                        if videoConnection.isVideoStabilizationSupported {
+                            videoConnection.preferredVideoStabilizationMode = videoStabilisationMode
+                        }
+                    }
+                }
+            }
+        }
     }
 
     
@@ -1471,7 +1488,6 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                         }
                     }
                     if previousOrientation != self.deviceOrientation {
-                        print("orientation changed")
                         self._orientationChanged()
                     }
                 }
@@ -1592,8 +1608,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             stillImageOutput = AVCaptureStillImageOutput()
         }
         if movieOutput == nil {
-            movieOutput = AVCaptureMovieFileOutput()
-            movieOutput?.movieFragmentInterval = CMTime.invalid
+            movieOutput = _getMovieOutput()
         }
         if library == nil {
             library = PHPhotoLibrary.shared()
