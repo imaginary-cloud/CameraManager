@@ -1456,6 +1456,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                     guard let motion = motion else { return }
                     let x = motion.gravity.x
                     let y = motion.gravity.y
+                    let previousOrientation = self.deviceOrientation
                     if fabs(y) >= fabs(x) {
                         if y >= 0 {
                             self.deviceOrientation = .portraitUpsideDown
@@ -1469,7 +1470,10 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                             self.deviceOrientation = .landscapeLeft
                         }
                     }
-                    self._orientationChanged()
+                    if previousOrientation != self.deviceOrientation {
+                        print("orientation changed")
+                        self._orientationChanged()
+                    }
                 }
                 
                 cameraIsObservingDeviceOrientation = true
