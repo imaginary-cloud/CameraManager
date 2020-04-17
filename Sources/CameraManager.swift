@@ -318,6 +318,22 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         }
     }
     
+    // Property to get the stabilization mode currently active
+    open var activeVideoStabilisationMode: AVCaptureVideoStabilizationMode {
+        if let movieOutput = movieOutput {
+            for connection in movieOutput.connections {
+                for port in connection.inputPorts {
+                    if port.mediaType == AVMediaType.video {
+                        let videoConnection = connection as AVCaptureConnection
+                        return videoConnection.activeVideoStabilizationMode
+                    }
+                }
+            }
+        }
+        
+        return .off
+    }
+    
     // MARK: - Private properties
     
     fileprivate var locationManager: CameraLocationManager?
@@ -1235,6 +1251,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         
         let newMovieOutput = AVCaptureMovieFileOutput()
         newMovieOutput.movieFragmentInterval = CMTime.invalid
+
         movieOutput = newMovieOutput
         
         _setupVideoConnection()
@@ -1245,7 +1262,6 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             captureSession.commitConfiguration()
         }
     }
-    
     
     fileprivate func _setupVideoConnection() {
         if let movieOutput = movieOutput {
@@ -1267,7 +1283,6 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         }
     }
 
-    
     fileprivate func _getStillImageOutput() -> AVCaptureStillImageOutput {
         if let stillImageOutput = stillImageOutput, let connection = stillImageOutput.connection(with: AVMediaType.video),
             connection.isActive {

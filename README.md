@@ -165,6 +165,12 @@ You can specify the stabilisation mode to be used during a video record session.
 cameraManager.videoStabilisationMode = .auto || .cinematic
 ```
 
+You can get the video stabilization mode currently active. If video stabilization is neither supported or active it will return `.off`.
+
+```swift
+cameraManager.activeVideoStabilisationMode
+```
+
 You can enable location services for storing GPS location when saving to Camera Roll. `(Default: false)`
 
 ```swift
