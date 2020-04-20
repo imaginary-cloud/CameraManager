@@ -258,11 +258,10 @@ and don't forget to call `cameraManager.stopQRCodeDetection()` whenever you done
 
 Supports iOS 9 and above. Xcode 11.4 is required to build the latest code written in Swift 5.2.
 
-Now it's compatible with latest Swift syntax, so if you're using any Swift version prior to 4.2 make sure to use one of the previously tagged releases:
+Now it's compatible with latest Swift syntax, so if you're using any Swift version prior to 5 make sure to use one of the previously tagged releases:
 
-- for Swift 4.0 see: [v4.4.0](https://github.com/imaginary-cloud/CameraManager/tree/4.4.0)
-
-- for Swift 3.0 see: [v3.2.0](https://github.com/imaginary-cloud/CameraManager/tree/3.2.0).
+- for Swift 4 see: [v4.4.0](https://github.com/imaginary-cloud/CameraManager/tree/4.4.0).
+- for Swift 3 see: [v3.2.0](https://github.com/imaginary-cloud/CameraManager/tree/3.2.0).
 
 ## License
 
