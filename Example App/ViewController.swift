@@ -38,13 +38,9 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        //      cameraManager.shouldRespondToOrientationChanges = false
-        cameraManager.shouldEnableExposure = true
         
-        cameraManager.writeFilesToPhoneLibrary = false
+        setupCameraManager()
         
-        cameraManager.shouldFlipFrontCameraImage = false
-        cameraManager.showAccessPermissionPopupAutomatically = false
         navigationController?.navigationBar.isHidden = true
         
         askForPermissionsLabel.isHidden = true
@@ -118,6 +114,15 @@ class ViewController: UIViewController {
     }
     
     // MARK: - ViewController
+    fileprivate func setupCameraManager() {
+        cameraManager.shouldEnableExposure = true
+        
+        cameraManager.writeFilesToPhoneLibrary = false
+        
+        cameraManager.shouldFlipFrontCameraImage = false
+        cameraManager.showAccessPermissionPopupAutomatically = false
+    }
+    
     
     fileprivate func addCameraToView() {
         cameraManager.addPreviewLayerToView(cameraView, newCameraOutputMode: CameraOutputMode.videoWithMic)

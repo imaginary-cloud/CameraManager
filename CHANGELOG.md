@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [5.1.3](https://github.com/imaginary-cloud/CameraManager/tree/5.1.3) - 2020-04-20
+
+### Fixed
+
+- Remove unnecessary calls to `_orientationChanged`
+- Change videoStabilisationMode in between recordings
+- [Change the main class to open to permit inheritance](https://github.com/imaginary-cloud/CameraManager/pull/225)
+
+### Added
+
+- [Add property to get the stabilisation mode currently active](https://github.com/imaginary-cloud/CameraManager/issues/177)
+
 ## [5.1.2](https://github.com/imaginary-cloud/CameraManager/tree/5.1.2) - 2020-04-16
 
 ### Fixed
