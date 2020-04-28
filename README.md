@@ -265,7 +265,7 @@ Now it's compatible with latest Swift syntax, so if you're using any Swift versi
 
 ## License
 
-Copyright © 2010-2020 [Imaginary Cloud](https://www.imaginarycloud.com). This library is licensed under the MIT license.
+Copyright © 2010-2020 [Imaginary Cloud](https://www.imaginarycloud.com/?utm_source=github). This library is licensed under the MIT license.
 
 ## About Imaginary Cloud
 
