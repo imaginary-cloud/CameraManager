@@ -570,6 +570,8 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                     PHPhotoLibrary.requestAuthorization { status in
                         if status == PHAuthorizationStatus.authorized {
                             self._saveImageToLibrary(atFileURL: filePath, imageCompletion)
+                        } else {
+                            self._show(NSLocalizedString("Photos access denied", comment: ""), message: NSLocalizedString("Please allow \(Bundle.main.infoDictionary?[String(kCFBundleNameKey)] ?? "App") to access your photos in \"Settings -> Privacy -> Photos\"", comment: ""))
                         }
                     }
                 } else {
@@ -898,6 +900,8 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                     PHPhotoLibrary.requestAuthorization { autorizationStatus in
                         if autorizationStatus == .authorized {
                             self._saveVideoToLibrary(outputFileURL)
+                        } else {
+                            self._show(NSLocalizedString("Photos access denied", comment: ""), message: NSLocalizedString("Please allow \(Bundle.main.infoDictionary?[String(kCFBundleNameKey)] ?? "App") to access your photos in \"Settings -> Privacy -> Photos\"", comment: ""))
                         }
                     }
                 }
