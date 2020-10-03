@@ -799,10 +799,15 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         guard let captureSession = self.captureSession
             else { return }
         
-        let output = AVCaptureMetadataOutput()
+        qrOutput = AVCaptureMetadataOutput()
         
-        guard captureSession.canAddOutput(output)
-            else { return }
+        guard let output = qrOutput else {
+            return
+        }
+
+        guard captureSession.canAddOutput(output) else {
+            return
+        }
         
         qrCodeDetectionHandler = handler
         captureSession.addOutput(output)
@@ -832,7 +837,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     /**
      The stored meta data output; used to detect QR codes.
      */
-    private var qrOutput: AVCaptureOutput?
+    private var qrOutput: AVCaptureMetadataOutput?
     
     /**
      Check if the device rotation is locked
