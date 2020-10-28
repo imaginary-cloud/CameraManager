@@ -503,6 +503,23 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         animateCameraDeviceChange = oldAnimationValue
     }
     
+    open func canUseCameraOutputMode(_ mode: CameraOutputMode) -> Bool {
+        guard let captureSession = captureSession else { return false }
+        switch mode {
+        case .stillImage:
+            return captureSession.canAddOutput(_getStillImageOutput())
+        case .videoOnly, .videoWithMic:
+            if mode == .videoWithMic {
+                if let micInput = _deviceInputFromDevice(mic) {
+                    if !captureSession.canAddInput(micInput) { return false }
+                } else {
+                    return false
+                }
+            }
+            return captureSession.canAddOutput(_getMovieOutput())
+        }
+    }
+    
     /**
      Captures still image from currently running capture session.
      
