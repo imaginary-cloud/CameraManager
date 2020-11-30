@@ -699,16 +699,12 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             _show(NSLocalizedString("No capture session setup", comment: ""), message: NSLocalizedString("I can't take any picture", comment: ""))
             return
         }
-        
-        guard cameraOutputMode == .stillImage else {
-            _show(NSLocalizedString("Capture session output mode video", comment: ""), message: NSLocalizedString("I can't take any picture", comment: ""))
-            return
-        }
-        
+                
         _updateIlluminationMode(flashMode)
         
-        sessionQueue.async {
-            let stillImageOutput = self._getStillImageOutput()
+        let stillImageOutput = self._getStillImageOutput()
+
+        sessionQueue.asyncAfter(deadline: .now() + 0.3) {
             if let connection = stillImageOutput.connection(with: AVMediaType.video),
                 connection.isEnabled {
                 if self.cameraDevice == CameraDevice.front, connection.isVideoMirroringSupported,
@@ -758,11 +754,6 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
      Starts recording a video with or without voice as in the session preset.
      */
     open func startRecordingVideo() {
-        guard cameraOutputMode != .stillImage else {
-            _show(NSLocalizedString("Capture session output still image", comment: ""), message: NSLocalizedString("I can only take pictures", comment: ""))
-            return
-        }
-    
         let videoOutput = _getMovieOutput()
         
         if shouldUseLocationServices {
@@ -1474,7 +1465,6 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     
     fileprivate func _setupCamera(_ completion: @escaping () -> Void) {
         captureSession = AVCaptureSession()
-        
         sessionQueue.async {
             if let validCaptureSession = self.captureSession {
                 validCaptureSession.beginConfiguration()
