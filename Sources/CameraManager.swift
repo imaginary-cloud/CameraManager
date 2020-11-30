@@ -1469,6 +1469,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             if let validCaptureSession = self.captureSession {
                 validCaptureSession.beginConfiguration()
                 validCaptureSession.sessionPreset = AVCaptureSession.Preset.high
+                validCaptureSession.automaticallyConfiguresApplicationAudioSession = false
                 self._updateCameraDevice(self.cameraDevice)
                 self._setupOutputs()
                 self._setupOutputMode(self.cameraOutputMode, oldCameraOutputMode: nil)
@@ -1617,6 +1618,26 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                 
                 if newCameraOutputMode == .videoWithMic,
                     let validMic = _deviceInputFromDevice(mic) {
+                    // MARK: - AVAudioSession
+                    do {
+                        try AVAudioSession.sharedInstance().setActive(false, options: [.notifyOthersOnDeactivation])
+                    } catch let error {
+                        print("\(#file)/\(#line) - Error deactivating AVAudioSession: \(error.localizedDescription as Any).")
+                    }
+                    do {
+                        if #available(iOS 10.0, *) {
+                            try AVAudioSession.sharedInstance().setCategory(.playAndRecord, mode: .default, options: [.mixWithOthers, .defaultToSpeaker, .allowBluetoothA2DP])
+                        }
+                    } catch let error {
+                        print("\(#file)/\(#line) - Error setting the AVAudioSession category: \(error.localizedDescription as Any).")
+                    }
+                    do {
+                        try AVAudioSession.sharedInstance().setActive(true, options: [])
+                    } catch let error {
+                        print("\(#file)/\(#line) - Error activating the AVAudioSession: \(error.localizedDescription as Any).")
+                    }
+
+                    captureSession?.automaticallyConfiguresApplicationAudioSession = false
                     captureSession?.addInput(validMic)
             }
         }
