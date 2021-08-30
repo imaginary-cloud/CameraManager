@@ -198,7 +198,6 @@
 				TargetAttributes = {
 					454C1F4019E82E2500C81915 = {
 						CreatedOnToolsVersion = 6.0.1;
-						DevelopmentTeam = QM7HJTY23M;
 						LastSwiftMigration = 1130;
 						ProvisioningStyle = Automatic;
 					};
@@ -412,7 +411,7 @@
 				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = QM7HJTY23M;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = "Example App/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -433,7 +432,7 @@
 				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = QM7HJTY23M;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = camera/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
