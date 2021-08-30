@@ -169,6 +169,7 @@
                         <outlet property="flashModeImageView" destination="Dl4-Bd-nCD" id="cAO-8p-HTZ"/>
                         <outlet property="footerView" destination="1mh-eT-4mm" id="5aT-gQ-xSA"/>
                         <outlet property="headerView" destination="jaF-q9-Eli" id="ws8-fM-eLu"/>
+                        <outlet property="lensLabel" destination="f7s-D3-6ba" id="g7i-7V-uRg"/>
                         <outlet property="locationButton" destination="3uo-sy-vdf" id="BPV-S4-Zbo"/>
                         <outlet property="outputImageView" destination="Nwk-zu-ilR" id="dol-Lo-s9p"/>
                         <outlet property="qualityLabel" destination="yae-yJ-Gt7" id="ov3-8B-KCh"/>

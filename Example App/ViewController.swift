@@ -10,6 +10,7 @@ import CameraManager
 import CoreLocation
 import UIKit
 
+@available(iOS 13.0, *)
 class ViewController: UIViewController {
     // MARK: - Constants
     
@@ -29,6 +30,8 @@ class ViewController: UIViewController {
     @IBOutlet var footerView: UIView!
     @IBOutlet var cameraButton: UIButton!
     @IBOutlet var locationButton: UIButton!
+    
+    @IBOutlet weak var lensLabel: UILabel!
     
     let darkBlue = UIColor(red: 4 / 255, green: 14 / 255, blue: 26 / 255, alpha: 1)
     let lightBlue = UIColor(red: 24 / 255, green: 125 / 255, blue: 251 / 255, alpha: 1)
@@ -55,11 +58,11 @@ class ViewController: UIViewController {
         
         if CLLocationManager.locationServicesEnabled() {
             switch CLLocationManager.authorizationStatus() {
-                case .authorizedAlways, .authorizedWhenInUse:
-                    cameraManager.shouldUseLocationServices = true
-                    locationButton.isHidden = true
-                default:
-                    cameraManager.shouldUseLocationServices = false
+            case .authorizedAlways, .authorizedWhenInUse:
+                cameraManager.shouldUseLocationServices = true
+                locationButton.isHidden = true
+            default:
+                cameraManager.shouldUseLocationServices = false
             }
         }
         
@@ -90,6 +93,11 @@ class ViewController: UIViewController {
         qualityLabel.isUserInteractionEnabled = true
         let qualityGesture = UITapGestureRecognizer(target: self, action: #selector(changeCameraQuality))
         qualityLabel.addGestureRecognizer(qualityGesture)
+        
+        //To enable the interaction with the label
+        lensLabel.isUserInteractionEnabled = true
+        let lensTypeGesture = UITapGestureRecognizer(target: self, action: #selector(changeCameraLens))
+        lensLabel.addGestureRecognizer(lensTypeGesture)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -99,10 +107,10 @@ class ViewController: UIViewController {
         cameraManager.resumeCaptureSession()
         cameraManager.startQRCodeDetection { result in
             switch result {
-                case .success(let value):
-                    print(value)
-                case .failure(let error):
-                    print(error.localizedDescription)
+            case .success(let value):
+                print(value)
+            case .failure(let error):
+                print(error.localizedDescription)
             }
         }
     }
@@ -139,49 +147,49 @@ class ViewController: UIViewController {
     
     @IBAction func changeFlashMode(_ sender: UIButton) {
         switch cameraManager.changeFlashMode() {
-            case .off:
-                flashModeImageView.image = UIImage(named: "flash_off")
-            case .on:
-                flashModeImageView.image = UIImage(named: "flash_on")
-            case .auto:
-                flashModeImageView.image = UIImage(named: "flash_auto")
+        case .off:
+            flashModeImageView.image = UIImage(named: "flash_off")
+        case .on:
+            flashModeImageView.image = UIImage(named: "flash_on")
+        case .auto:
+            flashModeImageView.image = UIImage(named: "flash_auto")
         }
     }
     
     @IBAction func recordButtonTapped(_ sender: UIButton) {
         switch cameraManager.cameraOutputMode {
-            case .stillImage:
-                cameraManager.capturePictureWithCompletion { result in
-                    switch result {
-                        case .failure:
-                            self.cameraManager.showErrorBlock("Error occurred", "Cannot save picture.")
-                        case .success(let content):
-                            
-                            let vc: ImageViewController? = self.storyboard?.instantiateViewController(withIdentifier: "ImageVC") as? ImageViewController
-                            if let validVC: ImageViewController = vc,
-                                case let capturedData = content.asData {
-                                print(capturedData!.printExifData())
-                                let capturedImage = UIImage(data: capturedData!)!
-                                validVC.image = capturedImage
-                                validVC.cameraManager = self.cameraManager
-                                self.navigationController?.pushViewController(validVC, animated: true)
-                            }
+        case .stillImage:
+            cameraManager.capturePictureWithCompletion { result in
+                switch result {
+                case .failure:
+                    self.cameraManager.showErrorBlock("Error occurred", "Cannot save picture.")
+                case .success(let content):
+                    
+                    let vc: ImageViewController? = self.storyboard?.instantiateViewController(withIdentifier: "ImageVC") as? ImageViewController
+                    if let validVC: ImageViewController = vc,
+                       case let capturedData = content.asData {
+                        print(capturedData!.printExifData())
+                        let capturedImage = UIImage(data: capturedData!)!
+                        validVC.image = capturedImage
+                        validVC.cameraManager = self.cameraManager
+                        self.navigationController?.pushViewController(validVC, animated: true)
                     }
                 }
-            case .videoWithMic, .videoOnly:
-                cameraButton.isSelected = !cameraButton.isSelected
-                cameraButton.setTitle("", for: UIControl.State.selected)
-                
-                cameraButton.backgroundColor = cameraButton.isSelected ? redColor : lightBlue
-                if sender.isSelected {
-                    cameraManager.startRecordingVideo()
-                } else {
-                    cameraManager.stopVideoRecording { (_, error) -> Void in
-                        if error != nil {
-                            self.cameraManager.showErrorBlock("Error occurred", "Cannot save video.")
-                        }
+            }
+        case .videoWithMic, .videoOnly:
+            cameraButton.isSelected = !cameraButton.isSelected
+            cameraButton.setTitle("", for: UIControl.State.selected)
+            
+            cameraButton.backgroundColor = cameraButton.isSelected ? redColor : lightBlue
+            if sender.isSelected {
+                cameraManager.startRecordingVideo()
+            } else {
+                cameraManager.stopVideoRecording { (_, error) -> Void in
+                    if error != nil {
+                        self.cameraManager.showErrorBlock("Error occurred", "Cannot save video.")
                     }
                 }
+            }
         }
     }
     
@@ -193,12 +201,12 @@ class ViewController: UIViewController {
     @IBAction func outputModeButtonTapped(_ sender: UIButton) {
         cameraManager.cameraOutputMode = cameraManager.cameraOutputMode == CameraOutputMode.videoWithMic ? CameraOutputMode.stillImage : CameraOutputMode.videoWithMic
         switch cameraManager.cameraOutputMode {
-            case .stillImage:
-                cameraButton.isSelected = false
-                cameraButton.backgroundColor = lightBlue
-                outputImageView.image = UIImage(named: "output_image")
-            case .videoWithMic, .videoOnly:
-                outputImageView.image = UIImage(named: "output_video")
+        case .stillImage:
+            cameraButton.isSelected = false
+            cameraButton.backgroundColor = lightBlue
+            outputImageView.image = UIImage(named: "output_image")
+        case .videoWithMic, .videoOnly:
+            outputImageView.image = UIImage(named: "output_video")
         }
     }
     
@@ -225,18 +233,32 @@ class ViewController: UIViewController {
     
     @IBAction func changeCameraQuality() {
         switch cameraManager.cameraOutputQuality {
-            case .high:
-                qualityLabel.text = "Medium"
-                cameraManager.cameraOutputQuality = .medium
-            case .medium:
-                qualityLabel.text = "Low"
-                cameraManager.cameraOutputQuality = .low
-            case .low:
-                qualityLabel.text = "High"
-                cameraManager.cameraOutputQuality = .high
-            default:
-                qualityLabel.text = "High"
-                cameraManager.cameraOutputQuality = .high
+        case .high:
+            qualityLabel.text = "Medium"
+            cameraManager.cameraOutputQuality = .medium
+        case .medium:
+            qualityLabel.text = "Low"
+            cameraManager.cameraOutputQuality = .low
+        case .low:
+            qualityLabel.text = "High"
+            cameraManager.cameraOutputQuality = .high
+        default:
+            qualityLabel.text = "High"
+            cameraManager.cameraOutputQuality = .high
+        }
+    }
+    
+    @IBAction func changeCameraLens() {
+        
+        cameraManager.cameraDevice = cameraManager.cameraDevice == CameraDevice.back ? CameraDevice.uWide : CameraDevice.back
+        
+        if(cameraManager.cameraDevice == CameraDevice.back)
+        {
+            lensLabel.text = "1x"
+        }
+        else
+        {
+            lensLabel.text = "0.5x"
         }
     }
 }

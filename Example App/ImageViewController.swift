@@ -9,21 +9,22 @@
 import CameraManager
 import UIKit
 
+@available(iOS 13.0, *)
 class ImageViewController: UIViewController {
     var image: UIImage?
     var cameraManager: CameraManager?
     @IBOutlet var imageView: UIImageView!
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.navigationBar.isHidden = true
-
+        
         guard let validImage = image else {
             return
         }
-
+        
         imageView.image = validImage
-
+        
         if cameraManager?.cameraDevice == .front {
             switch validImage.imageOrientation {
             case .up, .down:
@@ -33,20 +34,20 @@ class ImageViewController: UIViewController {
             }
         }
     }
-
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
+    
     @IBAction func closeButtonTapped(_: Any) {
         navigationController?.popViewController(animated: true)
     }
-
+    
     override var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation {
         return .portrait
     }
-
+    
     override var shouldAutorotate: Bool {
         return false
     }
