@@ -32,6 +32,10 @@ public enum CameraOutputMode {
     case stillImage, videoWithMic, videoOnly
 }
 
+public enum CameraPreviewMode {
+    case resizeAspect, resizeAspectFill
+}
+
 public enum CaptureResult {
     case success(content: CaptureContent)
     case failure(Error)
@@ -296,6 +300,8 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             }
         }
     }
+
+    open var cameraPreviewMode: CameraPreviewMode = .resizeAspectFill
     
     /// Property to check video recording duration when in progress.
     open var recordedDuration: CMTime { return movieOutput?.recordedDuration ?? CMTime.zero }
@@ -1465,7 +1471,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                 self._updateCameraDevice(self.cameraDevice)
                 self._setupOutputs()
                 self._setupOutputMode(self.cameraOutputMode, oldCameraOutputMode: nil)
-                self._setupPreviewLayer()
+                self._setupPreviewLayer(self.cameraPreviewMode)
                 validCaptureSession.commitConfiguration()
                 self._updateIlluminationMode(self.flashMode)
                 self._updateCameraQualityMode(self.cameraOutputQuality)
@@ -1630,10 +1636,10 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         }
     }
     
-    fileprivate func _setupPreviewLayer() {
+    fileprivate func _setupPreviewLayer(_ layerVideoGravity: CameraPreviewMode) {
         if let validCaptureSession = captureSession {
             previewLayer = AVCaptureVideoPreviewLayer(session: validCaptureSession)
-            previewLayer?.videoGravity = AVLayerVideoGravity.resizeAspectFill
+            previewLayer?.videoGravity = layerVideoGravity == .resizeAspect ?  AVLayerVideoGravity.resizeAspect : AVLayerVideoGravity.resizeAspectFill
         }
     }
     
