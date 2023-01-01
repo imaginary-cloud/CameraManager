@@ -368,7 +368,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     
     fileprivate var stillImageOutput: AVCaptureStillImageOutput?
     fileprivate var movieOutput: AVCaptureMovieFileOutput?
-    fileprivate var previewLayer: AVCaptureVideoPreviewLayer?
+    open private(set) var previewLayer: AVCaptureVideoPreviewLayer?
     fileprivate var library: PHPhotoLibrary?
     
     fileprivate var cameraIsSetup = false
