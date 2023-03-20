@@ -1505,8 +1505,10 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             coreMotionManager = CMMotionManager()
             coreMotionManager.deviceMotionUpdateInterval = 1 / 30.0
             if coreMotionManager.isDeviceMotionAvailable {
-                coreMotionManager.startDeviceMotionUpdates(to: OperationQueue()) { [weak self] motion, _ in
+                coreMotionManager.startDeviceMotionUpdates(to: OperationQueue()) { [weak self] motion, error in
                     guard let motion = motion, let self = self else { return }
+                    guard error == nil else { return }
+                    
                     let x = motion.gravity.x
                     let y = motion.gravity.y
                     let previousOrientation = self.deviceOrientation
