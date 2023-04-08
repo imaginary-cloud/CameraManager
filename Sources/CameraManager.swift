@@ -475,9 +475,9 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     open func resumeCaptureSession() {
         if let validCaptureSession = captureSession {
             if !validCaptureSession.isRunning, cameraIsSetup {
-                sessionQueue.async {
+                sessionQueue.async { [weak self] in
                     validCaptureSession.startRunning()
-                    self._startFollowingDeviceOrientation()
+                    self?._startFollowingDeviceOrientation()
                 }
             }
         } else {
@@ -539,7 +539,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
      :param: imageCompletion Completion block containing the captured UIImage
      */
     open func capturePictureWithCompletion(_ imageCompletion: @escaping (CaptureResult) -> Void) {
-        capturePictureDataWithCompletion { result in
+        capturePictureDataWithCompletion { [weak self] result in
             
             guard let imageData = result.imageData else {
                 if case let .failure(error) = result {
@@ -551,12 +551,14 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                 return
             }
             
-            if self.animateShutter {
-                self._performShutterAnimation {
+            if let self = self {
+                if self.animateShutter {
+                    self._performShutterAnimation {
+                        self._capturePicture(imageData, imageCompletion)
+                    }
+                } else {
                     self._capturePicture(imageData, imageCompletion)
                 }
-            } else {
-                self._capturePicture(imageData, imageCompletion)
             }
         }
     }
@@ -701,36 +703,38 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         
         _updateIlluminationMode(flashMode)
         
-        sessionQueue.async {
-            let stillImageOutput = self._getStillImageOutput()
-            if let connection = stillImageOutput.connection(with: AVMediaType.video),
-               connection.isEnabled {
-                if self.cameraDevice == CameraDevice.front, connection.isVideoMirroringSupported,
-                   self.shouldFlipFrontCameraImage {
-                    connection.isVideoMirrored = true
-                }
-                if connection.isVideoOrientationSupported {
-                    connection.videoOrientation = self._currentCaptureVideoOrientation()
-                }
-                
-                stillImageOutput.captureStillImageAsynchronously(from: connection, completionHandler: { [weak self] sample, error in
-                    
-                    if let error = error {
-                        self?._show(NSLocalizedString("Error", comment: ""), message: error.localizedDescription)
-                        imageCompletion(.failure(error))
-                        return
+        sessionQueue.async { [weak self] in
+            if let self = self {
+                let stillImageOutput = self._getStillImageOutput()
+                if let connection = stillImageOutput.connection(with: AVMediaType.video),
+                   connection.isEnabled {
+                    if self.cameraDevice == CameraDevice.front, connection.isVideoMirroringSupported,
+                       self.shouldFlipFrontCameraImage {
+                        connection.isVideoMirrored = true
+                    }
+                    if connection.isVideoOrientationSupported {
+                        connection.videoOrientation = self._currentCaptureVideoOrientation()
                     }
                     
-                    guard let sample = sample else { imageCompletion(.failure(CaptureError.noSampleBuffer)); return }
-                    if let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(sample) {
-                        imageCompletion(CaptureResult(imageData))
-                    } else {
-                        imageCompletion(.failure(CaptureError.noImageData))
-                    }
-                    
-                })
-            } else {
-                imageCompletion(.failure(CaptureError.noVideoConnection))
+                    stillImageOutput.captureStillImageAsynchronously(from: connection, completionHandler: { [weak self] sample, error in
+                        
+                        if let error = error {
+                            self?._show(NSLocalizedString("Error", comment: ""), message: error.localizedDescription)
+                            imageCompletion(.failure(error))
+                            return
+                        }
+                        
+                        guard let sample = sample else { imageCompletion(.failure(CaptureError.noSampleBuffer)); return }
+                        if let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(sample) {
+                            imageCompletion(CaptureResult(imageData))
+                        } else {
+                            imageCompletion(.failure(CaptureError.noImageData))
+                        }
+                        
+                    })
+                } else {
+                    imageCompletion(.failure(CaptureError.noVideoConnection))
+                }
             }
         }
     }
@@ -934,10 +938,12 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     fileprivate lazy var zoomGesture = UIPinchGestureRecognizer()
     
     fileprivate func attachZoom(_ view: UIView) {
-        DispatchQueue.main.async {
-            self.zoomGesture.addTarget(self, action: #selector(CameraManager._zoomStart(_:)))
-            view.addGestureRecognizer(self.zoomGesture)
-            self.zoomGesture.delegate = self
+        DispatchQueue.main.async { [weak self] in
+            if let self = self {
+                self.zoomGesture.addTarget(self, action: #selector(CameraManager._zoomStart(_:)))
+                view.addGestureRecognizer(self.zoomGesture)
+                self.zoomGesture.delegate = self
+            }
         }
     }
     
@@ -1002,20 +1008,24 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     fileprivate lazy var focusGesture = UITapGestureRecognizer()
     
     fileprivate func attachFocus(_ view: UIView) {
-        DispatchQueue.main.async {
-            self.focusGesture.addTarget(self, action: #selector(CameraManager._focusStart(_:)))
-            view.addGestureRecognizer(self.focusGesture)
-            self.focusGesture.delegate = self
+        DispatchQueue.main.async { [weak self] in
+            if let self = self {
+                self.focusGesture.addTarget(self, action: #selector(CameraManager._focusStart(_:)))
+                view.addGestureRecognizer(self.focusGesture)
+                self.focusGesture.delegate = self
+            }
         }
     }
     
     fileprivate lazy var exposureGesture = UIPanGestureRecognizer()
     
     fileprivate func attachExposure(_ view: UIView) {
-        DispatchQueue.main.async {
-            self.exposureGesture.addTarget(self, action: #selector(CameraManager._exposureStart(_:)))
-            view.addGestureRecognizer(self.exposureGesture)
-            self.exposureGesture.delegate = self
+        DispatchQueue.main.async { [weak self] in
+            if let self = self {
+                self.exposureGesture.addTarget(self, action: #selector(CameraManager._exposureStart(_:)))
+                view.addGestureRecognizer(self.exposureGesture)
+                self.exposureGesture.delegate = self
+            }
         }
     }
     
@@ -1345,8 +1355,8 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                 validOutputLayerConnection.videoOrientation = _currentCaptureVideoOrientation()
             }
             if !shouldKeepViewAtOrientationChanges && cameraIsObservingDeviceOrientation {
-                DispatchQueue.main.async { () -> Void in
-                    if let validEmbeddingView = self.embeddingView {
+                DispatchQueue.main.async { [weak self] () -> Void in
+                    if let self = self, let validEmbeddingView = self.embeddingView {
                         validPreviewLayer.frame = validEmbeddingView.bounds
                     }
                 }
@@ -1479,8 +1489,8 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     fileprivate func _setupCamera(_ completion: @escaping () -> Void) {
         captureSession = AVCaptureSession()
         
-        sessionQueue.async {
-            if let validCaptureSession = self.captureSession {
+        sessionQueue.async { [weak self] in
+            if let self = self, let validCaptureSession = self.captureSession {
                 validCaptureSession.beginConfiguration()
                 validCaptureSession.sessionPreset = AVCaptureSession.Preset.high
                 self._updateCameraDevice(self.cameraDevice)
@@ -1554,8 +1564,8 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         attachFocus(view)
         attachExposure(view)
         
-        DispatchQueue.main.async { () -> Void in
-            guard let previewLayer = self.previewLayer else { return }
+        DispatchQueue.main.async { [weak self] () -> Void in
+            guard let self = self, let previewLayer = self.previewLayer else { return }
             previewLayer.frame = view.layer.bounds
             view.clipsToBounds = true
             view.layer.addSublayer(previewLayer)
@@ -1700,8 +1710,8 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             
             validPreviewLayer.opacity = 0.0
             
-            DispatchQueue.main.async {
-                self._flipCameraTransitionView()
+            DispatchQueue.main.async { [weak self] in
+                self?._flipCameraTransitionView()
             }
         }
     }
@@ -1957,8 +1967,8 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     
     fileprivate func _show(_ title: String, message: String) {
         if showErrorsToUsers {
-            DispatchQueue.main.async { () -> Void in
-                self.showErrorBlock(title, message)
+            DispatchQueue.main.async { [weak self] () -> Void in
+                self?.showErrorBlock(title, message)
             }
         }
     }
