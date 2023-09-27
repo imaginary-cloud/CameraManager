@@ -292,7 +292,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                     _setupOutputMode(cameraOutputMode, oldCameraOutputMode: oldValue)
                 }
                 _setupMaxZoomScale()
-                _zoom(0)
+                _zoom(1)
             }
         }
     }
@@ -351,7 +351,6 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
       
       let devices = AVCaptureDevice.videoDevices.filter { $0.position == .back }
       if #available(iOS 13.0, *) {
-        beginZoomScale = 2.0
 //        if UIDevice().type == .iPhone15ProMax || UIDevice().type == .iPhone15Pro {
           return devices.first { d in
             d.deviceType == .builtInTripleCamera
