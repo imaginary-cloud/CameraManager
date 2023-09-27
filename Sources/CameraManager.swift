@@ -351,10 +351,11 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
       
       let devices = AVCaptureDevice.videoDevices.filter { $0.position == .back }
       if #available(iOS 13.0, *) {
+        beginZoomScale = 2.0
 //        if UIDevice().type == .iPhone15ProMax || UIDevice().type == .iPhone15Pro {
           return devices.first { d in
-              d.deviceType == .builtInTripleCamera
-          }
+            d.deviceType == .builtInTripleCamera
+          } ?? devices.first
 //        }
       }
       
