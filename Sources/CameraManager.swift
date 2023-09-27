@@ -292,7 +292,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                     _setupOutputMode(cameraOutputMode, oldCameraOutputMode: oldValue)
                 }
                 _setupMaxZoomScale()
-                _zoom(1)
+                _zoom(2)
             }
         }
     }
