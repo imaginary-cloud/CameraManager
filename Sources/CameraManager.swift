@@ -351,11 +351,11 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
       
       let devices = AVCaptureDevice.videoDevices.filter { $0.position == .back }
       if #available(iOS 13.0, *) {
-        if UIDevice().type == .iPhone15ProMax || UIDevice().type == .iPhone15Pro {
+//        if UIDevice().type == .iPhone15ProMax || UIDevice().type == .iPhone15Pro {
           return devices.first { d in
               d.deviceType == .builtInTripleCamera
           }
-        }
+//        }
       }
       
       return devices.first
@@ -1962,6 +1962,18 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
 
 private extension AVCaptureDevice {
     static var videoDevices: [AVCaptureDevice] {
+      if #available(iOS 13.0, *) {
+        let deviceTypes: [AVCaptureDevice.DeviceType]
+        deviceTypes = [.builtInTripleCamera, .builtInDualWideCamera, .builtInDualCamera, .builtInWideAngleCamera]
+
+        let session = AVCaptureDevice.DiscoverySession(
+            deviceTypes: deviceTypes,
+            mediaType: .video,
+            position: .unspecified
+        )
+        
+        return session.devices
+      }
         return AVCaptureDevice.devices(for: AVMediaType.video)
     }
 }
