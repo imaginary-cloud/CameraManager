@@ -144,12 +144,6 @@
       "size" : "83.5x83.5"
     },
     {
-      "filename" : "logo.jpeg",
-      "idiom" : "ios-marketing",
-      "scale" : "1x",
-      "size" : "1024x1024"
-    },
-    {
       "filename" : "Icon-App-60x60@2x.png",
       "idiom" : "car",
       "scale" : "2x",
@@ -160,6 +154,12 @@
       "idiom" : "car",
       "scale" : "3x",
       "size" : "60x60"
+    },
+    {
+      "filename" : "logo.jpeg",
+      "idiom" : "ios-marketing",
+      "scale" : "1x",
+      "size" : "1024x1024"
     },
     {
       "idiom" : "watch",
@@ -190,6 +190,13 @@
       "size" : "29x29"
     },
     {
+      "idiom" : "watch",
+      "role" : "notificationCenter",
+      "scale" : "2x",
+      "size" : "33x33",
+      "subtype" : "45mm"
+    },
+    {
       "filename" : "Icon-App-40x40@2x.png",
       "idiom" : "watch",
       "role" : "appLauncher",
@@ -208,8 +215,29 @@
       "idiom" : "watch",
       "role" : "appLauncher",
       "scale" : "2x",
+      "size" : "46x46",
+      "subtype" : "41mm"
+    },
+    {
+      "idiom" : "watch",
+      "role" : "appLauncher",
+      "scale" : "2x",
       "size" : "50x50",
       "subtype" : "44mm"
+    },
+    {
+      "idiom" : "watch",
+      "role" : "appLauncher",
+      "scale" : "2x",
+      "size" : "51x51",
+      "subtype" : "45mm"
+    },
+    {
+      "idiom" : "watch",
+      "role" : "appLauncher",
+      "scale" : "2x",
+      "size" : "54x54",
+      "subtype" : "49mm"
     },
     {
       "idiom" : "watch",
@@ -231,6 +259,20 @@
       "scale" : "2x",
       "size" : "108x108",
       "subtype" : "44mm"
+    },
+    {
+      "idiom" : "watch",
+      "role" : "quickLook",
+      "scale" : "2x",
+      "size" : "117x117",
+      "subtype" : "45mm"
+    },
+    {
+      "idiom" : "watch",
+      "role" : "quickLook",
+      "scale" : "2x",
+      "size" : "129x129",
+      "subtype" : "49mm"
     },
     {
       "idiom" : "watch-marketing",
