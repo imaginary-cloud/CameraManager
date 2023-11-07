@@ -762,21 +762,36 @@ open class CameraManager: NSObject, AVCapturePhotoCaptureDelegate, AVCaptureFile
         }
     }
     
+    public func isFlashSupported() -> Bool {
+        let supportedFlashModes = AVCapturePhotoOutput().supportedFlashModes
+        return !supportedFlashModes.isEmpty
+    }
+    
     fileprivate func _getPhotoSettings() -> AVCapturePhotoSettings {
         let photoSettings = AVCapturePhotoSettings()
         photoSettings.photoQualityPrioritization = self.photoQualityPrioritization
         
-        switch flashMode {
-            case .off:
-                photoSettings.flashMode = .off
-            case .on:
-                photoSettings.flashMode = .on
-            case .auto:
-                photoSettings.flashMode = .auto
+        if let supportedFlashModes = stillImageOutput?.supportedFlashModes {
+            
+            switch flashMode {
+                case .off:
+                    if supportedFlashModes.contains(.off) {
+                        photoSettings.flashMode = .off
+                    }
+                case .on:
+                    if supportedFlashModes.contains(.on) {
+                        photoSettings.flashMode = .on
+                    }
+                case .auto:
+                    if supportedFlashModes.contains(.auto) {
+                        photoSettings.flashMode = .auto
+                    }
+            }
         }
         
         return photoSettings
     }
+
     
     public func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
         
