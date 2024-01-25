@@ -379,6 +379,13 @@ open class CameraManager: NSObject, AVCapturePhotoCaptureDelegate, AVCaptureFile
     
     // MARK: - Private properties
     
+    fileprivate var deviceOrientationOperationQueue: OperationQueue = {
+        let queue = OperationQueue()
+        queue.name = "DeviceOrientationQueue"
+        queue.maxConcurrentOperationCount = 1
+        return queue
+    }()
+    
     fileprivate var locationManager: CameraLocationManager?
     
     fileprivate weak var embeddingView: UIView?
@@ -1624,28 +1631,28 @@ open class CameraManager: NSObject, AVCapturePhotoCaptureDelegate, AVCaptureFile
             coreMotionManager = CMMotionManager()
             coreMotionManager.deviceMotionUpdateInterval = 1 / 30.0
             if coreMotionManager.isDeviceMotionAvailable {
-                coreMotionManager.startDeviceMotionUpdates(to: OperationQueue()) { [weak self] motion, error in
-                    guard let motion = motion, let self = self else { return }
+                coreMotionManager.startDeviceMotionUpdates(to: deviceOrientationOperationQueue) { [weak self] motion, error in
+                    guard let motion = motion, let strongSelf = self else { return }
                     guard error == nil else { return }
                     
                     let x = motion.gravity.x
                     let y = motion.gravity.y
-                    let previousOrientation = self.deviceOrientation
+                    let previousOrientation = strongSelf.deviceOrientation
                     if fabs(y) >= fabs(x) {
                         if y >= 0 {
-                            self.deviceOrientation = .portraitUpsideDown
+                            strongSelf.deviceOrientation = .portraitUpsideDown
                         } else {
-                            self.deviceOrientation = .portrait
+                            strongSelf.deviceOrientation = .portrait
                         }
                     } else {
                         if x >= 0 {
-                            self.deviceOrientation = .landscapeRight
+                            strongSelf.deviceOrientation = .landscapeRight
                         } else {
-                            self.deviceOrientation = .landscapeLeft
+                            strongSelf.deviceOrientation = .landscapeLeft
                         }
                     }
-                    if previousOrientation != self.deviceOrientation {
-                        self._orientationChanged()
+                    if previousOrientation != strongSelf.deviceOrientation {
+                        strongSelf._orientationChanged()
                     }
                 }
                 
