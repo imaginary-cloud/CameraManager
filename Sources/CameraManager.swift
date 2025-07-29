@@ -454,8 +454,15 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
      Stops running capture session but all setup devices, inputs and outputs stay for further reuse.
      */
     open func stopCaptureSession() {
-        captureSession?.stopRunning()
-        _stopFollowingDeviceOrientation()
+        if let validCaptureSession = captureSession {
+            if validCaptureSession.isRunning, cameraIsSetup {
+                sessionQueue.async { [weak self] in
+                    guard let self = self else { return }
+                    self.captureSession?.stopRunning()
+                    self._stopFollowingDeviceOrientation()
+                }
+            }
+        }
     }
     
     /**
@@ -795,7 +802,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     /**
      Start detecting QR codes.
      */
-    open func startQRCodeDetection(_ handler: @escaping QRCodeDetectionHandler) {
+    open func startQRCodeDetection(withTypes types: [AVMetadataObject.ObjectType] = [.qr, .ean8, .ean13, .pdf417],  _ handler: @escaping QRCodeDetectionHandler) {
         guard let captureSession = self.captureSession
             else { return }
         
@@ -805,11 +812,17 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
             else { return }
         
         qrCodeDetectionHandler = handler
-        captureSession.addOutput(output)
         
-        // Note: The object types must be set after the output was added to the capture session.
-        output.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
-        output.metadataObjectTypes = [.qr, .ean8, .ean13, .pdf417].filter { output.availableMetadataObjectTypes.contains($0) }
+        sessionQueue.async {
+            captureSession.beginConfiguration()
+            captureSession.addOutput(output)
+            // Note: The object types must be set after the output was added to the capture session.
+            output.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
+            assert(captureSession.inputs.count ?? 0 > 0, "Error: output.availableMetadataObjectTypes is available only after adding input.")
+            output.metadataObjectTypes = types.filter { output.availableMetadataObjectTypes.contains($0) }
+            captureSession.commitConfiguration()
+        }
+        qrOutput = output //add this line, for removing when stopped
     }
     
     /**
@@ -832,7 +845,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     /**
      The stored meta data output; used to detect QR codes.
      */
-    private var qrOutput: AVCaptureOutput?
+    open private(set) var qrOutput: AVCaptureMetadataOutput?
     
     /**
      Check if the device rotation is locked
